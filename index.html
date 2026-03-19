@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEED — Buy & Sell Property Without Agents</title>
+  <meta name="description" content="Queensland's first AI-qualified private property platform. Sell without an agent. Keep the $20,000." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #070707;
+      --surface:    #0f0f0f;
+      --surface-2:  #161616;
+      --border:     #1e1e1e;
+      --border-2:   #2a2a2a;
+      --text:       #ede8df;
+      --text-muted: #6b6459;
+      --text-dim:   #3d3830;
+      --gold:       #c8922a;
+      --gold-light: #e0b060;
+      --gold-dim:   #3a2a0e;
+      --green:      #3dd68c;
+      --red:        #e05c4b;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-serif:   'Fraunces', serif;
+      --font-body:    'Outfit', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── GRAIN OVERLAY ─────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* ── NAV ───────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 3rem;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.4s, background 0.4s;
+    }
+    nav.scrolled {
+      border-color: var(--border);
+      background: rgba(7,7,7,0.92);
+      backdrop-filter: blur(12px);
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      letter-spacing: 0.12em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-cta {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+      border: 1px solid var(--gold);
+      padding: 0.55rem 1.4rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-cta:hover { background: var(--gold); color: var(--bg); }
+
+    /* ── HERO ──────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 3rem 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-stamp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -55%);
+      font-family: var(--font-display);
+      font-size: clamp(12rem, 28vw, 26rem);
+      letter-spacing: -0.02em;
+      line-height: 0.85;
+      color: transparent;
+      -webkit-text-stroke: 1px #1e1e1e;
+      text-stroke: 1px #1e1e1e;
+      user-select: none;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 780px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.9s ease forwards 0.2s;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .hero-headline {
+      font-family: var(--font-serif);
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 300;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 1.8rem;
+    }
+    .hero-headline em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      padding: 1rem 2.4rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    .hero-stat {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .hero-stat strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      letter-spacing: 0.05em;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .hero-divider {
+      width: 1px;
+      height: 2.5rem;
+      background: var(--border-2);
+    }
+
+    /* ── SCROLL INDICATOR ──────────────── */
+    .scroll-line {
+      position: absolute;
+      bottom: 2rem;
+      right: 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 1s;
+    }
+    .scroll-line span {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      writing-mode: vertical-rl;
+    }
+    .scroll-line::after {
+      content: '';
+      width: 1px;
+      height: 4rem;
+      background: linear-gradient(to bottom, var(--border-2), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    /* ── PROBLEM STRIP ─────────────────── */
+    .problem-strip {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      padding: 2rem 3rem;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      overflow: hidden;
+    }
+    .problem-strip-inner {
+      display: flex;
+      gap: 0;
+      width: 100%;
+    }
+    .problem-item {
+      flex: 1;
+      padding: 0 2.5rem;
+      border-right: 1px solid var(--border);
+    }
+    .problem-item:first-child { padding-left: 0; }
+    .problem-item:last-child { border-right: none; }
+    .problem-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .problem-value {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      letter-spacing: 0.05em;
+      color: var(--gold-light);
+      line-height: 1;
+    }
+    .problem-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    /* ── HOW IT WORKS ──────────────────── */
+    .section {
+      padding: 8rem 3rem;
+    }
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 3.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+    .how-card {
+      padding: 3rem;
+      border-right: 1px solid var(--border);
+      position: relative;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .how-card:last-child { border-right: none; }
+    .how-card.visible { opacity: 1; transform: none; }
+
+    .how-number {
+      font-family: var(--font-display);
+      font-size: 5rem;
+      color: var(--border-2);
+      line-height: 1;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+    .how-title {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      font-weight: 300;
+      margin-bottom: 1rem;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .how-body {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+    }
+    .how-tag {
+      display: inline-block;
+      margin-top: 1.5rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid var(--gold-dim);
+      padding: 0.3rem 0.8rem;
+    }
+
+    /* ── WAITLIST FORM ─────────────────── */
+    .form-section {
+      padding: 8rem 3rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+
+    .form-left h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 300;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+    .form-left h2 em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+    .form-left p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 2rem;
+    }
+
+    .form-promise {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .promise-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .promise-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      margin-top: 0.45rem;
+      flex-shrink: 0;
+    }
+
+    /* Form styles */
+    form { display: flex; flex-direction: column; gap: 1.2rem; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+
+    .field { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    input, select {
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 300;
+      padding: 0.9rem 1.1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input::placeholder { color: var(--text-dim); }
+    input:focus, select:focus { border-color: var(--gold); }
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6459' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; cursor: pointer; }
+    select option { background: #161616; }
+
+    /* Toggle */
+    .toggle-wrap {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border-2);
+    }
+    .toggle-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .toggle-btn.active {
+      background: var(--gold);
+      color: var(--bg);
+    }
+    .toggle-btn:not(.active):hover { background: var(--surface-2); color: var(--text); }
+
+    .submit-btn {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      padding: 1.1rem 2rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 0.5rem;
+    }
+    .submit-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .form-note {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 3rem;
+      border: 1px solid var(--gold-dim);
+      background: rgba(200,146,42,0.04);
+    }
+    .form-success h3 {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--gold-light);
+      margin-bottom: 0.75rem;
+    }
+    .form-success p { font-size: 0.88rem; color: var(--text-muted); }
+
+    /* ── WHY AGENTS FAIL ───────────────── */
+    .truth-section {
+      padding: 8rem 3rem;
+      border-top: 1px solid var(--border);
+    }
+    .truth-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+    .truth-left h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      font-weight: 300;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+    .truth-left h2 em { font-style: italic; color: var(--gold-light); }
+    .truth-left p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.75; }
+
+    .truth-list { display: flex; flex-direction: column; }
+    .truth-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1.5rem;
+      padding: 1.75rem 0;
+      border-bottom: 1px solid var(--border);
+      opacity: 0;
+      transform: translateX(16px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .truth-item:first-child { border-top: 1px solid var(--border); }
+    .truth-item.visible { opacity: 1; transform: none; }
+
+    .truth-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 1px solid var(--border-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .truth-content h4 {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+    .truth-content p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── FOOTER ────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+    .footer-note {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      text-align: right;
+    }
+
+    /* ── ANIMATIONS ────────────────────── */
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* ── RESPONSIVE ────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 1.25rem 1.5rem; }
+      .hero { padding: 0 1.5rem 4rem; }
+      .hero-stamp { font-size: 38vw; }
+      .section, .form-section, .truth-section { padding: 5rem 1.5rem; }
+      .problem-strip { padding: 1.5rem; overflow-x: auto; }
+      .problem-strip-inner { min-width: 600px; }
+      .how-grid { grid-template-columns: 1fr; }
+      .how-card { border-right: none; border-bottom: 1px solid var(--border); }
+      .how-card:last-child { border-bottom: none; }
+      .form-section { grid-template-columns: 1fr; gap: 3rem; }
+      .field-row { grid-template-columns: 1fr; }
+      .truth-grid { grid-template-columns: 1fr; gap: 3rem; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+      .footer-note { text-align: center; }
+      .scroll-line { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="#" class="nav-logo">DEED</a>
+    <a href="#waitlist" class="nav-cta">Join waitlist</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-stamp" aria-hidden="true">DEED</div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Queensland · Private Property Sales</p>
+      <h1 class="hero-headline">
+        Sell your home.<br/>
+        Skip the agent.<br/>
+        <em>Keep the $20,000.</em>
+      </h1>
+      <p class="hero-sub">
+        DEED is Queensland's first private property platform with AI-verified buyers.
+        Every buyer is pre-qualified before they make an offer. You get a managed process,
+        real pricing data, and no agent commission.
+      </p>
+      <div class="hero-actions">
+        <a href="#waitlist" class="btn-primary">Join the waitlist</a>
+        <div class="hero-stat">
+          <strong>$20,847</strong>
+          avg. QLD agent commission
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <strong>2.75%</strong>
+          taken on every sale
+        </div>
+      </div>
+    </div>
+    <div class="scroll-line"><span>Scroll</span></div>
+  </section>
+
+  <!-- PROBLEM STRIP -->
+  <div class="problem-strip">
+    <div class="problem-strip-inner">
+      <div class="problem-item">
+        <p class="problem-label">Standard commission</p>
+        <p class="problem-value">2.75%</p>
+        <p class="problem-desc">Paid regardless of outcome or effort</p>
+      </div>
+      <div class="problem-item">
+        <p class="problem-label">On a $750k home</p>
+        <p class="problem-value">$20,625</p>
+        <p class="problem-desc">Handed to an agent, not your future</p>
+      </div>
+      <div class="problem-item">
+        <p class="problem-label">Deals that collapse</p>
+        <p class="problem-value">1 in 4</p>
+        <p class="problem-desc">Often from unqualified buyers wasting time</p>
+      </div>
+      <div class="problem-item">
+        <p class="problem-label">What DEED charges</p>
+        <p class="problem-value">$999</p>
+        <p class="problem-desc">Flat fee. AI-qualified buyers. Full process.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="section">
+    <p class="section-label">How it works</p>
+    <div class="how-grid">
+      <div class="how-card">
+        <p class="how-number">01</p>
+        <h3 class="how-title">Buyers pre-qualify before they ever contact you</h3>
+        <p class="how-body">Every buyer on DEED submits income verification, deposit confirmation, and borrowing capacity before they can make an offer. You see a verified badge and their price range. No more weekends wasted on people who can't get finance.</p>
+        <span class="how-tag">AI Verification</span>
+      </div>
+      <div class="how-card">
+        <p class="how-number">02</p>
+        <h3 class="how-title">List with real pricing data, not an agent's anchor</h3>
+        <p class="how-body">Your listing includes comparable sales pulled from the Queensland market. Set your price with evidence, not gut feel. Pre-qualified buyers in your suburb are notified the moment you go live — demand before you even launch.</p>
+        <span class="how-tag">Price Intelligence</span>
+      </div>
+      <div class="how-card">
+        <p class="how-number">03</p>
+        <h3 class="how-title">Managed from offer to settlement, without an agent</h3>
+        <p class="how-body">Structured offer deadlines create competitive tension between buyers. Post-offer, a built-in pipeline tracks finance confirmation, building & pest, searches, and settlement. Your conveyancer handles the legal — DEED handles the rest.</p>
+        <span class="how-tag">Deal Pipeline</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAITLIST FORM -->
+  <section class="form-section" id="waitlist">
+    <div class="form-left">
+      <h2>Be first when<br/><em>DEED</em> launches<br/>in Queensland.</h2>
+      <p>We're building the buyer pool first. Sellers get access to verified buyers before we open public listings. Join now and we'll notify you at launch — and give you founding member pricing.</p>
+      <div class="form-promise">
+        <div class="promise-item">
+          <div class="promise-dot"></div>
+          <span>Founding member pricing — locked in for life</span>
+        </div>
+        <div class="promise-item">
+          <div class="promise-dot"></div>
+          <span>First access to verified buyer demand in your suburb</span>
+        </div>
+        <div class="promise-item">
+          <div class="promise-dot"></div>
+          <span>No spam. One email when we launch.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-right">
+      <form id="waitlist-form" action="https://formspree.io/f/REPLACE_THIS" method="POST">
+        <div class="field">
+          <label>I am a</label>
+          <div class="toggle-wrap">
+            <button type="button" class="toggle-btn active" data-value="buyer" onclick="setRole(this)">Buyer</button>
+            <button type="button" class="toggle-btn" data-value="seller" onclick="setRole(this)">Seller</button>
+          </div>
+          <input type="hidden" name="role" id="role-input" value="buyer" />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="fname">First name</label>
+            <input type="text" id="fname" name="first_name" placeholder="Ed" required />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@email.com" required />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="suburb">Suburb of interest</label>
+            <input type="text" id="suburb" name="suburb" placeholder="Paddington, New Farm…" required />
+          </div>
+          <div class="field">
+            <label for="price">Price range</label>
+            <select id="price" name="price_range" required>
+              <option value="" disabled selected>Select range</option>
+              <option>Under $500k</option>
+              <option>$500k – $750k</option>
+              <option>$750k – $1M</option>
+              <option>$1M – $1.5M</option>
+              <option>$1.5M – $2M</option>
+              <option>$2M+</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          Join the waitlist →
+        </button>
+        <p class="form-note">No agent. No commission. Just DEED.</p>
+      </form>
+
+      <div class="form-success" id="form-success">
+        <h3>You're on the list.</h3>
+        <p>We'll reach out when DEED launches in your area. Founding member pricing is locked in.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY AGENTS FAIL -->
+  <section class="truth-section">
+    <div class="truth-grid">
+      <div class="truth-left">
+        <h2>Agents haven't<br/>changed. The<br/><em>market has.</em></h2>
+        <p>Queensland's real estate industry charges 2.75% commission on every transaction. That model was built in an era before price transparency, verified finance, and digital contracts. DEED is built for how property actually transacts today.</p>
+      </div>
+      <div class="truth-list">
+        <div class="truth-item">
+          <div class="truth-icon">✕</div>
+          <div class="truth-content">
+            <h4>No visibility on buyer qualification</h4>
+            <p>Agents accept any enquiry and book any inspection. One in four deals collapses post-offer because the buyer couldn't get finance.</p>
+          </div>
+        </div>
+        <div class="truth-item">
+          <div class="truth-icon">✕</div>
+          <div class="truth-content">
+            <h4>Price guides designed to mislead</h4>
+            <p>Underquoting creates false competition. Overquoting wins the listing. Neither serves the seller. DEED shows you what comparable properties actually sold for.</p>
+          </div>
+        </div>
+        <div class="truth-item">
+          <div class="truth-icon">✕</div>
+          <div class="truth-content">
+            <h4>No accountability after the offer</h4>
+            <p>Once the contract is signed, most agents disappear. Building & pest failures, finance clause expiries, and settlement delays — all avoidable with a proper pipeline.</p>
+          </div>
+        </div>
+        <div class="truth-item">
+          <div class="truth-icon">✕</div>
+          <div class="truth-content">
+            <h4>Incentive misalignment baked in</h4>
+            <p>An agent earns the same whether your home sells for $700k or $750k. A quick low sale is better for their schedule. DEED's optional success fee only increases when your price does.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">DEED</span>
+    <div class="footer-note">
+      <p>Queensland, Australia</p>
+      <p style="margin-top:0.3rem;">© 2026 Deed Pty Ltd · Private property sales, done properly.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Nav scroll
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // Scroll-triggered animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 120);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.how-card, .truth-item').forEach(el => observer.observe(el));
+
+    // Role toggle
+    function setRole(btn) {
+      document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('role-input').value = btn.dataset.value;
+    }
+
+    // Form submission
+    const form = document.getElementById('waitlist-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const successEl = document.getElementById('form-success');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (res.ok) {
+          form.style.display = 'none';
+          successEl.style.display = 'block';
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Try again →';
+        }
+      } catch {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Try again →';
+      }
+    });
+  </script>
+</body>
+</html>
