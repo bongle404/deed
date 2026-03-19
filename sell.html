@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEED — List Your Property</title>
+  <meta name="description" content="List your Queensland property privately on DEED. See what comparable homes sold for, set your price, reach pre-qualified buyers. Flat $999 fee." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:         #070707;
+      --surface:    #0f0f0f;
+      --surface-2:  #161616;
+      --border:     #1e1e1e;
+      --border-2:   #2a2a2a;
+      --text:       #ede8df;
+      --text-muted: #6b6459;
+      --text-dim:   #3d3830;
+      --gold:       #c8922a;
+      --gold-light: #e0b060;
+      --gold-dim:   #3a2a0e;
+      --green:      #3dd68c;
+      --green-dim:  #0a2a1a;
+      --amber:      #f59e0b;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-serif:   'Fraunces', serif;
+      --font-body:    'Outfit', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* ── LAYOUT ── */
+    .app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .sidebar-logo { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 0.12em; color: var(--text); text-decoration: none; display: block; margin-bottom: 3rem; }
+    .sidebar-title { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2rem; }
+    .steps-nav { display: flex; flex-direction: column; gap: 0; flex: 1; }
+    .step-nav-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1.1rem 0; border-bottom: 1px solid var(--border); cursor: default; }
+    .step-nav-item:first-child { border-top: 1px solid var(--border); }
+    .step-nav-num { width: 1.8rem; height: 1.8rem; border: 1px solid var(--border-2); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; letter-spacing: 0.05em; color: var(--text-dim); flex-shrink: 0; transition: all 0.3s; }
+    .step-nav-item.active .step-nav-num { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+    .step-nav-item.done .step-nav-num { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+    .step-nav-label { font-size: 0.82rem; color: var(--text-muted); transition: color 0.3s; padding-top: 0.1rem; }
+    .step-nav-item.active .step-nav-label { color: var(--text); }
+
+    .sidebar-fee {
+      margin-top: auto;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    .fee-label { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .fee-amount { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.05em; color: var(--gold-light); }
+    .fee-desc { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.3rem; line-height: 1.5; }
+
+    /* ── MAIN ── */
+    .main { display: flex; flex-direction: column; min-height: 100vh; }
+    .main-header {
+      padding: 2rem 3rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .progress-bar { flex: 1; height: 2px; background: var(--border); margin: 0 2rem; position: relative; }
+    .progress-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--gold); transition: width 0.5s ease; }
+    .progress-label { font-size: 0.72rem; letter-spacing: 0.12em; color: var(--text-muted); white-space: nowrap; }
+    .main-body { flex: 1; padding: 4rem 3rem; max-width: 680px; }
+
+    /* ── STEPS ── */
+    .step-panel { display: none; opacity: 0; transform: translateX(20px); transition: opacity 0.4s ease, transform 0.4s ease; }
+    .step-panel.active { display: block; opacity: 1; transform: translateX(0); }
+    .step-eyebrow { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem; }
+    .step-eyebrow::before { content: ''; display: block; width: 1.5rem; height: 1px; background: var(--gold); }
+    .step-heading { font-family: var(--font-serif); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 300; line-height: 1.2; color: var(--text); margin-bottom: 0.75rem; }
+    .step-heading em { font-style: italic; color: var(--gold-light); }
+    .step-sub { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2.5rem; line-height: 1.7; }
+
+    /* ── OPTION CARDS ── */
+    .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 2rem; }
+    .option-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .option-card { border: 1px solid var(--border-2); padding: 1.2rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; text-align: center; }
+    .option-card:hover { background: var(--surface-2); }
+    .option-card.selected { border-color: var(--gold); background: var(--gold-dim); }
+    .option-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
+    .option-label { font-size: 0.82rem; color: var(--text); }
+    .option-desc { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+    /* ── FIELDS ── */
+    .fields { display: flex; flex-direction: column; gap: 1.2rem; margin-bottom: 2rem; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; }
+    .field { display: flex; flex-direction: column; gap: 0.5rem; }
+    label { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); }
+    input, select, textarea {
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 300;
+      padding: 0.9rem 1.1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+    input::placeholder, textarea::placeholder { color: var(--text-dim); }
+    input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6459' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      cursor: pointer;
+    }
+    select option { background: #161616; }
+    .input-prefix { position: relative; }
+    .input-prefix span { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem; pointer-events: none; }
+    .input-prefix input { padding-left: 2rem; }
+    .field-hint { font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+
+    /* ── FEATURES CHECKLIST ── */
+    .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 2rem; }
+    .feature-check { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border: 1px solid var(--border); cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+    .feature-check:hover { background: var(--surface-2); }
+    .feature-check.checked { border-color: var(--gold); background: var(--gold-dim); }
+    .feature-check input { display: none; }
+    .check-box { width: 16px; height: 16px; border: 1px solid var(--border-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; transition: all 0.2s; }
+    .feature-check.checked .check-box { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+    .feature-label { font-size: 0.82rem; color: var(--text-muted); }
+    .feature-check.checked .feature-label { color: var(--text); }
+
+    /* ── COMPARABLE SALES ── */
+    .comps-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .comps-title { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); }
+    .comps-note { font-size: 0.7rem; color: var(--text-dim); }
+
+    .comps-table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+    .comps-table th {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .comps-table td {
+      font-size: 0.85rem;
+      padding: 0.9rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .comps-table td:first-child { color: var(--text); }
+    .comp-price { font-weight: 500; color: var(--gold-light) !important; }
+    .comp-dist { font-size: 0.72rem; color: var(--text-dim) !important; }
+
+    .price-range-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .price-range-label { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .price-range-value { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 0.05em; color: var(--gold-light); }
+    .price-range-sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.2rem; }
+
+    .asking-price-wrap { margin-bottom: 1rem; }
+    .price-warning {
+      display: none;
+      margin-top: 0.5rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(245,158,11,0.3);
+      background: rgba(245,158,11,0.05);
+      font-size: 0.78rem;
+      color: var(--amber);
+    }
+
+    /* ── PHOTO UPLOAD ── */
+    .photo-upload {
+      border: 1px dashed var(--border-2);
+      padding: 2.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 1.5rem;
+    }
+    .photo-upload:hover { border-color: var(--gold); background: var(--gold-dim); }
+    .photo-upload input { display: none; }
+    .photo-upload-icon { font-size: 2rem; margin-bottom: 0.75rem; opacity: 0.5; }
+    .photo-upload-text { font-size: 0.88rem; color: var(--text-muted); }
+    .photo-upload-hint { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.3rem; }
+    .photo-preview { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .photo-thumb {
+      width: 80px; height: 80px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      position: relative;
+      overflow: hidden;
+    }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ── LISTING PREVIEW ── */
+    .listing-preview {
+      border: 1px solid var(--border-2);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .preview-header {
+      background: var(--surface-2);
+      padding: 0.75rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .preview-label { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); }
+    .preview-badge { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green); border: 1px solid var(--green-dim); padding: 0.2rem 0.6rem; background: var(--green-dim); }
+
+    .preview-photo {
+      height: 200px;
+      background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-photo-placeholder { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); }
+
+    .preview-body { padding: 1.5rem; }
+    .preview-address { font-size: 1rem; color: var(--text); margin-bottom: 0.25rem; }
+    .preview-suburb { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .preview-price { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 0.05em; color: var(--gold-light); margin-bottom: 1rem; }
+    .preview-specs { display: flex; gap: 1.5rem; margin-bottom: 1rem; }
+    .preview-spec { font-size: 0.82rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; }
+    .preview-spec strong { color: var(--text); }
+    .preview-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.65; border-top: 1px solid var(--border); padding-top: 1rem; }
+    .preview-deed-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 1rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid var(--gold-dim);
+      padding: 0.3rem 0.75rem;
+    }
+
+    .fee-summary {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      margin-bottom: 1.5rem;
+    }
+    .fee-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .fee-row:last-child { border-bottom: none; }
+    .fee-row-label { color: var(--text-muted); }
+    .fee-row-value { color: var(--text); font-weight: 500; }
+    .fee-row.total .fee-row-label { color: var(--text); font-weight: 500; }
+    .fee-row.total .fee-row-value { color: var(--gold-light); font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 0.05em; }
+    .fee-row.saving .fee-row-value { color: var(--green); }
+
+    /* ── ACTIONS ── */
+    .step-actions { display: flex; align-items: center; gap: 1.5rem; margin-top: 2rem; }
+    .btn-next { font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; background: var(--gold); color: var(--bg); border: none; padding: 1rem 2.2rem; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+    .btn-next:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-back { font-family: var(--font-body); font-size: 0.8rem; font-weight: 400; letter-spacing: 0.08em; color: var(--text-muted); background: none; border: none; cursor: pointer; transition: color 0.2s; padding: 0; }
+    .btn-back:hover { color: var(--text); }
+
+    .btn-submit { font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; background: var(--gold); color: var(--bg); border: none; padding: 1.1rem 2.4rem; cursor: pointer; transition: background 0.2s, transform 0.15s; margin-top: 0.5rem; width: 100%; }
+    .btn-submit:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .submit-note { font-size: 0.72rem; color: var(--text-dim); text-align: center; margin-top: 0.75rem; }
+
+    .submission-success { display: none; text-align: center; padding: 3rem; border: 1px solid var(--gold-dim); background: rgba(200,146,42,0.04); margin-top: 2rem; }
+    .submission-success h3 { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 300; color: var(--gold-light); margin-bottom: 0.75rem; }
+    .submission-success p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 800px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main-header { padding: 1.25rem 1.5rem; }
+      .main-body { padding: 2.5rem 1.5rem; }
+      .option-grid { grid-template-columns: 1fr 1fr; }
+      .option-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+      .field-row, .field-row-3 { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .price-range-box { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">DEED</a>
+    <p class="sidebar-title">List your property</p>
+    <nav class="steps-nav">
+      <div class="step-nav-item active" data-step="1"><div class="step-nav-num">01</div><div class="step-nav-label">Location</div></div>
+      <div class="step-nav-item" data-step="2"><div class="step-nav-num">02</div><div class="step-nav-label">Property details</div></div>
+      <div class="step-nav-item" data-step="3"><div class="step-nav-num">03</div><div class="step-nav-label">Pricing intelligence</div></div>
+      <div class="step-nav-item" data-step="4"><div class="step-nav-num">04</div><div class="step-nav-label">Your listing</div></div>
+      <div class="step-nav-item" data-step="5"><div class="step-nav-num">05</div><div class="step-nav-label">Review & launch</div></div>
+    </nav>
+    <div class="sidebar-fee">
+      <p class="fee-label">Listing fee</p>
+      <p class="fee-amount">$999</p>
+      <p class="fee-desc">Flat fee. No commission.<br/>Includes portal placement + pre-qualified buyer notifications.</p>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="main-header">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:20%"></div></div>
+      <span class="progress-label" id="progress-label">Step 1 of 5</span>
+    </div>
+
+    <div class="main-body">
+
+      <!-- STEP 1: LOCATION -->
+      <div class="step-panel active" id="step-1">
+        <p class="step-eyebrow">Step 01</p>
+        <h2 class="step-heading">Where is<br/><em>your property?</em></h2>
+        <p class="step-sub">We'll pull comparable sales data for your suburb to give you an accurate picture of what similar homes are selling for — no agent spin.</p>
+        <div class="fields">
+          <div class="field">
+            <label for="street">Street address</label>
+            <input type="text" id="street" placeholder="14 River Street" />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="suburb">Suburb</label>
+              <input type="text" id="suburb" placeholder="New Farm" />
+            </div>
+            <div class="field">
+              <label for="postcode">Postcode</label>
+              <input type="text" id="postcode" placeholder="4005" maxlength="4" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="contact-name">Your name</label>
+            <input type="text" id="contact-name" placeholder="Ed Steward" />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="contact-email">Email</label>
+              <input type="email" id="contact-email" placeholder="you@email.com" />
+            </div>
+            <div class="field">
+              <label for="contact-phone">Phone</label>
+              <input type="tel" id="contact-phone" placeholder="04XX XXX XXX" />
+            </div>
+          </div>
+        </div>
+        <div class="step-actions">
+          <button class="btn-next" onclick="nextStep(1)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: PROPERTY DETAILS -->
+      <div class="step-panel" id="step-2">
+        <p class="step-eyebrow">Step 02</p>
+        <h2 class="step-heading">Tell us about<br/><em>the property</em></h2>
+        <p class="step-sub">These details shape your comparable sales data and what buyers see in your listing.</p>
+
+        <p style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.8rem;">Property type</p>
+        <div class="option-grid" style="margin-bottom:1.5rem;">
+          <div class="option-card" data-field="type" data-value="house" onclick="selectOption(this)">
+            <div class="option-icon">🏡</div>
+            <div class="option-label">House</div>
+          </div>
+          <div class="option-card" data-field="type" data-value="townhouse" onclick="selectOption(this)">
+            <div class="option-icon">🏘️</div>
+            <div class="option-label">Townhouse</div>
+          </div>
+          <div class="option-card" data-field="type" data-value="apartment" onclick="selectOption(this)">
+            <div class="option-icon">🏢</div>
+            <div class="option-label">Apartment</div>
+          </div>
+          <div class="option-card" data-field="type" data-value="land" onclick="selectOption(this)">
+            <div class="option-icon">📐</div>
+            <div class="option-label">Land / acreage</div>
+          </div>
+        </div>
+
+        <div class="fields">
+          <div class="field-row-3">
+            <div class="field">
+              <label for="beds">Bedrooms</label>
+              <select id="beds">
+                <option value="" disabled selected>—</option>
+                <option>1</option><option>2</option><option>3</option>
+                <option>4</option><option>5</option><option>6+</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="baths">Bathrooms</label>
+              <select id="baths">
+                <option value="" disabled selected>—</option>
+                <option>1</option><option>2</option><option>3</option><option>4+</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cars">Car spaces</label>
+              <select id="cars">
+                <option value="" disabled selected>—</option>
+                <option>0</option><option>1</option><option>2</option><option>3+</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="land">Land size (m²)</label>
+              <input type="number" id="land" placeholder="405" min="0" />
+            </div>
+            <div class="field">
+              <label for="house-size">House size (m²)</label>
+              <input type="number" id="house-size" placeholder="220" min="0" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="condition">Property condition</label>
+            <select id="condition">
+              <option value="" disabled selected>Select condition</option>
+              <option value="new">New / near new</option>
+              <option value="renovated">Fully renovated</option>
+              <option value="good">Good — well maintained</option>
+              <option value="original">Original — cosmetic TLC needed</option>
+              <option value="reno">Renovation opportunity</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="year-built">Approximate year built</label>
+            <select id="year-built">
+              <option value="" disabled selected>Select era</option>
+              <option value="2020+">2020 or newer</option>
+              <option value="2010s">2010–2019</option>
+              <option value="2000s">2000–2009</option>
+              <option value="1990s">1990–1999</option>
+              <option value="1980s">1980–1989</option>
+              <option value="pre-1980">Pre-1980 (character home)</option>
+            </select>
+          </div>
+        </div>
+        <div class="step-actions">
+          <button class="btn-next" onclick="nextStep(2)">Continue →</button>
+          <button class="btn-back" onclick="prevStep(2)">← Back</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: PRICING -->
+      <div class="step-panel" id="step-3">
+        <p class="step-eyebrow">Step 03 — Pricing intelligence</p>
+        <h2 class="step-heading">What are similar homes<br/><em>actually selling for?</em></h2>
+        <p class="step-sub">Recent comparable sales in your area. Set your asking price based on evidence, not an agent's guess designed to win your listing.</p>
+
+        <div class="comps-header">
+          <span class="comps-title">Recent comparable sales</span>
+          <span class="comps-note">Within 1km · Last 6 months</span>
+        </div>
+
+        <table class="comps-table" id="comps-table">
+          <thead>
+            <tr>
+              <th>Address</th>
+              <th>Sold price</th>
+              <th>Beds / Bath</th>
+              <th>Land</th>
+              <th>Sold</th>
+            </tr>
+          </thead>
+          <tbody id="comps-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+
+        <div class="price-range-box">
+          <div>
+            <p class="price-range-label">Suggested asking range</p>
+            <p class="price-range-value" id="suggested-range">—</p>
+            <p class="price-range-sub">Based on <span id="comp-count">0</span> comparable sales</p>
+          </div>
+          <div style="text-align:right;">
+            <p class="price-range-label">Median sale price</p>
+            <p class="price-range-value" id="median-price">—</p>
+            <p class="price-range-sub">Your suburb</p>
+          </div>
+        </div>
+
+        <div class="asking-price-wrap">
+          <div class="field">
+            <label for="asking-price">Your asking price</label>
+            <div class="input-prefix">
+              <span>$</span>
+              <input type="number" id="asking-price" placeholder="850,000" min="0" oninput="checkPriceWarning()" />
+            </div>
+          </div>
+          <div class="price-warning" id="price-warning">
+            ⚠ This is notably above the comparable sales range. Overpriced listings attract fewer qualified buyers and often sell below market after extended time on market.
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-next" onclick="nextStep(3)">Continue →</button>
+          <button class="btn-back" onclick="prevStep(3)">← Back</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: LISTING -->
+      <div class="step-panel" id="step-4">
+        <p class="step-eyebrow">Step 04</p>
+        <h2 class="step-heading">Build your<br/><em>listing</em></h2>
+        <p class="step-sub">Write a description that tells the story of the property. Buyers read this before they request a viewing — make it count.</p>
+
+        <div class="fields" style="margin-bottom:1.5rem;">
+          <div class="field">
+            <label for="description">Property description</label>
+            <textarea id="description" placeholder="A beautifully maintained Queenslander on a quiet street in the heart of New Farm. The home retains all original character — VJ walls, timber floors, pressed tin ceilings — while offering a modern kitchen and updated bathrooms. The north-facing rear deck looks over a private garden with established landscaping..."></textarea>
+            <span class="field-hint">Aim for 150–300 words. Focus on what makes this property worth the price.</span>
+          </div>
+        </div>
+
+        <p style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.8rem;">Key features</p>
+        <div class="features-grid" id="features-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="fields">
+          <div class="field">
+            <label>Photo upload</label>
+            <label class="photo-upload" for="photo-input">
+              <input type="file" id="photo-input" accept="image/*" multiple onchange="handlePhotos(this)" />
+              <div class="photo-upload-icon">📸</div>
+              <p class="photo-upload-text">Click to upload photos</p>
+              <p class="photo-upload-hint">JPG or PNG · Max 20MB each · At least 5 photos recommended</p>
+            </label>
+            <div class="photo-preview" id="photo-preview"></div>
+          </div>
+          <div class="field">
+            <label for="offer-deadline">Offer deadline</label>
+            <input type="date" id="offer-deadline" />
+            <span class="field-hint">Setting a deadline creates competitive tension between buyers. Recommended: 14–21 days from listing.</span>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-next" onclick="nextStep(4)">Preview listing →</button>
+          <button class="btn-back" onclick="prevStep(4)">← Back</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: REVIEW -->
+      <div class="step-panel" id="step-5">
+        <p class="step-eyebrow">Step 05 — Review & launch</p>
+        <h2 class="step-heading">Your listing,<br/><em>ready to go live</em></h2>
+        <p class="step-sub">This is how pre-qualified buyers will see your property. Review, then reserve your listing for $999 flat.</p>
+
+        <div class="listing-preview">
+          <div class="preview-header">
+            <span class="preview-label">DEED Private Listing</span>
+            <span class="preview-badge">● Pre-qualified buyers only</span>
+          </div>
+          <div class="preview-photo">
+            <span class="preview-photo-placeholder">Photos upload at launch</span>
+          </div>
+          <div class="preview-body">
+            <p class="preview-address" id="preview-address">14 River Street</p>
+            <p class="preview-suburb" id="preview-suburb">New Farm QLD 4005</p>
+            <p class="preview-price" id="preview-price">$850,000</p>
+            <div class="preview-specs">
+              <span class="preview-spec">🛏 <strong id="preview-beds">—</strong> bed</span>
+              <span class="preview-spec">🚿 <strong id="preview-baths">—</strong> bath</span>
+              <span class="preview-spec">🚗 <strong id="preview-cars">—</strong> car</span>
+              <span class="preview-spec">📐 <strong id="preview-land">—</strong>m²</span>
+            </div>
+            <p class="preview-desc" id="preview-desc">Your description will appear here.</p>
+            <div class="preview-deed-tag">⚡ DEED — No agent · Verified buyers only</div>
+          </div>
+        </div>
+
+        <div class="fee-summary">
+          <div class="fee-row">
+            <span class="fee-row-label">DEED listing fee</span>
+            <span class="fee-row-value">$999</span>
+          </div>
+          <div class="fee-row">
+            <span class="fee-row-label">Portal placement (REA + Domain)</span>
+            <span class="fee-row-value">Included</span>
+          </div>
+          <div class="fee-row">
+            <span class="fee-row-label">Pre-qualified buyer notifications</span>
+            <span class="fee-row-value">Included</span>
+          </div>
+          <div class="fee-row">
+            <span class="fee-row-label">Offer management + deal pipeline</span>
+            <span class="fee-row-value">Included</span>
+          </div>
+          <div class="fee-row">
+            <span class="fee-row-label">Agent commission (traditional)</span>
+            <span class="fee-row-value saving" id="preview-commission-saved">You save ~$20,000+</span>
+          </div>
+          <div class="fee-row total">
+            <span class="fee-row-label">Total cost to sell</span>
+            <span class="fee-row-value">$999</span>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="submit-btn" onclick="submitListing()">
+          Reserve my listing — $999 →
+        </button>
+        <p class="submit-note">Payment processed securely. You'll receive a confirmation and onboarding call within 24 hours.</p>
+
+        <div class="submission-success" id="submission-success">
+          <h3>Listing reserved.</h3>
+          <p>We'll be in touch within 24 hours to complete your onboarding and confirm your portal placements. Your pre-qualified buyer notifications start at launch.</p>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+          <button class="btn-back" onclick="prevStep(5)">← Edit listing</button>
+        </div>
+      </div>
+
+    </div><!-- /main-body -->
+  </main>
+</div>
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 5;
+  const selections = { type: null };
+
+  // Comparable sales data by suburb type
+  const compData = {
+    default: {
+      median: 850000,
+      sales: [
+        { addr: '8 Moreton St', price: 920000, beds: 3, bath: 2, land: 450, months: 1 },
+        { addr: '22 Stanley St', price: 875000, beds: 3, bath: 1, land: 405, months: 2 },
+        { addr: '5 Merthyr Rd', price: 810000, beds: 3, bath: 2, land: 390, months: 3 },
+        { addr: '31 Villiers St', price: 1050000, beds: 4, bath: 2, land: 607, months: 4 },
+      ]
+    }
+  };
+
+  function selectOption(el) {
+    const field = el.dataset.field;
+    document.querySelectorAll(`[data-field="${field}"]`).forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selections[field] = el.dataset.value;
+  }
+
+  function goToStep(step) {
+    document.getElementById(`step-${currentStep}`).classList.remove('active');
+    document.getElementById(`step-${step}`).classList.add('active');
+    document.querySelectorAll('.step-nav-item').forEach(item => {
+      const s = parseInt(item.dataset.step);
+      item.classList.remove('active', 'done');
+      if (s === step) item.classList.add('active');
+      if (s < step) item.classList.add('done');
+    });
+    const pct = (step / totalSteps) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = `Step ${step} of ${totalSteps}`;
+    currentStep = step;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function nextStep(from) {
+    if (from === 2) populateComps();
+    if (from === 4) populatePreview();
+    goToStep(from + 1);
+  }
+
+  function prevStep(from) { if (from > 1) goToStep(from - 1); }
+
+  function fmt(n) { return '$' + Math.round(n).toLocaleString('en-AU'); }
+
+  function populateComps() {
+    const data = compData.default;
+    const beds = parseInt(document.getElementById('beds').value) || 3;
+
+    // Adjust sales to match beds count roughly
+    const adjusted = data.sales.map(s => ({
+      ...s,
+      price: Math.round(s.price * (beds / 3) * (0.9 + Math.random() * 0.2))
+    }));
+
+    const body = document.getElementById('comps-body');
+    body.innerHTML = adjusted.map(s => `
+      <tr>
+        <td>${s.addr}</td>
+        <td class="comp-price">${fmt(s.price)}</td>
+        <td>${s.beds} / ${s.bath}</td>
+        <td>${s.land}m²</td>
+        <td class="comp-dist">${s.months}mo ago</td>
+      </tr>
+    `).join('');
+
+    const prices = adjusted.map(s => s.price);
+    const median = prices.sort((a, b) => a - b)[Math.floor(prices.length / 2)];
+    const low = Math.min(...prices);
+    const high = Math.max(...prices);
+
+    document.getElementById('suggested-range').textContent = `${fmt(low)} – ${fmt(high)}`;
+    document.getElementById('median-price').textContent = fmt(median);
+    document.getElementById('comp-count').textContent = adjusted.length;
+
+    // Store range for warning
+    window.compLow = low;
+    window.compHigh = high;
+  }
+
+  function checkPriceWarning() {
+    const val = parseFloat(document.getElementById('asking-price').value);
+    const warning = document.getElementById('price-warning');
+    if (window.compHigh && val > window.compHigh * 1.15) {
+      warning.style.display = 'block';
+    } else {
+      warning.style.display = 'none';
+    }
+  }
+
+  // Features list
+  const features = [
+    'Air conditioning', 'Ceiling fans', 'Timber floors', 'Solar panels',
+    'Pool', 'Outdoor entertaining', 'Garden / yard', 'Storage shed',
+    'Modern kitchen', 'Ensuite', 'Study / home office', 'Alarm system',
+    'Ducted air', 'Fireplace', 'Walk-in robe', 'Dishwasher',
+  ];
+
+  function initFeatures() {
+    const grid = document.getElementById('features-grid');
+    grid.innerHTML = features.map(f => `
+      <label class="feature-check" onclick="toggleFeature(this)">
+        <input type="checkbox" value="${f}" />
+        <div class="check-box"></div>
+        <span class="feature-label">${f}</span>
+      </label>
+    `).join('');
+  }
+
+  function toggleFeature(el) {
+    el.classList.toggle('checked');
+    const cb = el.querySelector('input');
+    cb.checked = !cb.checked;
+    const box = el.querySelector('.check-box');
+    box.textContent = cb.checked ? '✓' : '';
+  }
+
+  function handlePhotos(input) {
+    const preview = document.getElementById('photo-preview');
+    const files = Array.from(input.files).slice(0, 12);
+    preview.innerHTML = files.map((f, i) => {
+      const url = URL.createObjectURL(f);
+      return `<div class="photo-thumb"><img src="${url}" alt="Photo ${i+1}" /></div>`;
+    }).join('');
+    if (files.length > 0) {
+      preview.innerHTML += `<div class="photo-thumb" style="font-size:0.75rem;color:var(--text-muted);">+${input.files.length} photo${input.files.length !== 1 ? 's' : ''}</div>`;
+    }
+  }
+
+  function populatePreview() {
+    const street = document.getElementById('street').value || '—';
+    const suburb = document.getElementById('suburb').value || '—';
+    const postcode = document.getElementById('postcode').value || '';
+    const price = document.getElementById('asking-price').value;
+    const beds = document.getElementById('beds').value || '—';
+    const baths = document.getElementById('baths').value || '—';
+    const cars = document.getElementById('cars').value || '—';
+    const land = document.getElementById('land').value || '—';
+    const desc = document.getElementById('description').value || 'No description added yet.';
+
+    document.getElementById('preview-address').textContent = street;
+    document.getElementById('preview-suburb').textContent = `${suburb} QLD ${postcode}`;
+    document.getElementById('preview-price').textContent = price ? fmt(parseFloat(price)) : '—';
+    document.getElementById('preview-beds').textContent = beds;
+    document.getElementById('preview-baths').textContent = baths;
+    document.getElementById('preview-cars').textContent = cars;
+    document.getElementById('preview-land').textContent = land;
+    document.getElementById('preview-desc').textContent = desc.slice(0, 300) + (desc.length > 300 ? '…' : '');
+
+    // Commission saving estimate
+    if (price) {
+      const saved = parseFloat(price) * 0.0275;
+      document.getElementById('preview-commission-saved').textContent = `You save ~${fmt(saved)}`;
+    }
+  }
+
+  async function submitListing() {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    const checkedFeatures = Array.from(document.querySelectorAll('.feature-check.checked input'))
+      .map(cb => cb.value).join(', ');
+
+    const payload = {
+      type: 'seller-listing',
+      contact_name: document.getElementById('contact-name').value,
+      contact_email: document.getElementById('contact-email').value,
+      contact_phone: document.getElementById('contact-phone').value,
+      address: `${document.getElementById('street').value}, ${document.getElementById('suburb').value} QLD ${document.getElementById('postcode').value}`,
+      property_type: selections.type,
+      bedrooms: document.getElementById('beds').value,
+      bathrooms: document.getElementById('baths').value,
+      car_spaces: document.getElementById('cars').value,
+      land_size: document.getElementById('land').value,
+      house_size: document.getElementById('house-size').value,
+      condition: document.getElementById('condition').value,
+      year_built: document.getElementById('year-built').value,
+      asking_price: document.getElementById('asking-price').value,
+      features: checkedFeatures,
+      description: document.getElementById('description').value,
+      offer_deadline: document.getElementById('offer-deadline').value,
+    };
+
+    try {
+      const res = await fetch('https://formspree.io/f/xdawbnba', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        document.getElementById('submit-btn').style.display = 'none';
+        document.querySelector('.submit-note').style.display = 'none';
+        document.getElementById('submission-success').style.display = 'block';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Try again →';
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Try again →';
+    }
+  }
+
+  // Set default offer deadline to 14 days out
+  function setDefaultDeadline() {
+    const d = new Date();
+    d.setDate(d.getDate() + 14);
+    document.getElementById('offer-deadline').valueAsDate = d;
+  }
+
+  initFeatures();
+  setDefaultDeadline();
+</script>
+</body>
+</html>
