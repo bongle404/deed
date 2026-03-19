@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEED — Buyer Pre-Qualification</title>
+  <meta name="description" content="Get verified as a buyer on DEED. Takes 3 minutes. Access private property listings before they go public." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #070707;
+      --surface:    #0f0f0f;
+      --surface-2:  #161616;
+      --border:     #1e1e1e;
+      --border-2:   #2a2a2a;
+      --text:       #ede8df;
+      --text-muted: #6b6459;
+      --text-dim:   #3d3830;
+      --gold:       #c8922a;
+      --gold-light: #e0b060;
+      --gold-dim:   #3a2a0e;
+      --green:      #3dd68c;
+      --green-dim:  #0a2a1a;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-serif:   'Fraunces', serif;
+      --font-body:    'Outfit', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* ── LAYOUT ────────────────────────── */
+    .app {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ───────────────────────── */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .sidebar-logo {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      letter-spacing: 0.12em;
+      color: var(--text);
+      text-decoration: none;
+      display: block;
+      margin-bottom: 3rem;
+    }
+
+    .sidebar-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .steps-nav { display: flex; flex-direction: column; gap: 0; flex: 1; }
+
+    .step-nav-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.1rem 0;
+      border-bottom: 1px solid var(--border);
+      cursor: default;
+      transition: opacity 0.3s;
+    }
+    .step-nav-item:first-child { border-top: 1px solid var(--border); }
+
+    .step-nav-num {
+      width: 1.8rem;
+      height: 1.8rem;
+      border: 1px solid var(--border-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+
+    .step-nav-item.active .step-nav-num {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    .step-nav-item.done .step-nav-num {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-dim);
+    }
+
+    .step-nav-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      transition: color 0.3s;
+      padding-top: 0.1rem;
+    }
+    .step-nav-item.active .step-nav-label { color: var(--text); }
+    .step-nav-item.done .step-nav-label { color: var(--text-muted); }
+
+    .sidebar-note {
+      margin-top: auto;
+      padding-top: 2rem;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── MAIN CONTENT ──────────────────── */
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .main-header {
+      padding: 2rem 3rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      margin: 0 2rem;
+      position: relative;
+    }
+    .progress-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      background: var(--gold);
+      transition: width 0.5s ease;
+    }
+
+    .progress-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .main-body {
+      flex: 1;
+      padding: 4rem 3rem;
+      max-width: 640px;
+    }
+
+    /* ── STEP PANELS ───────────────────── */
+    .step-panel {
+      display: none;
+      opacity: 0;
+      transform: translateX(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .step-panel.active {
+      display: block;
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .step-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .step-eyebrow::before {
+      content: '';
+      display: block;
+      width: 1.5rem;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .step-heading {
+      font-family: var(--font-serif);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 300;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+    .step-heading em { font-style: italic; color: var(--gold-light); }
+
+    .step-sub {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+    }
+
+    /* ── OPTION CARDS ──────────────────── */
+    .option-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-bottom: 2rem;
+    }
+    .option-grid.cols-1 { grid-template-columns: 1fr; }
+
+    .option-card {
+      border: 1px solid var(--border-2);
+      padding: 1.25rem 1.4rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .option-card:hover { border-color: var(--border-2); background: var(--surface-2); }
+    .option-card.selected {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    .option-icon {
+      font-size: 1.2rem;
+      width: 2rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .option-label {
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .option-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    /* ── FORM FIELDS ───────────────────── */
+    .fields { display: flex; flex-direction: column; gap: 1.2rem; margin-bottom: 2rem; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .field { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    input, select {
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 300;
+      padding: 0.9rem 1.1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input::placeholder { color: var(--text-dim); }
+    input:focus, select:focus { border-color: var(--gold); }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6459' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      cursor: pointer;
+    }
+    select option { background: #161616; }
+
+    .input-prefix {
+      position: relative;
+    }
+    .input-prefix span {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+    .input-prefix input { padding-left: 2rem; }
+
+    /* Toggle */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.2rem;
+      border: 1px solid var(--border-2);
+      margin-bottom: 1rem;
+    }
+    .toggle-row-label { font-size: 0.88rem; color: var(--text); }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input { display: none; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--border-2);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: var(--text-muted);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--gold-dim); border: 1px solid var(--gold); }
+    .toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); background: var(--gold); }
+
+    .conditional-field {
+      display: none;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      margin-bottom: 1rem;
+    }
+    .conditional-field.visible { display: block; }
+
+    /* ── BUTTONS ───────────────────────── */
+    .step-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .btn-next {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      padding: 1rem 2.2rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-next:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    .btn-back {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 0;
+    }
+    .btn-back:hover { color: var(--text); }
+
+    /* ── RESULT SCREEN ─────────────────── */
+    .result-panel { display: none; }
+    .result-panel.active { display: block; }
+
+    .verified-card {
+      border: 1px solid var(--gold-dim);
+      background: linear-gradient(135deg, rgba(200,146,42,0.04) 0%, rgba(7,7,7,0) 60%);
+      padding: 3rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .verified-card::before {
+      content: 'VERIFIED';
+      position: absolute;
+      top: 50%;
+      right: -2rem;
+      transform: translateY(-50%) rotate(90deg);
+      font-family: var(--font-display);
+      font-size: 5rem;
+      color: rgba(200,146,42,0.05);
+      letter-spacing: 0.15em;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--gold-dim);
+      border: 1px solid var(--gold);
+      padding: 0.4rem 1rem;
+      margin-bottom: 2rem;
+    }
+    .verified-badge span {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+    }
+    .verified-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .result-name {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-range {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      letter-spacing: 0.05em;
+      color: var(--gold-light);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .result-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+    .result-detail {
+      padding: 1rem 1.25rem;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .result-detail:nth-child(even) { border-right: none; }
+    .result-detail:nth-last-child(-n+2) { border-bottom: none; }
+
+    .result-detail-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.25rem;
+    }
+    .result-detail-value {
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+
+    .result-next {
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-top: 1.5rem;
+    }
+    .result-next h4 {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .result-next p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+    .result-next p strong { color: var(--text); font-weight: 500; }
+
+    .btn-submit {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      padding: 1.1rem 2.4rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 1.5rem;
+      width: 100%;
+    }
+    .btn-submit:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .submit-note {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    .submission-success {
+      display: none;
+      text-align: center;
+      padding: 3rem;
+      border: 1px solid var(--gold-dim);
+      background: rgba(200,146,42,0.04);
+      margin-top: 2rem;
+    }
+    .submission-success h3 {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--gold-light);
+      margin-bottom: 0.75rem;
+    }
+    .submission-success p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
+
+    /* ── MOBILE ────────────────────────── */
+    @media (max-width: 800px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main-header { padding: 1.25rem 1.5rem; }
+      .main-body { padding: 2.5rem 1.5rem; }
+      .option-grid { grid-template-columns: 1fr; }
+      .field-row { grid-template-columns: 1fr; }
+      .result-details { grid-template-columns: 1fr; }
+      .result-detail { border-right: none; }
+      .result-detail:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">DEED</a>
+    <p class="sidebar-title">Buyer pre-qualification</p>
+
+    <nav class="steps-nav">
+      <div class="step-nav-item active" data-step="1">
+        <div class="step-nav-num">01</div>
+        <div>
+          <div class="step-nav-label">Income</div>
+        </div>
+      </div>
+      <div class="step-nav-item" data-step="2">
+        <div class="step-nav-num">02</div>
+        <div>
+          <div class="step-nav-label">Deposit</div>
+        </div>
+      </div>
+      <div class="step-nav-item" data-step="3">
+        <div class="step-nav-num">03</div>
+        <div>
+          <div class="step-nav-label">Financial position</div>
+        </div>
+      </div>
+      <div class="step-nav-item" data-step="4">
+        <div class="step-nav-num">04</div>
+        <div>
+          <div class="step-nav-label">What you're looking for</div>
+        </div>
+      </div>
+      <div class="step-nav-item" data-step="5">
+        <div class="step-nav-num">05</div>
+        <div>
+          <div class="step-nav-label">Your result</div>
+        </div>
+      </div>
+    </nav>
+
+    <p class="sidebar-note">
+      This is an indicative pre-qualification, not a formal credit assessment.
+      DEED uses this information to match you with suitable listings in your area.
+    </p>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="main-header">
+      <a href="index.html" style="font-family:var(--font-display);font-size:1.2rem;letter-spacing:0.12em;color:var(--text);text-decoration:none;display:none;" id="mobile-logo">DEED</a>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:20%"></div>
+      </div>
+      <span class="progress-label" id="progress-label">Step 1 of 4</span>
+    </div>
+
+    <div class="main-body">
+
+      <!-- STEP 1: INCOME -->
+      <div class="step-panel active" id="step-1">
+        <p class="step-eyebrow">Step 01</p>
+        <h2 class="step-heading">Tell us about<br/><em>your income</em></h2>
+        <p class="step-sub">This helps us calculate your borrowing power. We only need the basics — no tax returns, no bank statements at this stage.</p>
+
+        <div class="option-grid">
+          <div class="option-card" data-field="employment" data-value="full-time" onclick="selectOption(this)">
+            <div class="option-icon">💼</div>
+            <div>
+              <div class="option-label">Full-time employed</div>
+              <div class="option-desc">PAYG, salary or wages</div>
+            </div>
+          </div>
+          <div class="option-card" data-field="employment" data-value="part-time" onclick="selectOption(this)">
+            <div class="option-icon">🕐</div>
+            <div>
+              <div class="option-label">Part-time / casual</div>
+              <div class="option-desc">Regular part-time hours</div>
+            </div>
+          </div>
+          <div class="option-card" data-field="employment" data-value="self-employed" onclick="selectOption(this)">
+            <div class="option-icon">🏢</div>
+            <div>
+              <div class="option-label">Self-employed</div>
+              <div class="option-desc">Business owner, contractor</div>
+            </div>
+          </div>
+          <div class="option-card" data-field="employment" data-value="investor" onclick="selectOption(this)">
+            <div class="option-icon">📈</div>
+            <div>
+              <div class="option-label">Investor / other</div>
+              <div class="option-desc">Investment income, retired</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fields">
+          <div class="field">
+            <label for="income">Your gross annual income</label>
+            <div class="input-prefix">
+              <span>$</span>
+              <input type="number" id="income" placeholder="95,000" min="0" />
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <span class="toggle-row-label">Buying with a partner?</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="has-partner" onchange="toggleConditional('partner-income-field', this.checked)" />
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+
+          <div class="conditional-field" id="partner-income-field">
+            <div class="field">
+              <label for="partner-income">Partner's gross annual income</label>
+              <div class="input-prefix">
+                <span>$</span>
+                <input type="number" id="partner-income" placeholder="85,000" min="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-next" onclick="nextStep(1)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: DEPOSIT -->
+      <div class="step-panel" id="step-2">
+        <p class="step-eyebrow">Step 02</p>
+        <h2 class="step-heading">How much have<br/>you <em>saved for a deposit?</em></h2>
+        <p class="step-sub">Your deposit size directly affects your borrowing capacity and the properties you can access. Lenders typically require 10–20% of the purchase price.</p>
+
+        <div class="fields">
+          <div class="field">
+            <label for="deposit">Your deposit amount</label>
+            <div class="input-prefix">
+              <span>$</span>
+              <input type="number" id="deposit" placeholder="120,000" min="0" />
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.8rem;">Where is your deposit coming from?</p>
+        <div class="option-grid">
+          <div class="option-card" data-field="deposit-source" data-value="savings" onclick="selectOption(this)">
+            <div class="option-icon">🏦</div>
+            <div>
+              <div class="option-label">Cash savings</div>
+              <div class="option-desc">Sitting in bank or offset</div>
+            </div>
+          </div>
+          <div class="option-card" data-field="deposit-source" data-value="equity" onclick="selectOption(this)">
+            <div class="option-icon">🏠</div>
+            <div>
+              <div class="option-label">Home equity</div>
+              <div class="option-desc">From an existing property</div>
+            </div>
+          </div>
+          <div class="option-card" data-field="deposit-source" data-value="gift" onclick="selectOption(this)">
+            <div class="option-icon">🎁</div>
+            <div>
+              <div class="option-label">Family gift</div>
+              <div class="option-desc">Gifted funds from family</div>
+            </div>
+          </div>
+          <div class="option-card" data-field="deposit-source" data-value="mixed" onclick="selectOption(this)">
+            <div class="option-icon">⚡</div>
+            <div>
+              <div class="option-label">Mixed sources</div>
+              <div class="option-desc">Combination of the above</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toggle-row" style="margin-top:1rem;">
+          <span class="toggle-row-label">First home buyer?</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="first-home" />
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-next" onclick="nextStep(2)">Continue →</button>
+          <button class="btn-back" onclick="prevStep(2)">← Back</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: FINANCIAL POSITION -->
+      <div class="step-panel" id="step-3">
+        <p class="step-eyebrow">Step 03</p>
+        <h2 class="step-heading">Any existing<br/><em>financial commitments?</em></h2>
+        <p class="step-sub">Lenders assess your existing obligations alongside your income. Be honest — this is just to give you an accurate picture, not a credit check.</p>
+
+        <div class="fields">
+          <div class="field">
+            <label for="debts">Existing monthly debt repayments</label>
+            <select id="debts">
+              <option value="" disabled selected>Select a range</option>
+              <option value="0">None — no loans or commitments</option>
+              <option value="500">Under $500 / month</option>
+              <option value="1000">$500 – $1,000 / month</option>
+              <option value="1500">$1,000 – $1,500 / month</option>
+              <option value="2500">$1,500 – $2,500 / month</option>
+              <option value="3500">$2,500+ / month</option>
+            </select>
+            <span style="font-size:0.72rem;color:var(--text-dim);margin-top:0.3rem;">Car loans, personal loans, HECS, credit card minimums</span>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <span class="toggle-row-label">Do you already have a lender pre-approval?</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="has-preapproval" onchange="toggleConditional('preapproval-field', this.checked)" />
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+
+        <div class="conditional-field" id="preapproval-field">
+          <div class="fields">
+            <div class="field-row">
+              <div class="field">
+                <label for="lender">Lender</label>
+                <input type="text" id="lender" placeholder="e.g. ANZ, Macquarie…" />
+              </div>
+              <div class="field">
+                <label for="preapproval-amount">Pre-approved amount</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="preapproval-amount" placeholder="600,000" min="0" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-next" onclick="nextStep(3)">Continue →</button>
+          <button class="btn-back" onclick="prevStep(3)">← Back</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: WHAT YOU'RE LOOKING FOR -->
+      <div class="step-panel" id="step-4">
+        <p class="step-eyebrow">Step 04</p>
+        <h2 class="step-heading">What are you<br/><em>looking for?</em></h2>
+        <p class="step-sub">We'll use this to notify you the moment a matching property lists on DEED — before it goes anywhere else.</p>
+
+        <div class="fields">
+          <div class="field-row">
+            <div class="field">
+              <label for="fname">First name</label>
+              <input type="text" id="fname" placeholder="Ed" />
+            </div>
+            <div class="field">
+              <label for="email">Email address</label>
+              <input type="email" id="email" placeholder="you@email.com" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="suburb">Suburb(s) of interest</label>
+            <input type="text" id="suburb" placeholder="New Farm, Paddington, Teneriffe…" />
+          </div>
+        </div>
+
+        <p style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.8rem;">Property type</p>
+        <div class="option-grid" style="margin-bottom:1.5rem;">
+          <div class="option-card" data-field="property-type" data-value="house" onclick="selectOption(this)">
+            <div class="option-icon">🏡</div>
+            <div><div class="option-label">House</div></div>
+          </div>
+          <div class="option-card" data-field="property-type" data-value="townhouse" onclick="selectOption(this)">
+            <div class="option-icon">🏘️</div>
+            <div><div class="option-label">Townhouse</div></div>
+          </div>
+          <div class="option-card" data-field="property-type" data-value="apartment" onclick="selectOption(this)">
+            <div class="option-icon">🏢</div>
+            <div><div class="option-label">Apartment</div></div>
+          </div>
+          <div class="option-card" data-field="property-type" data-value="any" onclick="selectOption(this)">
+            <div class="option-icon">⭐</div>
+            <div><div class="option-label">Any / flexible</div></div>
+          </div>
+        </div>
+
+        <p style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.8rem;">Purchase timeline</p>
+        <div class="option-grid cols-1" style="margin-bottom:1rem;">
+          <div class="option-card" data-field="timeline" data-value="asap" onclick="selectOption(this)">
+            <div class="option-icon">⚡</div>
+            <div>
+              <div class="option-label">Ready now</div>
+              <div class="option-desc">Actively searching, ready to make offers</div>
+            </div>
+          </div>
+          <div class="option-card" data-field="timeline" data-value="3-6months" onclick="selectOption(this)">
+            <div class="option-icon">📅</div>
+            <div>
+              <div class="option-label">3–6 months</div>
+              <div class="option-desc">Getting serious, want early access</div>
+            </div>
+          </div>
+          <div class="option-card" data-field="timeline" data-value="6-12months" onclick="selectOption(this)">
+            <div class="option-icon">🔭</div>
+            <div>
+              <div class="option-label">6–12 months</div>
+              <div class="option-desc">Planning ahead, want to understand the market</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-next" onclick="showResult()">See my result →</button>
+          <button class="btn-back" onclick="prevStep(4)">← Back</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: RESULT -->
+      <div class="step-panel" id="step-5">
+        <p class="step-eyebrow">Step 05 — Your result</p>
+        <h2 class="step-heading">You're <em>pre-qualified.</em></h2>
+        <p class="step-sub">Based on what you've told us, here's your estimated buying power on DEED.</p>
+
+        <div class="verified-card">
+          <div class="verified-badge">
+            <div class="verified-dot"></div>
+            <span>DEED Verified Buyer</span>
+          </div>
+          <p class="result-name" id="result-name">Verified buyer</p>
+          <p class="result-range" id="result-range">$0 – $0</p>
+          <p class="result-sub" id="result-sub">Estimated purchase range</p>
+
+          <div class="result-details">
+            <div class="result-detail">
+              <p class="result-detail-label">Max loan estimate</p>
+              <p class="result-detail-value" id="result-loan">—</p>
+            </div>
+            <div class="result-detail">
+              <p class="result-detail-label">Deposit</p>
+              <p class="result-detail-value" id="result-deposit">—</p>
+            </div>
+            <div class="result-detail">
+              <p class="result-detail-label">Suburb interest</p>
+              <p class="result-detail-value" id="result-suburb">—</p>
+            </div>
+            <div class="result-detail">
+              <p class="result-detail-label">Timeline</p>
+              <p class="result-detail-value" id="result-timeline">—</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-next">
+          <h4>What happens next</h4>
+          <p>We'll notify you at <strong id="result-email-display">your email</strong> the moment a matching property lists in your suburb — before it goes anywhere else. Founding members get first access and locked-in $999 flat fee pricing when DEED launches publicly.</p>
+        </div>
+
+        <button class="btn-submit" id="submit-btn" onclick="submitQualification()">
+          Confirm my pre-qualification →
+        </button>
+        <p class="submit-note">No credit check. No obligation. Just early access.</p>
+
+        <div class="submission-success" id="submission-success">
+          <h3>You're verified.</h3>
+          <p>We'll be in touch when properties matching your criteria list in <span id="success-suburb"></span>. Your DEED Verified Buyer status is locked in.</p>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+          <button class="btn-back" onclick="prevStep(5)">← Adjust my details</button>
+        </div>
+      </div>
+
+    </div><!-- /main-body -->
+  </main>
+</div>
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 4;
+
+  // Track selections
+  const selections = {
+    employment: null,
+    'deposit-source': null,
+    'property-type': null,
+    timeline: null,
+  };
+
+  // Option card selection
+  function selectOption(el) {
+    const field = el.dataset.field;
+    document.querySelectorAll(`[data-field="${field}"]`).forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selections[field] = el.dataset.value;
+  }
+
+  // Toggle conditional field
+  function toggleConditional(id, show) {
+    document.getElementById(id).classList.toggle('visible', show);
+  }
+
+  // Navigation
+  function nextStep(from) {
+    if (from < 4) {
+      goToStep(from + 1);
+    }
+  }
+
+  function prevStep(from) {
+    if (from > 1) goToStep(from - 1);
+  }
+
+  function goToStep(step) {
+    document.getElementById(`step-${currentStep}`).classList.remove('active');
+    document.getElementById(`step-${step}`).classList.add('active');
+
+    // Update sidebar
+    document.querySelectorAll('.step-nav-item').forEach(item => {
+      const s = parseInt(item.dataset.step);
+      item.classList.remove('active', 'done');
+      if (s === step) item.classList.add('active');
+      if (s < step) item.classList.add('done');
+    });
+
+    // Update progress
+    const pct = (step / totalSteps) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent =
+      step <= totalSteps ? `Step ${step} of ${totalSteps}` : 'Your result';
+
+    currentStep = step;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Format currency
+  function fmt(n) {
+    return '$' + Math.round(n).toLocaleString('en-AU');
+  }
+
+  // Calculate and show result
+  function showResult() {
+    // Gather inputs
+    const income = parseFloat(document.getElementById('income').value) || 0;
+    const partnerIncome = document.getElementById('has-partner').checked
+      ? (parseFloat(document.getElementById('partner-income').value) || 0) : 0;
+    const deposit = parseFloat(document.getElementById('deposit').value) || 0;
+    const debts = parseFloat(document.getElementById('debts').value) || 0;
+    const hasPreapproval = document.getElementById('has-preapproval').checked;
+    const preapprovalAmt = parseFloat(document.getElementById('preapproval-amount').value) || 0;
+    const fname = document.getElementById('fname').value || 'Buyer';
+    const email = document.getElementById('email').value || '';
+    const suburb = document.getElementById('suburb').value || 'your suburb';
+    const timeline = selections.timeline;
+
+    let maxLoan, minPrice, maxPrice;
+
+    if (hasPreapproval && preapprovalAmt > 0) {
+      maxLoan = preapprovalAmt;
+      maxPrice = preapprovalAmt + deposit;
+      minPrice = maxPrice * 0.85;
+    } else {
+      const totalIncome = income + partnerIncome;
+      const monthlyIncome = totalIncome / 12;
+      const availableForRepayment = (monthlyIncome * 0.32) - debts;
+      // At ~6.5% p.a., 30yr: factor ≈ 6.32 per $1k/month
+      maxLoan = Math.max(0, availableForRepayment * 6.32 * 1000);
+      maxPrice = maxLoan + deposit;
+      minPrice = maxPrice * 0.85;
+    }
+
+    // Update result display
+    document.getElementById('result-name').textContent = fname;
+    document.getElementById('result-range').textContent = `${fmt(minPrice)} – ${fmt(maxPrice)}`;
+    document.getElementById('result-sub').textContent = 'Estimated purchase range based on your profile';
+    document.getElementById('result-loan').textContent = fmt(maxLoan);
+    document.getElementById('result-deposit').textContent = fmt(deposit);
+    document.getElementById('result-suburb').textContent = suburb;
+    document.getElementById('result-timeline').textContent =
+      { asap: 'Ready now', '3-6months': '3–6 months', '6-12months': '6–12 months' }[timeline] || '—';
+    document.getElementById('result-email-display').textContent = email || 'your email';
+    document.getElementById('success-suburb').textContent = suburb;
+
+    // Activate step 5
+    document.getElementById(`step-${currentStep}`).classList.remove('active');
+    document.getElementById('step-5').classList.add('active');
+    document.querySelectorAll('.step-nav-item').forEach(item => {
+      item.classList.remove('active', 'done');
+      item.classList.add('done');
+    });
+    document.querySelector('[data-step="5"]').classList.remove('done');
+    document.querySelector('[data-step="5"]').classList.add('active');
+    document.getElementById('progress-fill').style.width = '100%';
+    document.getElementById('progress-label').textContent = 'Your result';
+    currentStep = 5;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Submit to Formspree
+  async function submitQualification() {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    const payload = {
+      type: 'buyer-qualification',
+      first_name: document.getElementById('fname').value,
+      email: document.getElementById('email').value,
+      suburb: document.getElementById('suburb').value,
+      employment: selections.employment,
+      income: document.getElementById('income').value,
+      partner_income: document.getElementById('has-partner').checked ? document.getElementById('partner-income').value : 'N/A',
+      deposit: document.getElementById('deposit').value,
+      deposit_source: selections['deposit-source'],
+      first_home_buyer: document.getElementById('first-home').checked ? 'Yes' : 'No',
+      existing_debts_monthly: document.getElementById('debts').value,
+      has_preapproval: document.getElementById('has-preapproval').checked ? 'Yes' : 'No',
+      lender: document.getElementById('lender').value || 'N/A',
+      preapproval_amount: document.getElementById('preapproval-amount').value || 'N/A',
+      property_type: selections['property-type'],
+      timeline: selections.timeline,
+      result_range: document.getElementById('result-range').textContent,
+    };
+
+    try {
+      const res = await fetch('https://formspree.io/f/xdawbnba', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        document.getElementById('submit-btn').style.display = 'none';
+        document.querySelector('.submit-note').style.display = 'none';
+        document.getElementById('submission-success').style.display = 'block';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Try again →';
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Try again →';
+    }
+  }
+</script>
+
+</body>
+</html>
