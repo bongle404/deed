@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEED — Submit an Offer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #070707; --surface: #0f0f0f; --surface-2: #161616;
+      --border: #1e1e1e; --border-2: #2a2a2a;
+      --text: #ede8df; --text-muted: #6b6459; --text-dim: #3d3830;
+      --gold: #c8922a; --gold-light: #e0b060; --gold-dim: #3a2a0e;
+      --green: #3dd68c; --green-dim: #0a2a1a; --red: #e05c4b;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-serif: 'Fraunces', serif;
+      --font-body: 'Outfit', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.6; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); background-size: 200px; }
+
+    .app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 2.5rem; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+    .sidebar-logo { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 0.12em; color: var(--text); text-decoration: none; display: block; margin-bottom: 2rem; }
+    .sidebar-property { border: 1px solid var(--border-2); padding: 1.25rem; margin-bottom: 2rem; background: var(--surface-2); }
+    .property-label { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
+    .property-address { font-size: 0.9rem; color: var(--text); margin-bottom: 0.2rem; }
+    .property-suburb { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .property-price { font-family: var(--font-display); font-size: 1.4rem; letter-spacing: 0.05em; color: var(--gold-light); }
+    .sidebar-title { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2rem; }
+    .steps-nav { display: flex; flex-direction: column; gap: 0; flex: 1; }
+    .step-nav-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .step-nav-item:first-child { border-top: 1px solid var(--border); }
+    .step-nav-num { width: 1.8rem; height: 1.8rem; border: 1px solid var(--border-2); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; color: var(--text-dim); flex-shrink: 0; transition: all 0.3s; }
+    .step-nav-item.active .step-nav-num { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+    .step-nav-item.done .step-nav-num { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+    .step-nav-label { font-size: 0.82rem; color: var(--text-muted); padding-top: 0.1rem; transition: color 0.3s; }
+    .step-nav-item.active .step-nav-label { color: var(--text); }
+    .sidebar-note { margin-top: auto; padding-top: 2rem; border-top: 1px solid var(--border); font-size: 0.72rem; color: var(--text-dim); line-height: 1.6; }
+
+    /* MAIN */
+    .main { display: flex; flex-direction: column; min-height: 100vh; }
+    .main-header { padding: 2rem 3rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .progress-bar { flex: 1; height: 2px; background: var(--border); margin: 0 2rem; position: relative; }
+    .progress-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--gold); transition: width 0.5s ease; }
+    .progress-label { font-size: 0.72rem; letter-spacing: 0.12em; color: var(--text-muted); white-space: nowrap; }
+    .main-body { flex: 1; padding: 4rem 3rem; max-width: 640px; }
+
+    /* STEPS */
+    .step-panel { display: none; opacity: 0; transform: translateX(20px); transition: opacity 0.4s ease, transform 0.4s ease; }
+    .step-panel.active { display: block; opacity: 1; transform: translateX(0); }
+    .step-eyebrow { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem; }
+    .step-eyebrow::before { content: ''; display: block; width: 1.5rem; height: 1px; background: var(--gold); }
+    .step-heading { font-family: var(--font-serif); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 300; line-height: 1.2; color: var(--text); margin-bottom: 0.75rem; }
+    .step-heading em { font-style: italic; color: var(--gold-light); }
+    .step-sub { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2.5rem; line-height: 1.7; }
+
+    /* OFFER TYPE CARDS */
+    .offer-types { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
+    .offer-type-card { border: 1px solid var(--border-2); padding: 1.4rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 1rem; }
+    .offer-type-card:hover { background: var(--surface-2); }
+    .offer-type-card.selected { border-color: var(--gold); background: var(--gold-dim); }
+    .offer-type-title { font-size: 0.92rem; color: var(--text); margin-bottom: 0.25rem; font-weight: 400; }
+    .offer-type-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+    .offer-strength { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.25rem 0.65rem; border: 1px solid; }
+    .strength-strong { color: var(--green); border-color: var(--green-dim); background: var(--green-dim); }
+    .strength-standard { color: var(--gold); border-color: var(--gold-dim); background: var(--gold-dim); }
+    .strength-weak { color: var(--text-muted); border-color: var(--border); }
+
+    /* FIELDS */
+    .fields { display: flex; flex-direction: column; gap: 1.2rem; margin-bottom: 2rem; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .field { display: flex; flex-direction: column; gap: 0.5rem; }
+    label { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); }
+    input, select, textarea { background: var(--surface-2); border: 1px solid var(--border-2); color: var(--text); font-family: var(--font-body); font-size: 0.9rem; font-weight: 300; padding: 0.9rem 1.1rem; outline: none; transition: border-color 0.2s; width: 100%; -webkit-appearance: none; appearance: none; }
+    textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+    input::placeholder, textarea::placeholder { color: var(--text-dim); }
+    input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6459' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; cursor: pointer; }
+    select option { background: #161616; }
+    .input-prefix { position: relative; }
+    .input-prefix span { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem; pointer-events: none; }
+    .input-prefix input { padding-left: 2rem; }
+    .field-hint { font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; line-height: 1.5; }
+
+    /* CONDITIONAL BLOCKS */
+    .condition-block { display: none; padding: 1.5rem; border: 1px solid var(--border); background: var(--surface-2); margin-top: -0.5rem; margin-bottom: 1.2rem; }
+    .condition-block.visible { display: block; }
+    .condition-block-title { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+
+    /* OFFER SUMMARY */
+    .offer-summary { border: 1px solid var(--border-2); overflow: hidden; margin-bottom: 1.5rem; }
+    .summary-header { background: var(--surface-2); padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .summary-header-label { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); }
+    .verified-pill { display: flex; align-items: center; gap: 0.4rem; background: var(--green-dim); border: 1px solid rgba(61,214,140,0.2); padding: 0.25rem 0.75rem; }
+    .verified-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .verified-pill-text { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green); }
+
+    .summary-rows { }
+    .summary-row { display: flex; align-items: flex-start; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); gap: 1rem; }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row-label { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); min-width: 120px; padding-top: 0.1rem; }
+    .summary-row-value { font-size: 0.9rem; color: var(--text); text-align: right; line-height: 1.4; }
+    .summary-price { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 0.05em; color: var(--gold-light); line-height: 1; }
+    .summary-tag { display: inline-block; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.2rem 0.6rem; border: 1px solid; margin-top: 0.3rem; }
+
+    /* CHAR COUNTER */
+    .textarea-wrap { position: relative; }
+    .char-count { position: absolute; bottom: 0.75rem; right: 1rem; font-size: 0.65rem; color: var(--text-dim); pointer-events: none; }
+
+    /* BUTTONS */
+    .step-actions { display: flex; align-items: center; gap: 1.5rem; margin-top: 2rem; }
+    .btn-next { font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; background: var(--gold); color: var(--bg); border: none; padding: 1rem 2.2rem; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+    .btn-next:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-back { font-family: var(--font-body); font-size: 0.8rem; font-weight: 400; letter-spacing: 0.08em; color: var(--text-muted); background: none; border: none; cursor: pointer; transition: color 0.2s; padding: 0; }
+    .btn-back:hover { color: var(--text); }
+    .btn-submit { font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; background: var(--gold); color: var(--bg); border: none; padding: 1.1rem 2.4rem; cursor: pointer; transition: background 0.2s, transform 0.15s; width: 100%; margin-top: 0.5rem; }
+    .btn-submit:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .submit-note { font-size: 0.72rem; color: var(--text-dim); text-align: center; margin-top: 0.75rem; line-height: 1.6; }
+    .submission-success { display: none; text-align: center; padding: 3rem; border: 1px solid var(--gold-dim); background: rgba(200,146,42,0.04); margin-top: 2rem; }
+    .submission-success h3 { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 300; color: var(--gold-light); margin-bottom: 0.75rem; }
+    .submission-success p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 0.75rem; }
+
+    /* MOBILE */
+    @media (max-width: 800px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main-header { padding: 1.25rem 1.5rem; }
+      .main-body { padding: 2.5rem 1.5rem; }
+      .field-row { grid-template-columns: 1fr; }
+      .summary-row { flex-direction: column; gap: 0.3rem; }
+      .summary-row-value { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="listing.html" class="sidebar-logo">DEED</a>
+    <div class="sidebar-property">
+      <p class="property-label">Making an offer on</p>
+      <p class="property-address">14 Riverview Terrace</p>
+      <p class="property-suburb">New Farm QLD 4005</p>
+      <p class="property-price">Asking $895,000</p>
+    </div>
+    <p class="sidebar-title">Your offer</p>
+    <nav class="steps-nav">
+      <div class="step-nav-item active" data-step="1"><div class="step-nav-num">01</div><div class="step-nav-label">Offer amount</div></div>
+      <div class="step-nav-item" data-step="2"><div class="step-nav-num">02</div><div class="step-nav-label">Conditions</div></div>
+      <div class="step-nav-item" data-step="3"><div class="step-nav-num">03</div><div class="step-nav-label">Cover note</div></div>
+      <div class="step-nav-item" data-step="4"><div class="step-nav-num">04</div><div class="step-nav-label">Review & submit</div></div>
+    </nav>
+    <p class="sidebar-note">Your DEED Verified Buyer badge is attached to this offer. The seller sees your verification status before reading your offer amount.</p>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="main-header">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:25%"></div></div>
+      <span class="progress-label" id="progress-label">Step 1 of 4</span>
+    </div>
+
+    <div class="main-body">
+
+      <!-- STEP 1: AMOUNT + TYPE -->
+      <div class="step-panel active" id="step-1">
+        <p class="step-eyebrow">Step 01</p>
+        <h2 class="step-heading">Your offer<br/><em>amount & type</em></h2>
+        <p class="step-sub">The asking price is $895,000. What are you offering, and what conditions does it come with? Stronger offers stand out — the seller sees all offers simultaneously at the deadline.</p>
+
+        <div class="fields">
+          <div class="field">
+            <label for="offer-amount">Offer amount</label>
+            <div class="input-prefix">
+              <span>$</span>
+              <input type="number" id="offer-amount" placeholder="895,000" min="0" oninput="updateSummaryPrice()" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="deposit-pct">Deposit on exchange</label>
+            <select id="deposit-pct">
+              <option value="" disabled selected>Select deposit</option>
+              <option value="5">5% of purchase price</option>
+              <option value="10" selected>10% of purchase price (standard)</option>
+              <option value="20">20% of purchase price</option>
+              <option value="custom">Other amount</option>
+            </select>
+            <span class="field-hint">Paid to the seller's solicitor upon contract exchange. Shows commitment.</span>
+          </div>
+        </div>
+
+        <p style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Offer type</p>
+        <div class="offer-types">
+          <div class="offer-type-card" data-value="unconditional" onclick="selectOfferType(this)">
+            <div>
+              <p class="offer-type-title">Unconditional</p>
+              <p class="offer-type-desc">No finance or building & pest clauses. The strongest possible offer — you're committing to complete regardless. Requires existing pre-approval and confidence in the property.</p>
+            </div>
+            <span class="offer-strength strength-strong">Strongest</span>
+          </div>
+          <div class="offer-type-card" data-value="finance" onclick="selectOfferType(this)">
+            <div>
+              <p class="offer-type-title">Subject to finance</p>
+              <p class="offer-type-desc">You need formal loan approval from your lender. Standard condition for most buyers. You'll set a finance deadline on the next screen.</p>
+            </div>
+            <span class="offer-strength strength-standard">Standard</span>
+          </div>
+          <div class="offer-type-card" data-value="bp" onclick="selectOfferType(this)">
+            <div>
+              <p class="offer-type-title">Subject to building & pest</p>
+              <p class="offer-type-desc">You want a building and pest inspection completed before committing. Reasonable for older homes. Finance is unconditional.</p>
+            </div>
+            <span class="offer-strength strength-standard">Standard</span>
+          </div>
+          <div class="offer-type-card" data-value="both" onclick="selectOfferType(this)">
+            <div>
+              <p class="offer-type-title">Subject to finance & building and pest</p>
+              <p class="offer-type-desc">Both conditions apply. The most protection for a buyer, but the weakest offer position if competing against others.</p>
+            </div>
+            <span class="offer-strength strength-weak">Most conditional</span>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-next" onclick="nextStep(1)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: CONDITIONS -->
+      <div class="step-panel" id="step-2">
+        <p class="step-eyebrow">Step 02</p>
+        <h2 class="step-heading">Set your<br/><em>conditions & timeline</em></h2>
+        <p class="step-sub">Lock in your deadlines now. Sellers can see exactly when each condition expires — vague conditions are a red flag. Tight, realistic deadlines show you're serious.</p>
+
+        <!-- Finance block -->
+        <div class="condition-block" id="finance-block">
+          <p class="condition-block-title">Finance condition</p>
+          <div class="fields">
+            <div class="field-row">
+              <div class="field">
+                <label for="finance-lender">Your lender</label>
+                <input type="text" id="finance-lender" placeholder="ANZ, CBA, Macquarie…" />
+              </div>
+              <div class="field">
+                <label for="finance-deadline">Finance deadline</label>
+                <input type="date" id="finance-deadline" />
+                <span class="field-hint">Recommended: 14–21 days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- B&P block -->
+        <div class="condition-block" id="bp-block">
+          <p class="condition-block-title">Building & pest condition</p>
+          <div class="fields">
+            <div class="field-row">
+              <div class="field">
+                <label for="bp-inspector">Inspector (optional)</label>
+                <input type="text" id="bp-inspector" placeholder="Inspector name or TBC" />
+              </div>
+              <div class="field">
+                <label for="bp-deadline">B&P deadline</label>
+                <input type="date" id="bp-deadline" />
+                <span class="field-hint">Recommended: 7–10 days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fields">
+          <div class="field">
+            <label for="settlement">Settlement preference</label>
+            <select id="settlement">
+              <option value="" disabled selected>Select preferred settlement</option>
+              <option value="30">30 days from contract</option>
+              <option value="45">45 days from contract</option>
+              <option value="60">60 days from contract (standard)</option>
+              <option value="90">90 days from contract</option>
+              <option value="negotiate">Flexible — open to negotiation</option>
+            </select>
+            <span class="field-hint">60 days is standard in Queensland. Sellers sometimes prefer shorter.</span>
+          </div>
+          <div class="field">
+            <label for="special-conditions">Special conditions (optional)</label>
+            <input type="text" id="special-conditions" placeholder="e.g. Subject to sale of existing property" />
+            <span class="field-hint">Leave blank if none. Complex conditions should be drafted by your conveyancer.</span>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-next" onclick="nextStep(2)">Continue →</button>
+          <button class="btn-back" onclick="prevStep(2)">← Back</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: COVER NOTE -->
+      <div class="step-panel" id="step-3">
+        <p class="step-eyebrow">Step 03</p>
+        <h2 class="step-heading">A note to<br/><em>the seller</em></h2>
+        <p class="step-sub">Optional — but sellers read these. A genuine note about why this property is the right fit can be the difference when two offers are close. Don't pitch yourself. Tell a true story.</p>
+
+        <div class="fields">
+          <div class="field">
+            <label for="cover-note">Your note (optional)</label>
+            <div class="textarea-wrap">
+              <textarea id="cover-note" maxlength="500" placeholder="We've been searching in New Farm for 8 months and walked through a lot of properties that looked great in photos but felt wrong. This one was different. The north light in the afternoon, the way the deck opens to the garden — this is the kind of home we'd actually live in, not just buy..." oninput="updateCharCount()"></textarea>
+              <span class="char-count" id="char-count">0 / 500</span>
+            </div>
+            <span class="field-hint">500 characters max. Genuine and specific beats polished and generic every time.</span>
+          </div>
+        </div>
+
+        <div style="padding:1.25rem;border:1px solid var(--border);background:var(--surface-2);margin-top:0.5rem;">
+          <p style="font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem;">What the seller sees with your offer</p>
+          <div style="display:flex;flex-direction:column;gap:0.4rem;">
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text-muted);">
+              <span style="color:var(--green);">✓</span> Your DEED Verified Buyer badge + income range
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text-muted);">
+              <span style="color:var(--green);">✓</span> Offer amount + deposit commitment
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text-muted);">
+              <span style="color:var(--green);">✓</span> All conditions with clear deadlines
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text-muted);">
+              <span style="color:var(--green);">✓</span> Your cover note
+            </div>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-next" onclick="buildReview(); nextStep(3)">Review offer →</button>
+          <button class="btn-back" onclick="prevStep(3)">← Back</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: REVIEW -->
+      <div class="step-panel" id="step-4">
+        <p class="step-eyebrow">Step 04 — Review</p>
+        <h2 class="step-heading">Review your<br/><em>offer</em></h2>
+        <p class="step-sub">This is exactly what the seller will see. Once submitted, your offer joins the queue and the seller reviews all offers at the deadline.</p>
+
+        <div class="offer-summary">
+          <div class="summary-header">
+            <span class="summary-header-label">DEED Offer — 14 Riverview Tce, New Farm</span>
+            <div class="verified-pill">
+              <div class="verified-pill-dot"></div>
+              <span class="verified-pill-text">Verified buyer</span>
+            </div>
+          </div>
+          <div class="summary-rows">
+            <div class="summary-row">
+              <span class="summary-row-label">Offer price</span>
+              <div>
+                <p class="summary-price" id="rev-price">—</p>
+                <span id="rev-vs-asking" style="font-size:0.72rem;color:var(--text-dim);"></span>
+              </div>
+            </div>
+            <div class="summary-row">
+              <span class="summary-row-label">Offer type</span>
+              <div class="summary-row-value" id="rev-type">—</div>
+            </div>
+            <div class="summary-row">
+              <span class="summary-row-label">Deposit</span>
+              <div class="summary-row-value" id="rev-deposit">—</div>
+            </div>
+            <div class="summary-row" id="rev-finance-row" style="display:none;">
+              <span class="summary-row-label">Finance clause</span>
+              <div class="summary-row-value" id="rev-finance">—</div>
+            </div>
+            <div class="summary-row" id="rev-bp-row" style="display:none;">
+              <span class="summary-row-label">Building & pest</span>
+              <div class="summary-row-value" id="rev-bp">—</div>
+            </div>
+            <div class="summary-row">
+              <span class="summary-row-label">Settlement</span>
+              <div class="summary-row-value" id="rev-settlement">—</div>
+            </div>
+            <div class="summary-row" id="rev-note-row" style="display:none;">
+              <span class="summary-row-label">Cover note</span>
+              <div class="summary-row-value" id="rev-note" style="font-style:italic;color:var(--text-muted);font-size:0.82rem;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:1rem 1.25rem;border:1px solid var(--border);background:var(--surface-2);margin-bottom:1.5rem;font-size:0.82rem;color:var(--text-muted);line-height:1.6;">
+          By submitting, you confirm this is a genuine offer and you have the financial capacity to proceed. Your offer will be held until the offer deadline. The seller will review all offers simultaneously and may accept, decline, or counter.
+        </div>
+
+        <button class="btn-submit" id="submit-btn" onclick="submitOffer()">Submit offer →</button>
+        <p class="submit-note">No obligation until the seller formally accepts and contracts are exchanged.<br/>Your conveyancer prepares the contract at that point.</p>
+
+        <div class="submission-success" id="submission-success">
+          <h3>Offer submitted.</h3>
+          <p>Your offer on 14 Riverview Terrace, New Farm has been received. The seller will review all offers at the deadline and you'll be notified of their decision by email.</p>
+          <p style="color:var(--text-dim);">If your offer is accepted, DEED will connect you with a conveyancer to prepare the contract of sale.</p>
+          <a href="listing.html" style="display:inline-block;margin-top:1rem;font-size:0.78rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold-dim);padding-bottom:2px;">← Back to listing</a>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+          <button class="btn-back" onclick="prevStep(4)">← Edit offer</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  let currentStep = 1;
+  let offerType = null;
+
+  const offerTypeLabels = {
+    unconditional: 'Unconditional',
+    finance: 'Subject to finance',
+    bp: 'Subject to building & pest',
+    both: 'Subject to finance & building and pest',
+  };
+
+  function selectOfferType(el) {
+    document.querySelectorAll('.offer-type-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    offerType = el.dataset.value;
+  }
+
+  function goToStep(step) {
+    document.getElementById(`step-${currentStep}`).classList.remove('active');
+    document.getElementById(`step-${step}`).classList.add('active');
+    document.querySelectorAll('.step-nav-item').forEach(item => {
+      const s = parseInt(item.dataset.step);
+      item.classList.remove('active', 'done');
+      if (s === step) item.classList.add('active');
+      if (s < step) item.classList.add('done');
+    });
+    const pct = (step / 4) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = `Step ${step} of 4`;
+    currentStep = step;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function nextStep(from) {
+    if (from === 1) updateConditionBlocks();
+    goToStep(from + 1);
+  }
+
+  function prevStep(from) { if (from > 1) goToStep(from - 1); }
+
+  function updateConditionBlocks() {
+    const showFinance = offerType === 'finance' || offerType === 'both';
+    const showBP = offerType === 'bp' || offerType === 'both';
+    document.getElementById('finance-block').classList.toggle('visible', showFinance);
+    document.getElementById('bp-block').classList.toggle('visible', showBP);
+
+    // Set default dates
+    if (showFinance && !document.getElementById('finance-deadline').value) {
+      const d = new Date(); d.setDate(d.getDate() + 14);
+      document.getElementById('finance-deadline').valueAsDate = d;
+    }
+    if (showBP && !document.getElementById('bp-deadline').value) {
+      const d = new Date(); d.setDate(d.getDate() + 7);
+      document.getElementById('bp-deadline').valueAsDate = d;
+    }
+  }
+
+  function fmt(n) { return '$' + Math.round(n).toLocaleString('en-AU'); }
+  function fmtDate(str) {
+    if (!str) return '—';
+    const d = new Date(str);
+    return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function updateSummaryPrice() {
+    const val = parseFloat(document.getElementById('offer-amount').value);
+    if (!isNaN(val)) {
+      document.getElementById('rev-price').textContent = fmt(val);
+      const diff = val - 895000;
+      const pct = ((diff / 895000) * 100).toFixed(1);
+      const el = document.getElementById('rev-vs-asking');
+      if (diff > 0) { el.textContent = `+${fmt(diff)} above asking (${pct}%)`; el.style.color = 'var(--green)'; }
+      else if (diff < 0) { el.textContent = `${fmt(diff)} below asking (${pct}%)`; el.style.color = 'var(--red)'; }
+      else { el.textContent = 'At asking price'; el.style.color = 'var(--text-muted)'; }
+    }
+  }
+
+  function updateCharCount() {
+    const len = document.getElementById('cover-note').value.length;
+    document.getElementById('char-count').textContent = `${len} / 500`;
+  }
+
+  function buildReview() {
+    const amount = parseFloat(document.getElementById('offer-amount').value);
+    const depositPct = document.getElementById('deposit-pct').value;
+    const settlement = document.getElementById('settlement').value;
+    const note = document.getElementById('cover-note').value.trim();
+
+    // Price
+    document.getElementById('rev-price').textContent = amount ? fmt(amount) : '—';
+    updateSummaryPrice();
+
+    // Type
+    document.getElementById('rev-type').textContent = offerTypeLabels[offerType] || '—';
+
+    // Deposit
+    const depositAmt = amount && depositPct && depositPct !== 'custom'
+      ? fmt(amount * parseFloat(depositPct) / 100) + ` (${depositPct}%)` : '—';
+    document.getElementById('rev-deposit').textContent = depositAmt;
+
+    // Finance
+    if (offerType === 'finance' || offerType === 'both') {
+      const lender = document.getElementById('finance-lender').value || 'TBC';
+      const deadline = fmtDate(document.getElementById('finance-deadline').value);
+      document.getElementById('rev-finance').textContent = `${lender} · Due ${deadline}`;
+      document.getElementById('rev-finance-row').style.display = 'flex';
+    } else {
+      document.getElementById('rev-finance-row').style.display = 'none';
+    }
+
+    // B&P
+    if (offerType === 'bp' || offerType === 'both') {
+      const deadline = fmtDate(document.getElementById('bp-deadline').value);
+      document.getElementById('rev-bp').textContent = `Due ${deadline}`;
+      document.getElementById('rev-bp-row').style.display = 'flex';
+    } else {
+      document.getElementById('rev-bp-row').style.display = 'none';
+    }
+
+    // Settlement
+    const settlementLabels = { '30': '30 days', '45': '45 days', '60': '60 days (standard)', '90': '90 days', 'negotiate': 'Flexible' };
+    document.getElementById('rev-settlement').textContent = settlementLabels[settlement] || '—';
+
+    // Note
+    if (note) {
+      document.getElementById('rev-note').textContent = `"${note}"`;
+      document.getElementById('rev-note-row').style.display = 'flex';
+    } else {
+      document.getElementById('rev-note-row').style.display = 'none';
+    }
+  }
+
+  async function submitOffer() {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    const payload = {
+      type: 'buyer-offer',
+      property: '14 Riverview Terrace, New Farm QLD 4005',
+      offer_amount: document.getElementById('offer-amount').value,
+      offer_type: offerType,
+      deposit_pct: document.getElementById('deposit-pct').value,
+      finance_lender: document.getElementById('finance-lender').value || 'N/A',
+      finance_deadline: document.getElementById('finance-deadline').value || 'N/A',
+      bp_deadline: document.getElementById('bp-deadline').value || 'N/A',
+      settlement: document.getElementById('settlement').value,
+      special_conditions: document.getElementById('special-conditions').value || 'None',
+      cover_note: document.getElementById('cover-note').value || 'None',
+    };
+
+    try {
+      const res = await fetch('https://formspree.io/f/xdawbnba', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        document.getElementById('submit-btn').style.display = 'none';
+        document.querySelector('.submit-note').style.display = 'none';
+        document.getElementById('submission-success').style.display = 'block';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Try again →';
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Try again →';
+    }
+  }
+</script>
+</body>
+</html>
