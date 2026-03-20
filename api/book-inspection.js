@@ -24,6 +24,14 @@ function validateInput({ listing_id, slot_id, slot_label, name, email, phone }) 
   return null; // valid
 }
 
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 // ─── Email helpers ───────────────────────────────────────────────────────────
 
 async function sendEmail({ to, subject, html }) {
@@ -58,12 +66,12 @@ function buyerEmail({ name, email, slot_label }) {
       <span style="font-family:Georgia,serif;font-size:1.3rem;letter-spacing:0.14em;color:#ede8df;">DEED</span>
     </div>
     <div style="padding:2rem;">
-      <h2 style="margin:0 0 0.5rem;font-size:1.3rem;color:#0b0b0b;">You're booked in, ${name.split(' ')[0]}.</h2>
+      <h2 style="margin:0 0 0.5rem;font-size:1.3rem;color:#0b0b0b;">You're booked in, ${escHtml(name.split(' ')[0])}.</h2>
       <p style="margin:0 0 1.5rem;color:#666;font-size:0.9rem;">Here are your inspection details.</p>
 
       <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
         <p style="margin:0 0 0.25rem;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:#92400e;">Your inspection</p>
-        <p style="margin:0;font-size:1rem;font-weight:600;color:#78350f;">📅 ${slot_label}</p>
+        <p style="margin:0;font-size:1rem;font-weight:600;color:#78350f;">📅 ${escHtml(slot_label)}</p>
       </div>
 
       <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
@@ -97,13 +105,13 @@ function sellerEmail({ name, email, phone, slot_label }) {
 
       <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
         <p style="margin:0 0 0.25rem;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:#92400e;">Slot</p>
-        <p style="margin:0;font-size:1rem;font-weight:600;color:#78350f;">📅 ${slot_label}</p>
+        <p style="margin:0;font-size:1rem;font-weight:600;color:#78350f;">📅 ${escHtml(slot_label)}</p>
       </div>
 
       <table style="width:100%;border-collapse:collapse;">
-        <tr><td style="padding:0.6rem 0;border-bottom:1px solid #f0ece6;color:#999;font-size:0.85rem;width:30%;">Name</td><td style="padding:0.6rem 0;border-bottom:1px solid #f0ece6;font-size:0.85rem;color:#0b0b0b;">${name}</td></tr>
-        <tr><td style="padding:0.6rem 0;border-bottom:1px solid #f0ece6;color:#999;font-size:0.85rem;">Email</td><td style="padding:0.6rem 0;border-bottom:1px solid #f0ece6;font-size:0.85rem;color:#0b0b0b;"><a href="mailto:${email}" style="color:#b45309;">${email}</a></td></tr>
-        <tr><td style="padding:0.6rem 0;color:#999;font-size:0.85rem;">Mobile</td><td style="padding:0.6rem 0;font-size:0.85rem;color:#0b0b0b;"><a href="tel:${phone}" style="color:#b45309;">${phone}</a></td></tr>
+        <tr><td style="padding:0.6rem 0;border-bottom:1px solid #f0ece6;color:#999;font-size:0.85rem;width:30%;">Name</td><td style="padding:0.6rem 0;border-bottom:1px solid #f0ece6;font-size:0.85rem;color:#0b0b0b;">${escHtml(name)}</td></tr>
+        <tr><td style="padding:0.6rem 0;border-bottom:1px solid #f0ece6;color:#999;font-size:0.85rem;">Email</td><td style="padding:0.6rem 0;border-bottom:1px solid #f0ece6;font-size:0.85rem;color:#0b0b0b;"><a href="mailto:${escHtml(email)}" style="color:#b45309;">${escHtml(email)}</a></td></tr>
+        <tr><td style="padding:0.6rem 0;color:#999;font-size:0.85rem;">Mobile</td><td style="padding:0.6rem 0;font-size:0.85rem;color:#0b0b0b;"><a href="tel:${escHtml(phone)}" style="color:#b45309;">${escHtml(phone)}</a></td></tr>
       </table>
     </div>
   </div>
@@ -115,6 +123,11 @@ function sellerEmail({ name, email, phone, slot_label }) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  if (!process.env.SUPABASE_SERVICE_KEY) {
+    console.error('SUPABASE_SERVICE_KEY not set');
+    return res.status(500).json({ error: 'Server configuration error.' });
+  }
 
   const { listing_id, slot_id, slot_label, name, email, phone } = req.body || {};
 
