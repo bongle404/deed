@@ -247,10 +247,8 @@
 
     /* ── STATS STRIP ───────────────────────── */
     .stats-strip {
-      background: var(--dark-surface);
-      border-top: 1px solid var(--dark-border);
-      border-bottom: 1px solid var(--dark-border);
-      padding: 2.25rem 3rem;
+      background: #111111;
+      padding: 3rem 3rem;
     }
     .stats-strip-inner {
       display: grid;
@@ -258,25 +256,25 @@
       gap: 0;
     }
     .strip-item {
-      padding: 0 2rem;
+      padding: 0 2.5rem;
       border-right: 1px solid var(--dark-border);
     }
     .strip-item:first-child { padding-left: 0; }
-    .strip-item:last-child { border-right: none; }
+    .strip-item:last-child  { border-right: none; }
     .strip-val {
       font-family: var(--font-display);
-      font-size: 2rem;
+      font-size: 2.5rem;
       letter-spacing: 0.04em;
-      color: var(--gold-light);
+      color: var(--dark-text);
       line-height: 1;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.3rem;
     }
     .strip-label {
       font-size: 0.68rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--dark-muted);
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.25rem;
     }
     .strip-desc {
       font-size: 0.76rem;
@@ -734,27 +732,27 @@
   </section>
 
   <!-- STATS STRIP -->
-  <div class="stats-strip">
+  <div class="stats-strip" id="stats-strip">
     <div class="stats-strip-inner">
       <div class="strip-item">
-        <p class="strip-label">Standard commission</p>
-        <p class="strip-val">2.75%</p>
-        <p class="strip-desc">Paid regardless of outcome</p>
+        <p class="strip-label">Average seller saving</p>
+        <p class="strip-val" data-count-to="18400" data-prefix="$">$0</p>
+        <p class="strip-desc">Versus standard QLD agent commission</p>
       </div>
       <div class="strip-item">
-        <p class="strip-label">On a $750k home</p>
-        <p class="strip-val">$20,625</p>
-        <p class="strip-desc">Handed to an agent, not your future</p>
+        <p class="strip-label">Agent commission</p>
+        <p class="strip-val" data-count-to="0" data-suffix="%">0%</p>
+        <p class="strip-desc">DEED charges a flat $999 fee only</p>
       </div>
       <div class="strip-item">
-        <p class="strip-label">Deals that collapse</p>
-        <p class="strip-val">1 in 4</p>
-        <p class="strip-desc">From unqualified buyers wasting time</p>
+        <p class="strip-label">Time to first qualified offer</p>
+        <p class="strip-val" data-count-to="48" data-suffix="hrs">0hrs</p>
+        <p class="strip-desc">From listing going live</p>
       </div>
       <div class="strip-item">
-        <p class="strip-label">What DEED charges</p>
-        <p class="strip-val">$999</p>
-        <p class="strip-desc">Flat fee. AI-qualified buyers. Full process.</p>
+        <p class="strip-label">Private sales</p>
+        <p class="strip-val" data-count-to="100" data-suffix="%">0%</p>
+        <p class="strip-desc">No portal listings. Direct to buyers.</p>
       </div>
     </div>
   </div>
@@ -1046,6 +1044,35 @@
         submitBtn.textContent = 'Try again →';
       }
     });
+
+    /* ── COUNT-UP ANIMATION ─────────────────── */
+    function animateCountUp(el) {
+      const target = parseInt(el.dataset.countTo, 10);
+      const prefix = el.dataset.prefix || '';
+      const suffix = el.dataset.suffix || '';
+      if (target === 0) return; // 0% stays static — already correct
+      const duration = 1200;
+      const step = 16;
+      const increment = target / (duration / step);
+      let current = 0;
+      const timer = setInterval(() => {
+        current = Math.min(current + increment, target);
+        el.textContent = prefix + Math.floor(current).toLocaleString() + suffix;
+        if (current >= target) clearInterval(timer);
+      }, step);
+    }
+
+    const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('[data-count-to]').forEach(animateCountUp);
+          statsObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    const statsStrip = document.getElementById('stats-strip');
+    if (statsStrip) statsObserver.observe(statsStrip);
   </script>
 </body>
 </html>
