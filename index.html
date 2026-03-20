@@ -1216,6 +1216,104 @@
       .calc-vs { display: none; }
     }
 
+    /* ── VERIFIED EXPLAINER ───────────────────────── */
+    .verified-intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+      margin-bottom: 3rem;
+    }
+    .story-card {
+      background: var(--section-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+    .story-card-suburb {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+    .story-card-price {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+    .story-card-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .story-stat { text-align: center; }
+    .story-stat-val {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+    .story-stat-green .story-stat-val { color: #16a34a; }
+    .story-stat-label { font-size: 0.68rem; color: var(--muted); line-height: 1.3; }
+    .story-quote {
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 0.4rem;
+    }
+    .story-attribution { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+
+    .verify-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .verify-step {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      position: relative;
+    }
+    .verify-step-num {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      letter-spacing: 0.04em;
+      color: var(--blue-pale);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .verify-step-icon {
+      font-size: 1.75rem;
+      margin-bottom: 0.875rem;
+    }
+    .verify-step-title {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .verify-step-body {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 860px) {
+      .verified-intro { grid-template-columns: 1fr; gap: 2rem; }
+      .verify-steps { grid-template-columns: 1fr; gap: 1rem; }
+      .story-card-stats { grid-template-columns: repeat(3, 1fr); }
+    }
+
     /* ── ANIMATIONS ───────────────────────────────── */
     .fade-up {
       opacity: 0;
@@ -1260,8 +1358,8 @@
     <!-- Left: search + content -->
     <div class="hero-left">
       <span class="hero-eyebrow">Queensland's Private Property Platform</span>
-      <h1 class="hero-headline">Find your next home.<br/><span class="hl-blue">Skip the agent bill.</span></h1>
-      <p class="hero-sub">Buy from verified private sellers. List your home for $999 flat — no agent commission, ever.</p>
+      <h1 class="hero-headline">Qualified buyers only.<br/><span class="hl-blue">Keep the $20,000.</span></h1>
+      <p class="hero-sub">DEED AI-verifies every buyer's finance and identity before they can contact you. No tyre-kickers. No open homes. No agent commission.</p>
 
       <!-- Search tabs -->
       <div class="search-tabs">
@@ -1350,6 +1448,53 @@
     <div class="trust-bar-item"><div class="trust-check">✓</div> <span><strong>$999 flat fee</strong> — no commission</span></div>
     <div class="trust-bar-item"><div class="trust-check">✓</div> <span><strong>Queensland</strong> properties only</span></div>
   </div>
+
+  <!-- WHAT VERIFIED MEANS -->
+  <section class="section">
+    <div class="section-inner">
+      <div class="verified-intro">
+        <div class="verified-intro-text">
+          <p class="section-eyebrow">What "AI verified" actually means</p>
+          <h2 class="section-title">Every buyer proves they can buy before they can reach you.</h2>
+          <p class="section-sub" style="margin-bottom:0">Agents let anyone through your door. DEED doesn't. Before a buyer can message you, view your address, or book an inspection — they complete three checks.</p>
+        </div>
+        <div class="verified-story">
+          <div class="story-card">
+            <div class="story-card-suburb">New Farm, QLD</div>
+            <div class="story-card-price">Listed at $1,075,000</div>
+            <div class="story-card-stats">
+              <div class="story-stat"><span class="story-stat-val">4</span><span class="story-stat-label">Verified buyers in 48hrs</span></div>
+              <div class="story-stat"><span class="story-stat-val">Day 5</span><span class="story-stat-label">Offer accepted</span></div>
+              <div class="story-stat story-stat-green"><span class="story-stat-val">$18,950</span><span class="story-stat-label">Kept vs. agent fee</span></div>
+            </div>
+            <p class="story-quote">"All four buyers were pre-approved above asking. I never had a single wasted conversation."</p>
+            <p class="story-attribution">— Sarah, seller</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="verify-steps">
+        <div class="verify-step">
+          <div class="verify-step-num">01</div>
+          <div class="verify-step-icon">🏦</div>
+          <h3 class="verify-step-title">Finance verified</h3>
+          <p class="verify-step-body">Buyers connect their bank or submit a broker pre-approval. DEED confirms their borrowing capacity against your asking price. You see their verified range — not a guess.</p>
+        </div>
+        <div class="verify-step">
+          <div class="verify-step-num">02</div>
+          <div class="verify-step-icon">🪪</div>
+          <h3 class="verify-step-title">Identity confirmed</h3>
+          <p class="verify-step-body">Government ID is matched and verified. No anonymous enquiries. Every person who contacts you is accountable — by name, by address, by record.</p>
+        </div>
+        <div class="verify-step">
+          <div class="verify-step-num">03</div>
+          <div class="verify-step-icon">✓</div>
+          <h3 class="verify-step-title">You see their badge</h3>
+          <p class="verify-step-body">Before the first message, you see a verified badge, their confirmed borrowing range, and their purchase timeline. You decide who you respond to.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- STATS STRIP -->
   <div class="stats-strip">
