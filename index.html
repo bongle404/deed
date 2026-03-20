@@ -149,12 +149,125 @@
     /* ── HERO ─────────────────────────────────────── */
     .hero {
       background: var(--page-bg);
-      padding: 3rem 1.5rem 3.5rem;
       border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 64px);
+      overflow: hidden;
     }
+    .hero-left {
+      padding: 4rem 3rem 4rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .hero-right {
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      /* Cinematic orange grade */
+      filter: contrast(1.08) saturate(1.35) sepia(0.25) brightness(0.92);
+      display: block;
+    }
+    /* Orange-to-teal cinematic overlay */
+    .hero-right::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        160deg,
+        rgba(195, 95, 30, 0.22) 0%,
+        rgba(10, 25, 60, 0.18) 100%
+      );
+      pointer-events: none;
+    }
+    /* Floating listing card over the image */
+    .hero-listing-card {
+      position: absolute;
+      bottom: 2rem;
+      left: 2rem;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      z-index: 2;
+      min-width: 220px;
+    }
+    .hero-listing-card-suburb {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+    .hero-listing-card-price {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+    .hero-listing-card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--blue);
+      background: var(--blue-pale);
+      padding: 0.2rem 0.6rem;
+      border-radius: 99px;
+    }
+    .hero-listing-card-tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--blue);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+    /* Saving badge top-right of image */
+    .hero-saving-badge {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: rgba(10,25,60,0.82);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      border-radius: 12px;
+      padding: 0.875rem 1.125rem;
+      z-index: 2;
+      text-align: center;
+    }
+    .hero-saving-badge-val {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      letter-spacing: 0.04em;
+      color: #fb923c;
+      line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+    .hero-saving-badge-label {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+    }
+
     .hero-inner {
-      max-width: 860px;
-      margin: 0 auto;
+      /* legacy class — unused in split layout */
     }
     .hero-eyebrow {
       display: inline-flex;
@@ -712,6 +825,79 @@
       font-weight: 400;
     }
 
+    /* ── LIFESTYLE BREAK ──────────────────────────── */
+    .lifestyle-break {
+      position: relative;
+      height: 480px;
+      overflow: hidden;
+    }
+    .lifestyle-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 60%;
+      /* Cinematic orange grade — stronger than hero */
+      filter: contrast(1.12) saturate(1.4) sepia(0.3) brightness(0.85);
+      display: block;
+    }
+    /* Orange warm → deep blue cinematic overlay */
+    .lifestyle-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(180, 75, 10, 0.55) 0%,
+        rgba(8, 18, 50, 0.72) 100%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lifestyle-content {
+      text-align: center;
+      color: #fff;
+      padding: 2rem;
+      max-width: 680px;
+    }
+    .lifestyle-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #fb923c;
+      margin-bottom: 0.75rem;
+    }
+    .lifestyle-stat {
+      font-family: var(--font-display);
+      font-size: clamp(4rem, 10vw, 7rem);
+      letter-spacing: 0.02em;
+      line-height: 1;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+    .lifestyle-sub {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.6;
+      max-width: 440px;
+      margin: 0 auto 1.5rem;
+    }
+    .lifestyle-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.75rem;
+      background: #fb923c;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+    .lifestyle-cta:hover { background: #ea7c2a; }
+
     /* ── WAITLIST / CTA SECTION ───────────────────── */
     .cta-section {
       background: var(--blue);
@@ -886,11 +1072,14 @@
       .nav-links, .nav-actions { display: none; }
       .nav-hamburger { display: flex; }
 
-      .hero { padding: 2rem 1.25rem 2.5rem; }
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-left { padding: 2rem 1.25rem 2.5rem; }
+      .hero-right { display: none; }
       .hero-stats { gap: 1.25rem; }
       .search-row { flex-direction: column; }
       .search-btn { width: 100%; justify-content: center; height: 48px; }
       .sell-panel-inner { flex-direction: column; }
+      .lifestyle-break { height: 360px; }
 
       .trust-bar { gap: 1rem; justify-content: flex-start; }
 
@@ -964,7 +1153,8 @@
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-inner">
+    <!-- Left: search + content -->
+    <div class="hero-left">
       <span class="hero-eyebrow">Queensland's Private Property Platform</span>
       <h1 class="hero-headline">Find your next home.<br/><span class="hl-blue">Skip the agent bill.</span></h1>
       <p class="hero-sub">Buy from verified private sellers. List your home for $999 flat — no agent commission, ever.</p>
@@ -977,7 +1167,6 @@
 
       <!-- Search box -->
       <div class="search-box">
-        <!-- Buy panel -->
         <div class="search-panel active" id="panel-buy">
           <div class="search-row">
             <div class="search-input-wrap">
@@ -990,8 +1179,6 @@
             </a>
           </div>
         </div>
-
-        <!-- Sell panel -->
         <div class="search-panel" id="panel-sell">
           <div class="sell-panel-inner">
             <div class="sell-panel-text">
@@ -999,9 +1186,7 @@
               <h3>LIST WITHOUT AN AGENT.</h3>
               <p>$999 flat fee. AI-qualified buyers. You stay in control.</p>
             </div>
-            <a href="sell.html" class="search-btn">
-              List your property →
-            </a>
+            <a href="sell.html" class="search-btn">List your property →</a>
           </div>
         </div>
       </div>
@@ -1029,6 +1214,27 @@
             <div class="hero-stat-label">From listing going live</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Right: cinematic property image -->
+    <div class="hero-right">
+      <img
+        class="hero-img"
+        src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=900&q=85&fit=crop&crop=center"
+        alt="Queensland luxury home"
+        loading="eager"
+      />
+      <!-- Floating saving badge -->
+      <div class="hero-saving-badge">
+        <div class="hero-saving-badge-val">$18,400</div>
+        <div class="hero-saving-badge-label">Avg. seller saving</div>
+      </div>
+      <!-- Floating listing card -->
+      <div class="hero-listing-card">
+        <p class="hero-listing-card-suburb">New Farm, QLD</p>
+        <p class="hero-listing-card-price">$1,075,000</p>
+        <span class="hero-listing-card-tag">3 Qualified Buyers</span>
       </div>
     </div>
   </section>
@@ -1136,6 +1342,24 @@
       </div>
     </div>
   </section>
+
+  <!-- LIFESTYLE BREAK -->
+  <div class="lifestyle-break">
+    <img
+      class="lifestyle-img"
+      src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=85&fit=crop&crop=center"
+      alt="Queensland home"
+      loading="lazy"
+    />
+    <div class="lifestyle-overlay">
+      <div class="lifestyle-content">
+        <p class="lifestyle-label">What Queensland sellers keep</p>
+        <p class="lifestyle-stat">$18,400</p>
+        <p class="lifestyle-sub">The average saving when selling through DEED instead of paying a traditional agent commission.</p>
+        <a href="sell.html" class="lifestyle-cta">List your property — $999 →</a>
+      </div>
+    </div>
+  </div>
 
   <!-- WHY NO AGENT -->
   <section class="section">
