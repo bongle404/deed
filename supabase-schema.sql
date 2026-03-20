@@ -267,3 +267,59 @@ $$ language plpgsql;
 create trigger sync_watcher_count
   after insert or delete on watchers
   for each row execute function update_watcher_count();
+
+-- ═══════════════════════════════════════════
+--  BROKER PORTAL MIGRATION
+--  Run this block in Supabase SQL Editor
+--  after the initial schema has been applied
+-- ═══════════════════════════════════════════
+
+-- ── BROKERS ─────────────────────────────────
+create table if not exists brokers (
+  id              uuid primary key default uuid_generate_v4(),
+  created_at      timestamptz default now(),
+  name            text not null,
+  email           text not null unique,
+  brokerage       text not null,
+  asic_licence    text not null,
+  phone           text,
+  status          text default 'pending', -- pending, approved, suspended
+  approved_at     timestamptz
+);
+
+alter table brokers enable row level security;
+create policy "public can insert brokers"
+  on brokers for insert with check (true);
+-- No select policy — anon cannot read brokers table.
+-- All broker reads go through service role in serverless functions.
+
+-- ── BUYERS — broker portal columns ──────────
+alter table buyers add column if not exists
+  verification_method     text default 'self_reported';
+  -- values: self_reported, broker_preapproval
+
+alter table buyers add column if not exists
+  verified_amount         bigint;
+  -- bigint: supports pre-approvals above $2.1M without overflow
+
+alter table buyers add column if not exists
+  broker_id               uuid references brokers(id) on delete set null;
+
+alter table buyers add column if not exists
+  activation_token        text;
+  -- UUID sent in activation email. Nulled out after use (replay prevention).
+
+alter table buyers add column if not exists
+  activation_token_expires_at  timestamptz;
+  -- Set to now() + interval '7 days' on insert.
+
+alter table buyers add column if not exists
+  activation_complete     boolean default false;
+
+alter table buyers add column if not exists
+  verified_at             timestamptz;
+
+-- ── max_price type safety ────────────────────
+-- max_price is integer. Alter to bigint if any pre-approvals exceed $2.1M.
+-- alter table buyers alter column max_price type bigint;
+-- (Uncomment and run if needed before inserting large amounts.)
