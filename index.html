@@ -170,19 +170,17 @@
       height: 100%;
       object-fit: cover;
       object-position: center;
-      /* Cinematic orange grade */
-      filter: contrast(1.08) saturate(1.35) sepia(0.25) brightness(0.92);
       display: block;
     }
-    /* Orange-to-teal cinematic overlay */
+    /* Subtle dark vignette at bottom for card legibility */
     .hero-right::after {
       content: '';
       position: absolute;
       inset: 0;
       background: linear-gradient(
-        160deg,
-        rgba(195, 95, 30, 0.22) 0%,
-        rgba(10, 25, 60, 0.18) 100%
+        to bottom,
+        transparent 60%,
+        rgba(0,0,0,0.35) 100%
       );
       pointer-events: none;
     }
@@ -836,19 +834,13 @@
       height: 100%;
       object-fit: cover;
       object-position: center 60%;
-      /* Cinematic orange grade — stronger than hero */
-      filter: contrast(1.12) saturate(1.4) sepia(0.3) brightness(0.85);
       display: block;
     }
-    /* Orange warm → deep blue cinematic overlay */
+    /* Dark overlay — let the photo's natural warmth show through */
     .lifestyle-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(
-        135deg,
-        rgba(180, 75, 10, 0.55) 0%,
-        rgba(8, 18, 50, 0.72) 100%
-      );
+      background: rgba(10, 18, 40, 0.58);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1221,7 +1213,7 @@
     <div class="hero-right">
       <img
         class="hero-img"
-        src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=900&q=85&fit=crop&crop=center"
+        src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=900&q=85&fit=crop&crop=center"
         alt="Queensland luxury home"
         loading="eager"
       />
@@ -1347,8 +1339,8 @@
   <div class="lifestyle-break">
     <img
       class="lifestyle-img"
-      src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=85&fit=crop&crop=center"
-      alt="Queensland home"
+      src="https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=1600&q=85&fit=crop&crop=center"
+      alt="Queensland home at golden hour"
       loading="lazy"
     />
     <div class="lifestyle-overlay">
