@@ -390,6 +390,10 @@
     .how-step:nth-child(odd)  .how-step-body { margin-left: auto; }
     .how-step:nth-child(even) .how-step-body { margin-right: auto; }
 
+    @media (prefers-reduced-motion: reduce) {
+      .how-step { opacity: 1; transform: none; transition: none; }
+    }
+
     /* ── WHY AGENTS FAIL ───────────────────── */
     .truth-section {
       background: #f2efe9;
@@ -1142,7 +1146,11 @@
       });
     }, { threshold: 0.2 });
 
-    document.querySelectorAll('.how-step').forEach(el => howObserver.observe(el));
+    if ('IntersectionObserver' in window) {
+      document.querySelectorAll('.how-step').forEach(el => howObserver.observe(el));
+    } else {
+      document.querySelectorAll('.how-step').forEach(el => el.classList.add('visible'));
+    }
   </script>
 </body>
 </html>
