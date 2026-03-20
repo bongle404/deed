@@ -394,75 +394,99 @@
       .how-step { opacity: 1; transform: none; transition: none; }
     }
 
-    /* ── WHY AGENTS FAIL ───────────────────── */
-    .truth-section {
-      background: #f2efe9;
+    /* ── WHY NO AGENT ───────────────────────── */
+    .agent-section {
+      background: #F7F5F2;
       padding: 7rem 3rem;
       border-top: 1px solid var(--light-border);
     }
-    .truth-grid {
+    .agent-grid {
       display: grid;
-      grid-template-columns: 1fr 1.4fr;
-      gap: 7rem;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 6rem;
       align-items: start;
+      max-width: 1100px;
+      margin: 0 auto;
     }
-    .truth-left-eyebrow {
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--light-muted);
-      margin-bottom: 1.25rem;
-    }
-    .truth-left-heading {
+    .agent-left-headline {
       font-family: var(--font-display);
-      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      font-size: clamp(2.5rem, 4.5vw, 4rem);
       letter-spacing: 0.02em;
       line-height: 1;
       color: var(--light-text);
       margin-bottom: 1.5rem;
     }
-    .truth-left-heading .accent { color: var(--gold); }
-    .truth-left p {
+    .agent-left-sub {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 0.02em;
+      color: var(--light-muted);
+      margin-bottom: 1.25rem;
+    }
+    .agent-left p {
       font-size: 0.9rem;
       color: var(--light-muted);
-      line-height: 1.75;
+      line-height: 1.8;
     }
+    .agent-left p + p { margin-top: 1rem; }
 
-    .truth-list { display: flex; flex-direction: column; gap: 0; }
-    .truth-item {
-      display: grid;
-      grid-template-columns: 2.25rem 1fr;
-      gap: 1.25rem;
-      padding: 1.5rem 0;
-      border-bottom: 1px solid var(--light-border);
-      align-items: start;
-    }
-    .truth-item:first-child { border-top: 1px solid var(--light-border); }
-
-    .truth-icon {
-      width: 2.25rem;
-      height: 2.25rem;
-      background: var(--red-pale);
-      border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--red);
+    /* Comparison table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
       font-size: 0.85rem;
-      font-weight: 600;
-      flex-shrink: 0;
     }
-    .truth-content h4 {
-      font-size: 0.9rem;
+    .compare-table thead th {
+      padding: 0.75rem 1rem;
+      font-size: 0.7rem;
       font-weight: 500;
-      color: var(--light-text);
-      margin-bottom: 0.35rem;
-    }
-    .truth-content p {
-      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       color: var(--light-muted);
-      line-height: 1.65;
+      text-align: left;
+      border-bottom: 1px solid var(--light-border);
+    }
+    .compare-table thead th.col-deed {
+      border-top: 2px solid var(--blue);
+      color: var(--blue);
+    }
+    .compare-table tbody tr {
+      border-bottom: 1px solid var(--light-border);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .compare-table tbody tr.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .compare-table tbody td {
+      padding: 1rem 1rem;
+      color: var(--light-text);
+      vertical-align: top;
+    }
+    .compare-table tbody td:first-child {
+      font-weight: 500;
+      font-size: 0.8rem;
+      color: var(--light-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .compare-no {
+      color: var(--red);
+      font-weight: 500;
+    }
+    .compare-yes {
+      color: var(--blue);
+      font-weight: 500;
+    }
+    .compare-note {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--light-dim);
+      margin-top: 0.2rem;
+      font-weight: 300;
     }
 
     /* ── COMMISSION CALCULATOR ─────────────── */
@@ -693,8 +717,9 @@
       .strip-item { padding: 0; border-right: none; }
       .calc-section { padding: 5rem 1.5rem; }
       .calc-comparison { gap: 1rem; }
-      .how-section, .truth-section, .waitlist-section { padding: 5rem 1.5rem; }
-      .truth-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .how-section, .agent-section, .waitlist-section { padding: 5rem 1.5rem; }
+      .agent-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .compare-table tbody td:first-child { white-space: normal; }
       .waitlist-inner { grid-template-columns: 1fr; gap: 3rem; }
       .field-row { grid-template-columns: 1fr; }
       .scroll-hint { display: none; }
@@ -707,8 +732,8 @@
       .calc-section { padding: 3rem 1rem; }
       .calc-input { width: 160px; font-size: 1.6rem; }
       .calc-dollar { font-size: 1.6rem; }
-      .how-section, .truth-section, .waitlist-section { padding: 3rem 1rem; }
-      .truth-grid { gap: 2rem; }
+      .how-section, .agent-section, .waitlist-section { padding: 3rem 1rem; }
+      .agent-grid { gap: 2rem; }
       .waitlist-inner { grid-template-columns: 1fr; gap: 2rem; }
       .field-row { grid-template-columns: 1fr; }
     }
@@ -886,43 +911,52 @@
     </div>
   </section>
 
-  <!-- WHY AGENTS FAIL -->
-  <section class="truth-section">
-    <div class="truth-grid">
-      <div class="truth-left">
-        <p class="truth-left-eyebrow">Why agents fail sellers</p>
-        <h2 class="truth-left-heading">AGENTS HAVEN'T<br/>CHANGED.<br/><span class="accent">THE MARKET HAS.</span></h2>
-        <p>Queensland's real estate industry charges 2.75% on every transaction. That model was built before price transparency, verified finance, and digital contracts. DEED is built for how property actually transacts today.</p>
+  <!-- WHY NO AGENT -->
+  <section class="agent-section">
+    <div class="agent-grid">
+      <div class="agent-left">
+        <h2 class="agent-left-headline">THE AGENT'S CUT WAS NEVER YOURS TO GIVE.</h2>
+        <p class="agent-left-sub">$20,000. Gone. For what?</p>
+        <p>Queensland's real estate commission model was built before price transparency, AI-verified finance, and digital contracts existed. Agents haven't changed because they haven't had to — until now.</p>
+        <p>DEED does what a good agent should do: qualifies buyers, manages the offer process, and gets you to settlement. Without the 2.75% toll on everything you've built.</p>
       </div>
-      <div class="truth-list">
-        <div class="truth-item reveal">
-          <div class="truth-icon">✕</div>
-          <div class="truth-content">
-            <h4>No visibility on buyer qualification</h4>
-            <p>Agents accept any enquiry and book any inspection. One in four deals collapses post-offer because the buyer couldn't get finance.</p>
-          </div>
-        </div>
-        <div class="truth-item reveal" style="transition-delay: 0.08s">
-          <div class="truth-icon">✕</div>
-          <div class="truth-content">
-            <h4>Price guides designed to mislead</h4>
-            <p>Underquoting creates false competition. Overquoting wins the listing. Neither serves the seller. DEED shows what comparable properties actually sold for.</p>
-          </div>
-        </div>
-        <div class="truth-item reveal" style="transition-delay: 0.16s">
-          <div class="truth-icon">✕</div>
-          <div class="truth-content">
-            <h4>No accountability after the offer</h4>
-            <p>Once the contract is signed, most agents disappear. Building & pest failures, finance clause expiries, settlement delays — all avoidable with a proper pipeline.</p>
-          </div>
-        </div>
-        <div class="truth-item reveal" style="transition-delay: 0.24s">
-          <div class="truth-icon">✕</div>
-          <div class="truth-content">
-            <h4>Incentive misalignment baked in</h4>
-            <p>An agent earns the same whether your home sells for $700k or $750k. A quick low sale fits their schedule. DEED's optional success fee only increases when your price does.</p>
-          </div>
-        </div>
+      <div class="agent-right">
+        <table class="compare-table" id="compare-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Traditional Agent</th>
+              <th class="col-deed">DEED</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Commission fee</td>
+              <td><span class="compare-no">✕ 2.75%</span><span class="compare-note">$20,000+ on avg. QLD home</span></td>
+              <td><span class="compare-yes">✓ $999 flat</span><span class="compare-note">No commission, ever</span></td>
+            </tr>
+            <tr>
+              <td>Buyer qualification</td>
+              <td><span class="compare-no">✕ None</span><span class="compare-note">Any enquiry accepted</span></td>
+              <td><span class="compare-yes">✓ AI verified</span><span class="compare-note">Finance + identity checked</span></td>
+            </tr>
+            <tr>
+              <td>Contract support</td>
+              <td><span class="compare-no">✕ Basic</span><span class="compare-note">Disappears post-offer</span></td>
+              <td><span class="compare-yes">✓ Full pipeline</span><span class="compare-note">Finance, B&amp;P, settlement tracked</span></td>
+            </tr>
+            <tr>
+              <td>Listing control</td>
+              <td><span class="compare-no">✕ Agent-led</span><span class="compare-note">You're consulted, not in charge</span></td>
+              <td><span class="compare-yes">✓ You control</span><span class="compare-note">Your price, your timeline</span></td>
+            </tr>
+            <tr>
+              <td>Privacy</td>
+              <td><span class="compare-no">✕ Portal listed</span><span class="compare-note">Public on REA, Domain</span></td>
+              <td><span class="compare-yes">✓ Private</span><span class="compare-note">No public portal exposure</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -1151,6 +1185,22 @@
     } else {
       document.querySelectorAll('.how-step').forEach(el => el.classList.add('visible'));
     }
+
+    /* ── COMPARISON TABLE ROW REVEAL ────────── */
+    const tableObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('tbody tr').forEach((row, i) => {
+            row.style.transitionDelay = `${i * 0.08}s`;
+            row.classList.add('visible');
+          });
+          tableObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    const compareTable = document.getElementById('compare-table');
+    if (compareTable) tableObserver.observe(compareTable);
   </script>
 </body>
 </html>
