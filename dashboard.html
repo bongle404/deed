@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEED — Seller Dashboard</title>
+  <link rel="stylesheet" href="deed-ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root {
+      --blue:#2563EB; --blue-hover:#1d4ed8; --blue-light:#3b82f6;
+      --blue-pale:#eff6ff; --blue-muted:rgba(37,99,235,0.10);
+      --page-bg:#ffffff; --section-bg:#f7f8fa; --border:#e5e7eb;
+      --text:#111827; --muted:#6b7280; --dim:#9ca3af;
+    }
+    body { background:var(--page-bg); font-family:var(--font-body); color:var(--text); }
+
+    /* ── NAV ─────────────────────────────────── */
+    .nav { background:#fff !important; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; padding:0 1.5rem; height:64px; display:flex; align-items:center; justify-content:space-between; }
+    .nav-logo { font-family:var(--font-display); font-size:1.6rem; letter-spacing:0.06em; color:var(--text); text-decoration:none; }
+    .nav-links { display:flex; list-style:none; gap:0; margin:0; padding:0; }
+    .nav-links a { font-size:0.875rem; font-weight:500; color:var(--muted); text-decoration:none; padding:0.5rem 0.875rem; border-radius:8px; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-actions { display:flex; gap:0.5rem; align-items:center; }
+    .btn-nav-outline { font-size:0.875rem; font-weight:500; color:var(--text); text-decoration:none; padding:0.5rem 1rem; border:1px solid var(--border); border-radius:8px; background:#fff; }
+    .btn-nav-blue { font-size:0.875rem; font-weight:500; color:#fff; text-decoration:none; padding:0.5rem 1.125rem; background:var(--blue); border:1px solid var(--blue); border-radius:8px; }
+    .nav-hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:4px; }
+    .nav-hamburger span { display:block; width:22px; height:2px; background:var(--text); border-radius:2px; }
+    .nav-mobile-menu { display:none; position:fixed; top:64px; left:0; right:0; background:#fff; border-bottom:1px solid var(--border); padding:1rem 1.5rem 1.5rem; z-index:99; box-shadow:0 8px 24px rgba(0,0,0,0.10); }
+    .nav-mobile-menu.open { display:block; }
+    .nav-mobile-menu a { display:block; padding:0.875rem 0; font-size:1rem; font-weight:500; color:var(--text); text-decoration:none; border-bottom:1px solid var(--border); }
+    .nav-mobile-menu a:last-child { border-bottom:none; }
+    .nav-mobile-cta { margin-top:1rem; text-align:center; padding:0.875rem !important; background:var(--blue); color:#fff !important; border-radius:8px; }
+    @media (max-width:860px) { .nav-links,.nav-actions{display:none;} .nav-hamburger{display:flex;} }
+
+    /* ── NAV RIGHT ───────────────────────────── */
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .badge-active { font-size: 0.68rem; font-weight: 500; padding: 0.25rem 0.65rem; border-radius: 999px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .btn-view-listing {
+      font-size: 0.8rem; font-weight: 500; color: var(--blue); text-decoration: none;
+      padding: 0.4rem 0.875rem; border: 1px solid var(--blue); border-radius: 8px;
+      transition: background 0.15s;
+    }
+    .btn-view-listing:hover { background: var(--blue-pale); }
+
+    /* ── PAGE ────────────────────────────────── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 2.5rem 3rem; }
+
+    /* Listing header */
+    .listing-header {
+      display: grid; grid-template-columns: 1fr auto; gap: 2rem;
+      align-items: center; background: var(--section-bg);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 2rem; margin-bottom: 2rem;
+    }
+    .listing-address { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 0.03em; color: var(--text); line-height: 1; margin-bottom: 0.25rem; }
+    .listing-suburb { font-size: 0.82rem; color: var(--muted); margin-bottom: 1rem; }
+    .listing-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .listing-meta-item { font-size: 0.78rem; color: var(--muted); }
+    .listing-meta-item strong { color: var(--text); font-weight: 500; }
+    .listing-price { font-family: var(--font-display); font-size: 2.5rem; letter-spacing: 0.04em; color: var(--blue); line-height: 1; text-align: right; }
+    .listing-price-label { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-align: right; margin-top: 0.2rem; }
+
+    /* Countdown bar */
+    .deadline-bar {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 1.25rem 1.5rem; display: flex; align-items: center;
+      justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04); flex-wrap: wrap;
+    }
+    .deadline-left { display: flex; align-items: center; gap: 1.25rem; }
+    .deadline-label { font-size: 0.62rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.2rem; }
+    .countdown-inline { display: flex; align-items: center; gap: 0.4rem; }
+    .cd-unit { text-align: center; }
+    .cd-num { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 0.04em; color: #ea580c; line-height: 1; display: block; }
+    .cd-lbl { font-size: 0.55rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #c2410c; }
+    .cd-sep { font-family: var(--font-display); font-size: 1.4rem; color: var(--border); padding: 0 0.1rem; margin-bottom: 0.4rem; }
+    .watchers-inline { display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; color: var(--muted); }
+    .watchers-inline strong { color: var(--text); }
+    .watcher-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulsate 2s ease-in-out infinite; flex-shrink: 0; }
+    @keyframes pulsate { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)} }
+
+    /* Extend btn */
+    .btn-outline-sm {
+      font-size: 0.8rem; font-weight: 500; color: var(--text);
+      padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 8px;
+      background: #fff; cursor: pointer; font-family: var(--font-body);
+      transition: border-color 0.15s; min-height: 36px;
+    }
+    .btn-outline-sm:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 1.25rem 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .stat-card-val { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.04em; color: var(--text); line-height: 1; margin-bottom: 0.25rem; }
+    .stat-card-val.blue { color: var(--blue); }
+    .stat-card-val.green { color: #16a34a; }
+    .stat-card-label { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+    /* Section header */
+    .section-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .section-hdr-title { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+
+    /* Offer cards */
+    .offer-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; margin-bottom: 1rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      transition: box-shadow 0.15s;
+    }
+    .offer-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .offer-header { padding: 1.25rem 1.5rem; display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start; border-bottom: 1px solid var(--border); }
+    .offer-rank { font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 0.1em; color: var(--dim); margin-bottom: 0.1rem; }
+    .offer-price { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.03em; color: var(--text); line-height: 1; }
+    .offer-type { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+    .offer-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end; }
+    .offer-body { padding: 1.25rem 1.5rem; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: center; }
+
+    /* Strength meter */
+    .strength-wrap { display: flex; flex-direction: column; gap: 0.4rem; }
+    .strength-header { display: flex; justify-content: space-between; align-items: center; }
+    .strength-label { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .strength-score { font-family: var(--font-display); font-size: 1rem; letter-spacing: 0.04em; }
+    .strength-score.strong { color: #16a34a; }
+    .strength-score.medium { color: #d97706; }
+    .strength-score.weak { color: #dc2626; }
+    .strength-bar { height: 4px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .strength-fill { height: 100%; border-radius: 999px; }
+    .strength-fill.strong { background: #22c55e; }
+    .strength-fill.medium { background: #f59e0b; }
+    .strength-fill.weak { background: #ef4444; }
+
+    .offer-detail-key { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.25rem; }
+    .offer-detail-val { font-size: 0.86rem; color: var(--text); font-weight: 400; }
+    .offer-actions { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; }
+
+    /* Offer action buttons */
+    .btn-accept {
+      font-size: 0.8rem; font-weight: 500; color: #fff; background: var(--blue);
+      border: 1px solid var(--blue); border-radius: 8px; padding: 0.5rem 1rem;
+      cursor: pointer; font-family: var(--font-body); transition: background 0.15s;
+      min-height: 36px;
+    }
+    .btn-accept:hover { background: var(--blue-hover); }
+    .btn-counter {
+      font-size: 0.8rem; font-weight: 500; color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 1rem;
+      background: #fff; cursor: pointer; font-family: var(--font-body);
+      transition: border-color 0.15s; min-height: 36px;
+    }
+    .btn-counter:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-decline {
+      font-size: 0.75rem; font-weight: 400; color: #dc2626; background: transparent;
+      border: none; padding: 0.3rem 0.5rem; cursor: pointer; font-family: var(--font-body);
+    }
+
+    /* Badge overrides */
+    .badge { font-size: 0.68rem; font-weight: 500; padding: 0.25rem 0.65rem; border-radius: 999px; }
+    .badge-verified { background: var(--blue-pale); color: var(--blue); border: 1px solid #bfdbfe; }
+    .badge-open { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-under { background: #fefce8; color: #a16207; border: 1px solid #fde68a; }
+
+    /* AI insight strip */
+    .offer-insight {
+      padding: 1rem 1.5rem; background: var(--section-bg); border-top: 1px solid var(--border);
+      font-size: 0.8rem; color: var(--muted); line-height: 1.65;
+      display: flex; gap: 0.75rem; align-items: flex-start;
+    }
+    .ai-tag {
+      font-size: 0.62rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--blue); flex-shrink: 0; padding-top: 0.1rem;
+    }
+
+    /* Empty state */
+    .empty-offers {
+      background: #fff; border: 1px dashed var(--border); border-radius: 12px;
+      padding: 3rem 2rem; text-align: center;
+    }
+    .empty-offers-title { font-family: var(--font-display); font-size: 1.2rem; letter-spacing: 0.04em; color: var(--text); margin-bottom: 0.5rem; }
+    .empty-offers-sub { font-size: 0.84rem; color: var(--muted); line-height: 1.65; }
+
+    /* Loading state */
+    .loading-pulse { opacity: 0.4; animation: loadpulse 1.5s ease-in-out infinite; }
+    @keyframes loadpulse { 0%,100%{opacity:.4} 50%{opacity:.8} }
+
+    /* AI Advisor */
+    .ai-advisor {
+      background: var(--blue-pale); border: 1px solid #bfdbfe;
+      border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; position: relative; overflow: hidden;
+    }
+    .ai-advisor-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+    .ai-advisor-icon {
+      width: 1.75rem; height: 1.75rem; background: var(--blue-muted);
+      border: 1px solid #bfdbfe; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; color: var(--blue); flex-shrink: 0;
+    }
+    .ai-advisor-label { font-size: 0.62rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); flex: 1; }
+    .ai-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulsate 2s ease-in-out infinite; }
+    .ai-live-label { font-size: 0.62rem; color: var(--muted); }
+    .ai-advisor-text { font-size: 0.88rem; color: #1e3a8a; line-height: 1.75; margin-bottom: 0.75rem; }
+    .ai-disclaimer { font-size: 0.65rem; color: #3b82f6; font-style: italic; }
+
+    /* Timing card */
+    .timing-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .timing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem; }
+    .timing-item { padding: 1rem; background: var(--section-bg); border-radius: 8px; border: 1px solid var(--border); }
+    .timing-item-val { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 0.03em; color: var(--text); line-height: 1; margin-bottom: 0.25rem; }
+    .timing-item-val.blue { color: var(--blue); }
+    .timing-item-label { font-size: 0.68rem; color: var(--muted); line-height: 1.4; }
+
+    /* War room banner */
+    .war-room-banner {
+      background: #fef3c7; border: 1px solid #fde68a;
+      border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem; display: none;
+    }
+    .war-room-banner.active { display: block; }
+    .war-room-top { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .war-room-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: #92400e; margin-bottom: 0.2rem; }
+    .war-room-title { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 0.04em; color: #78350f; line-height: 1; }
+    .war-room-countdown { display: flex; gap: 0.75rem; align-items: baseline; }
+    .war-room-cd-block { text-align: center; }
+    .war-room-cd-val { font-family: var(--font-display); font-size: 2.2rem; letter-spacing: 0.06em; color: #dc2626; line-height: 1; }
+    .war-room-cd-lbl { font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase; color: #92400e; }
+    .war-room-cd-sep { font-family: var(--font-display); font-size: 1.8rem; color: #fde68a; padding-bottom: 0.5rem; }
+    .war-room-sub { font-size: 0.82rem; color: #92400e; line-height: 1.6; }
+
+    /* Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 800; display: flex; align-items: center; justify-content: center; padding: 1.5rem; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+    .modal { background: #fff; border-radius: 12px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); transform: translateY(8px); transition: transform 0.2s; border: 1px solid var(--border); }
+    .modal-backdrop.open .modal { transform: translateY(0); }
+    .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 0.04em; color: var(--text); }
+    .modal-close { width: 2rem; height: 2rem; border-radius: 50%; border: none; background: var(--section-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--muted); transition: background 0.15s; }
+    .modal-close:hover { background: var(--border); }
+    .modal-body { padding: 1.5rem; }
+    .modal-body p { font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin-bottom: 1rem; }
+    .modal-footer { padding: 1rem 1.5rem 1.5rem; display: flex; gap: 0.75rem; }
+    .modal-note { font-size: 0.72rem; color: var(--dim); margin-top: 0.75rem; text-align: center; }
+    .form-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-label { font-size: 0.78rem; font-weight: 500; color: var(--text); }
+    .form-input { padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; font-family: var(--font-body); color: var(--text); background: #fff; min-height: 44px; }
+    .form-input:focus { outline: none; border-color: var(--blue); }
+    .form-textarea { resize: none; min-height: 80px; }
+
+    /* Modal buttons */
+    .btn-modal-blue {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 0.75rem 1.25rem; background: var(--blue); color: #fff;
+      border: 1px solid var(--blue); border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500; font-family: var(--font-body);
+      cursor: pointer; transition: background 0.15s; min-height: 44px;
+    }
+    .btn-modal-blue:hover { background: var(--blue-hover); }
+    .btn-modal-outline {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 0.75rem 1.25rem; background: #fff; color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500; font-family: var(--font-body);
+      cursor: pointer; min-height: 44px;
+    }
+    .btn-modal-outline:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-modal-red {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 0.75rem 1.25rem; background: #dc2626; color: #fff;
+      border: 1px solid #dc2626; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500; font-family: var(--font-body);
+      cursor: pointer; transition: background 0.15s; min-height: 44px;
+    }
+    .btn-modal-red:hover { background: #b91c1c; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) { .timing-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 900px) {
+      .page { padding: 1.5rem 1.25rem; }
+      .listing-header { grid-template-columns: 1fr; }
+      .listing-price { text-align: left; }
+      .listing-price-label { text-align: left; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .offer-body { grid-template-columns: 1fr 1fr; }
+      .offer-actions { flex-direction: row; align-items: center; grid-column: 1/-1; }
+    }
+    @media (max-width: 480px) {
+      .page { padding: 1.25rem 1rem; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .offer-body { grid-template-columns: 1fr; gap: 0.75rem; }
+      .offer-actions { flex-direction: row; flex-wrap: wrap; grid-column: 1/-1; }
+      .deadline-bar { flex-direction: column; align-items: flex-start; gap: 1rem; }
+      .listing-header { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a href="index.html" class="nav-logo">DEED</a>
+  <ul class="nav-links">
+    <li><a href="browse.html">Browse</a></li>
+    <li><a href="sell.html">Sell</a></li>
+    <li><a href="qualify.html">Pre-qualify</a></li>
+  </ul>
+  <div class="nav-actions">
+    <span class="nav-label" style="display:none;" id="nav-dashboard-label">Seller dashboard</span>
+    <span class="badge-active">Active listing</span>
+    <a id="view-listing-link" href="listing.html?id=demo" class="btn-view-listing">View listing</a>
+  </div>
+  <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-mobile-menu" id="nav-mobile-menu">
+  <a href="browse.html">Browse listings</a>
+  <a href="sell.html">Sell your property</a>
+  <a href="qualify.html">Buyer pre-qualification</a>
+  <a href="qualify.html" class="nav-mobile-cta">Get pre-qualified →</a>
+</div>
+
+<div class="page">
+
+  <!-- LISTING HEADER -->
+  <div class="listing-header">
+    <div>
+      <p class="listing-address" id="listing-address">14 Headland Drive</p>
+      <p class="listing-suburb" id="listing-suburb">Burleigh Heads QLD 4220</p>
+      <div class="listing-meta">
+        <span class="listing-meta-item"><strong id="listing-beds">4</strong> bed</span>
+        <span class="listing-meta-item"><strong id="listing-baths">2</strong> bath</span>
+        <span class="listing-meta-item"><strong id="listing-land">612</strong> m²</span>
+        <span class="listing-meta-item">Listed <strong id="listing-listed">Today</strong></span>
+      </div>
+    </div>
+    <div>
+      <p class="listing-price" id="listing-price">$1,450,000</p>
+      <p class="listing-price-label">Asking price</p>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN BAR -->
+  <div class="deadline-bar">
+    <div class="deadline-left">
+      <div>
+        <p class="deadline-label">Offer deadline closes in</p>
+        <div class="countdown-inline">
+          <div class="cd-unit"><span class="cd-num" id="cd-days">09</span><span class="cd-lbl">days</span></div>
+          <span class="cd-sep">:</span>
+          <div class="cd-unit"><span class="cd-num" id="cd-hours">14</span><span class="cd-lbl">hrs</span></div>
+          <span class="cd-sep">:</span>
+          <div class="cd-unit"><span class="cd-num" id="cd-mins">22</span><span class="cd-lbl">min</span></div>
+        </div>
+      </div>
+      <div class="watchers-inline">
+        <div class="watcher-dot"></div>
+        <span><strong id="watcher-count">11</strong> verified buyers watching</span>
+      </div>
+    </div>
+    <button class="btn-outline-sm" onclick="openModal('extend-modal')">Extend deadline</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-card-val blue" id="stat-offers">3</div>
+      <div class="stat-card-label">Offers received</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-val" id="stat-watchers">14</div>
+      <div class="stat-card-label">Verified watchers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-val" id="stat-views">61</div>
+      <div class="stat-card-label">Listing views</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-val green" id="stat-highest">$1.45m</div>
+      <div class="stat-card-label">Highest offer</div>
+    </div>
+  </div>
+
+  <!-- WAR ROOM BANNER -->
+  <div class="war-room-banner" id="war-room-banner">
+    <div class="war-room-top">
+      <div>
+        <p class="war-room-label">Offer round active</p>
+        <p class="war-room-title">Final Round Closes In</p>
+      </div>
+      <div class="war-room-countdown">
+        <div class="war-room-cd-block">
+          <div class="war-room-cd-val" id="wr-hours">24</div>
+          <div class="war-room-cd-lbl">Hours</div>
+        </div>
+        <div class="war-room-cd-sep">:</div>
+        <div class="war-room-cd-block">
+          <div class="war-room-cd-val" id="wr-mins">00</div>
+          <div class="war-room-cd-lbl">Mins</div>
+        </div>
+        <div class="war-room-cd-sep">:</div>
+        <div class="war-room-cd-block">
+          <div class="war-room-cd-val" id="wr-secs">00</div>
+          <div class="war-room-cd-lbl">Secs</div>
+        </div>
+      </div>
+    </div>
+    <p class="war-room-sub" id="wr-sub">All verified buyers have been notified — offers close at the deadline above. Every buyer sees the same information simultaneously.</p>
+  </div>
+
+  <!-- AI ADVISOR -->
+  <div class="ai-advisor">
+    <div class="ai-advisor-header">
+      <div class="ai-advisor-icon">◆</div>
+      <span class="ai-advisor-label">DEED AI Advisor</span>
+      <div class="ai-live-dot"></div>
+      <span class="ai-live-label">Live analysis</span>
+    </div>
+    <p id="ai-advisor-text" class="ai-advisor-text">
+      You have <strong>1 unconditional offer at your asking price</strong> from a verified buyer with $145,000 deposit confirmed. Unconditional offers complete at 94% vs 71% for conditional — this is maximum execution certainty. Offer #2 is $15,000 below asking with a 14-day finance clause; the buyer is pre-approved to $1.5M. <strong>Recommend: accept offer #1, or counter at $1,479,000 to test the ceiling without losing the buyer.</strong> Extending your deadline by 7 days could attract 2–3 more unconditional offers based on your 14 active watchers.
+    </p>
+    <span class="ai-disclaimer">Analysis based on verified buyer data and offer terms. Not financial advice.</span>
+  </div>
+
+  <!-- TIMING INTELLIGENCE -->
+  <div class="timing-card" id="timing-card">
+    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.25rem;">
+      <span style="font-size:0.62rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue);">◆ Market Intelligence</span>
+    </div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-bottom:0;">Live buyer pool data for your suburb</p>
+    <div class="timing-grid" id="timing-grid">
+      <div class="timing-item">
+        <div class="timing-item-val blue" id="timing-buyers">—</div>
+        <div class="timing-item-label">Verified buyers in your suburb</div>
+      </div>
+      <div class="timing-item">
+        <div class="timing-item-val" id="timing-best-day">Thursday</div>
+        <div class="timing-item-label">Best day to list — 40% more first-week enquiry</div>
+      </div>
+      <div class="timing-item">
+        <div class="timing-item-val" id="timing-days">18 days</div>
+        <div class="timing-item-label">Avg. days to accepted offer at this price range</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFERS -->
+  <div class="section-hdr">
+    <span class="section-hdr-title">Offers — ranked by strength</span>
+    <button id="start-round-btn" onclick="openModal('war-room-modal')" style="display:none;background:#dc2626;color:#fff;border:1px solid #dc2626;border-radius:8px;padding:0.4rem 0.875rem;font-size:0.8rem;font-weight:500;font-family:var(--font-body);cursor:pointer;gap:0.4rem;align-items:center;">
+      ⚡ Start offer round
+    </button>
+  </div>
+  <p style="font-size:0.72rem;color:var(--dim);margin-top:-0.75rem;margin-bottom:1.25rem;">Ranked by more than price — finance certainty, settlement timeline, and conditions are all scored</p>
+
+  <div id="offers-container">
+
+    <!-- Offer 1 — strongest -->
+    <div class="offer-card">
+      <div class="offer-header">
+        <div>
+          <p class="offer-rank">#1 STRONGEST</p>
+          <p class="offer-price">$1,450,000</p>
+          <p class="offer-type">Unconditional · No finance or B&P clauses</p>
+        </div>
+        <div class="offer-badges">
+          <span class="badge badge-verified">Verified buyer</span>
+          <span class="badge badge-open">Unconditional</span>
+        </div>
+      </div>
+      <div class="offer-body">
+        <div class="strength-wrap">
+          <div class="strength-header">
+            <span class="strength-label">Strength score</span>
+            <span class="strength-score strong">94/100</span>
+          </div>
+          <div class="strength-bar"><div class="strength-fill strong" style="width:94%"></div></div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:0.25rem;">Finance verified · No conditions · 30-day settlement</div>
+        </div>
+        <div>
+          <div class="offer-detail-key">Settlement</div>
+          <div class="offer-detail-val">30 days</div>
+        </div>
+        <div>
+          <div class="offer-detail-key">Deposit</div>
+          <div class="offer-detail-val">$145,000 (10%)</div>
+        </div>
+        <div class="offer-actions">
+          <button class="btn-accept" onclick="openAcceptModal(-1)">Accept →</button>
+          <button class="btn-counter" onclick="openModal('counter-modal')">Counter</button>
+          <button class="btn-decline" onclick="openModal('decline-modal')">Decline</button>
+        </div>
+      </div>
+      <div class="offer-insight">
+        <span class="ai-tag">◆ AI</span>
+        <span>At your full asking price with no conditions and 10% deposit confirmed, this is maximum execution certainty. The buyer's income has been verified via open banking — capacity confirmed to $1.6M. <strong style="color:var(--text);">Accept or counter up to $1,480,000.</strong></span>
+      </div>
+    </div>
+
+    <!-- Offer 2 -->
+    <div class="offer-card">
+      <div class="offer-header">
+        <div>
+          <p class="offer-rank">#2</p>
+          <p class="offer-price">$1,435,000</p>
+          <p class="offer-type">Subject to finance · 14-day finance clause</p>
+        </div>
+        <div class="offer-badges">
+          <span class="badge badge-verified">Verified buyer</span>
+          <span class="badge badge-under">Finance condition</span>
+        </div>
+      </div>
+      <div class="offer-body">
+        <div class="strength-wrap">
+          <div class="strength-header">
+            <span class="strength-label">Strength score</span>
+            <span class="strength-score medium">71/100</span>
+          </div>
+          <div class="strength-bar"><div class="strength-fill medium" style="width:71%"></div></div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:0.25rem;">Finance pre-approved · 14-day clause · 45-day settlement</div>
+        </div>
+        <div>
+          <div class="offer-detail-key">Settlement</div>
+          <div class="offer-detail-val">45 days</div>
+        </div>
+        <div>
+          <div class="offer-detail-key">Deposit</div>
+          <div class="offer-detail-val">$143,500 (10%)</div>
+        </div>
+        <div class="offer-actions">
+          <button class="btn-accept" onclick="openAcceptModal(-1)">Accept →</button>
+          <button class="btn-counter" onclick="openModal('counter-modal')">Counter</button>
+          <button class="btn-decline" onclick="openModal('decline-modal')">Decline</button>
+        </div>
+      </div>
+      <div class="offer-insight">
+        <span class="ai-tag">◆ AI</span>
+        <span>$15,000 below asking with a 14-day finance clause. Buyer is pre-approved to $1.5M — approval is likely but not guaranteed. 45-day settlement adds 15 days vs offer #1. <strong style="color:var(--text);">Use as leverage to push offer #1 higher. Solid fallback if #1 falls through.</strong></span>
+      </div>
+    </div>
+
+    <!-- Offer 3 -->
+    <div class="offer-card">
+      <div class="offer-header">
+        <div>
+          <p class="offer-rank">#3</p>
+          <p class="offer-price">$1,390,000</p>
+          <p class="offer-type">Finance + building & pest · Both conditions</p>
+        </div>
+        <div class="offer-badges">
+          <span class="badge badge-verified">Verified buyer</span>
+          <span class="badge" style="background:var(--section-bg);color:var(--muted);border:1px solid var(--border);">Finance + B&P</span>
+        </div>
+      </div>
+      <div class="offer-body">
+        <div class="strength-wrap">
+          <div class="strength-header">
+            <span class="strength-label">Strength score</span>
+            <span class="strength-score weak">48/100</span>
+          </div>
+          <div class="strength-bar"><div class="strength-fill weak" style="width:48%"></div></div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:0.25rem;">Two conditions · 60-day settlement · $60K below asking</div>
+        </div>
+        <div>
+          <div class="offer-detail-key">Settlement</div>
+          <div class="offer-detail-val">60 days</div>
+        </div>
+        <div>
+          <div class="offer-detail-key">Deposit</div>
+          <div class="offer-detail-val">$69,500 (5%)</div>
+        </div>
+        <div class="offer-actions">
+          <button class="btn-accept" onclick="openAcceptModal(-1)">Accept →</button>
+          <button class="btn-counter" onclick="openModal('counter-modal')">Counter</button>
+          <button class="btn-decline" onclick="openModal('decline-modal')">Decline</button>
+        </div>
+      </div>
+      <div class="offer-insight">
+        <span class="ai-tag">◆ AI</span>
+        <span>$60,000 below asking, two conditions, 5% deposit, 60-day settlement. Two-condition offers fall through 29% of the time. <strong style="color:var(--text);">Counter to $1,430,000 unconditional — or decline and focus on offers #1 and #2.</strong></span>
+      </div>
+    </div>
+
+  </div><!-- /offers-container -->
+
+</div><!-- /page -->
+
+<!-- ACCEPT MODAL -->
+<div class="modal-backdrop" id="accept-modal">
+  <div class="modal" style="max-width:560px;">
+    <div id="accept-step-1">
+      <div class="modal-header">
+        <span class="modal-title">Accept offer</span>
+        <button class="modal-close" onclick="closeModal('accept-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>You're about to accept this offer. DEED will notify the buyer and generate a draft contract of sale. All other offers will be declined.</p>
+        <div id="accept-offer-summary" style="background:var(--section-bg);border-radius:8px;padding:1rem;margin:0.5rem 0 1rem;font-size:0.86rem;color:var(--text);">—</div>
+        <div class="form-field"><label class="form-label">Message to buyer (optional)</label><textarea id="accept-msg" class="form-input form-textarea" rows="2" placeholder="Thank you for your offer. We're pleased to accept…"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-blue" onclick="confirmAcceptance()">Confirm acceptance →</button>
+        <button class="btn-modal-outline" onclick="closeModal('accept-modal')">Cancel</button>
+      </div>
+      <p class="modal-note" style="padding:0 1.5rem 1rem;">This action cannot be undone. Both parties will be notified immediately.</p>
+    </div>
+
+    <div id="accept-step-2" style="display:none;">
+      <div class="modal-header">
+        <span class="modal-title">◆ Generating contract</span>
+      </div>
+      <div class="modal-body" style="text-align:center;padding:3rem 2rem;">
+        <div style="width:2.5rem;height:2.5rem;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.5rem;"></div>
+        <p style="font-size:0.88rem;color:var(--muted);">AI is drafting your contract of sale…</p>
+        <p style="font-size:0.78rem;color:var(--dim);margin-top:0.5rem;">Buyer and seller are being notified simultaneously</p>
+      </div>
+    </div>
+
+    <div id="accept-step-3" style="display:none;">
+      <div class="modal-header">
+        <span class="modal-title">Contract draft ready</span>
+        <button class="modal-close" onclick="closeModal('accept-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.9rem 1rem;margin-bottom:1rem;font-size:0.8rem;color:#166534;">
+          ✓ Both parties notified · ✓ Referral partners alerted · ✓ Contract draft below
+        </div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-bottom:0.75rem;">AI-drafted for review by your conveyancer before execution. Not a legally binding document until signed by both parties.</p>
+        <div id="contract-output" style="background:var(--section-bg);border:1px solid var(--border);border-radius:8px;padding:1.25rem;font-size:0.78rem;color:var(--text);line-height:1.75;max-height:320px;overflow-y:auto;white-space:pre-wrap;font-family:monospace;"></div>
+      </div>
+      <div class="modal-footer" style="flex-wrap:wrap;gap:0.5rem;">
+        <button class="btn-modal-blue" style="min-width:140px;" onclick="copyContract()">Copy contract text</button>
+        <button class="btn-modal-outline" style="min-width:140px;" onclick="closeModal('accept-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COUNTER MODAL -->
+<div class="modal-backdrop" id="counter-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Counter offer</span>
+      <button class="modal-close" onclick="closeModal('counter-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>Send a counter offer to this buyer. They'll have 24 hours to accept or reject.</p>
+      <div class="form-field"><label class="form-label">Your counter price</label><div style="position:relative;"><span style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--muted);">$</span><input class="form-input" type="number" placeholder="890,000" style="padding-left:1.75rem;" /></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-blue" onclick="closeModal('counter-modal')">Send counter →</button>
+      <button class="btn-modal-outline" onclick="closeModal('counter-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DECLINE MODAL -->
+<div class="modal-backdrop" id="decline-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Decline offer</span>
+      <button class="modal-close" onclick="closeModal('decline-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>This offer will be declined and the buyer notified. You can still accept other offers before the deadline.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-red" onclick="closeModal('decline-modal')">Decline offer</button>
+      <button class="btn-modal-outline" onclick="closeModal('decline-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- WAR ROOM MODAL -->
+<div class="modal-backdrop" id="war-room-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Start Offer Round</span>
+      <button class="modal-close" onclick="closeModal('war-room-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>An offer round notifies <strong id="wr-modal-buyer-count">all verified buyers</strong> watching your property simultaneously — no buyer has an information advantage over another.</p>
+      <p>Every buyer has <strong>24 hours</strong> to submit their best and final offer. The round closes automatically at the deadline. You review all offers at the same time.</p>
+      <div style="background:var(--blue-pale);border:1px solid #bfdbfe;border-radius:8px;padding:1rem;font-size:0.8rem;color:#1e40af;line-height:1.6;">
+        This creates competitive tension and typically results in higher offers. Agents charge for this as a "multi-offer process" — DEED does it automatically.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-red" onclick="confirmStartRound()">Start round — notify all buyers →</button>
+      <button class="btn-modal-outline" onclick="closeModal('war-room-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXTEND MODAL -->
+<div class="modal-backdrop" id="extend-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Extend deadline</span>
+      <button class="modal-close" onclick="closeModal('extend-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>Extending the deadline gives more buyers time to submit offers. All current registered buyers will be notified of the extension.</p>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.5rem;">
+        <label style="display:flex;align-items:center;gap:0.75rem;padding:0.9rem 1rem;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.86rem;color:var(--text);"><input type="radio" name="extend" value="7" style="accent-color:var(--blue);" /> Extend by 7 days</label>
+        <label style="display:flex;align-items:center;gap:0.75rem;padding:0.9rem 1rem;border:1.5px solid var(--blue);border-radius:8px;cursor:pointer;font-size:0.86rem;color:var(--text);background:var(--blue-pale);"><input type="radio" name="extend" value="14" checked style="accent-color:var(--blue);" /> Extend by 14 days</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-blue" onclick="closeModal('extend-modal')">Confirm extension →</button>
+      <button class="btn-modal-outline" onclick="closeModal('extend-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://jtpykhrdjkzhcbswrhzo.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0cHlraHJkamt6aGNic3dyaHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTYxMjAsImV4cCI6MjA4OTQ5MjEyMH0.U3q_ktH3vN7loxEgUg-oJw9mXYYwhMC0aL6bK9YBVRI';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ─── Countdown ───────────────────────────────────────────────────────────
+  let countdownInterval = null;
+  function startCountdown(deadlineDate) {
+    function tick() {
+      const diff = new Date(deadlineDate) - new Date();
+      if (diff <= 0) {
+        ['cd-days','cd-hours','cd-mins'].forEach(id => document.getElementById(id).textContent = '00');
+        clearInterval(countdownInterval);
+        return;
+      }
+      document.getElementById('cd-days').textContent  = String(Math.floor(diff / 86400000)).padStart(2,'0');
+      document.getElementById('cd-hours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+      document.getElementById('cd-mins').textContent  = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+    }
+    tick();
+    countdownInterval = setInterval(tick, 60000);
+  }
+
+  // ─── Modals ───────────────────────────────────────────────────────────────
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-backdrop').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+  });
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────
+  function strengthClass(score) {
+    if (score >= 80) return 'strong';
+    if (score >= 60) return 'medium';
+    return 'weak';
+  }
+
+  function offerTypeLabel(offer) {
+    if (!offer.finance_condition && !offer.building_pest_condition) return 'Unconditional · No finance or B&amp;P clauses';
+    if (offer.finance_condition && !offer.building_pest_condition) return `Subject to finance · ${offer.finance_days || 14}-day finance clause`;
+    if (offer.finance_condition && offer.building_pest_condition) return `Finance + building &amp; pest · Both conditions`;
+    if (!offer.finance_condition && offer.building_pest_condition) return 'Subject to building &amp; pest only';
+    return offer.offer_type || 'Conditional';
+  }
+
+  function conditionBadge(offer) {
+    if (!offer.finance_condition && !offer.building_pest_condition) return '<span class="badge badge-open">Unconditional</span>';
+    if (offer.finance_condition && !offer.building_pest_condition) return '<span class="badge badge-under">Finance condition</span>';
+    return '<span class="badge" style="background:var(--section-bg);color:var(--muted);border:1px solid var(--border);">Finance + B&P</span>';
+  }
+
+  function formatPrice(n) { return '$' + Number(n).toLocaleString('en-AU'); }
+  function formatPriceShort(n) {
+    if (n >= 1000000) return '$' + (n / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'm';
+    if (n >= 1000) return '$' + (n / 1000).toFixed(0) + 'k';
+    return '$' + n;
+  }
+
+  function depositPct(offer) {
+    if (!offer.deposit_amount || !offer.offer_price) return '';
+    return Math.round(offer.deposit_amount / offer.offer_price * 100) + '%';
+  }
+
+  function strengthSubtext(offer) {
+    const parts = [];
+    if (!offer.finance_condition && !offer.building_pest_condition) parts.push('No conditions');
+    if (offer.finance_condition) parts.push(`${offer.finance_days || 14}-day finance clause`);
+    if (offer.building_pest_condition) parts.push('B&P condition');
+    parts.push(`${offer.settlement_days || 30}-day settlement`);
+    return parts.join(' · ');
+  }
+
+  // ─── AI text generators ───────────────────────────────────────────────────
+  function generateOfferInsight(offer, rank, listing, allOffers) {
+    const price = offer.offer_price;
+    const asking = listing.asking_price;
+    const diff = price - asking;
+    const sc = strengthClass(offer.strength_score);
+
+    if (sc === 'strong') {
+      const depStr = offer.deposit_amount ? `${formatPrice(offer.deposit_amount)} (${depositPct(offer)}) deposit confirmed. ` : '';
+      const counterCeil = Math.round(asking * 1.02 / 1000) * 1000;
+      return `At${diff >= 0 ? ' or above' : ''} your ${diff < 0 ? 'asking price with' : 'full asking price with'} no conditions and ${depStr}this is maximum execution certainty. <strong style="color:var(--text);">Accept${allOffers.length > 1 ? `, or counter up to ${formatPrice(counterCeil)} to test the ceiling.` : '.'}</strong>`;
+    }
+    if (sc === 'medium') {
+      const belowStr = diff < 0 ? `${formatPrice(Math.abs(diff))} below asking` : 'at asking price';
+      const finStr = offer.finance_condition ? ` with a ${offer.finance_days || 14}-day finance clause` : '';
+      const settleExtra = (offer.settlement_days || 30) > 30 ? ` ${offer.settlement_days}-day settlement adds ${offer.settlement_days - 30} days vs a faster offer.` : '';
+      return `${formatPrice(price)} is ${belowStr}${finStr}.${settleExtra} Solid offer — use as leverage to push stronger offers higher. <strong style="color:var(--text);">Good fallback if the top offer falls through.</strong>`;
+    }
+    const condCount = (offer.finance_condition ? 1 : 0) + (offer.building_pest_condition ? 1 : 0);
+    const condStr = condCount === 2 ? 'Two-condition offers fall through 29% of the time.' : '';
+    const depPctVal = offer.deposit_amount ? parseInt(depositPct(offer)) : 0;
+    const lowDep = depPctVal < 10 ? ` Only ${depPctVal}% deposit is low.` : '';
+    return `${formatPrice(Math.abs(diff))} below asking, ${condCount > 0 ? condCount + ' condition' + (condCount > 1 ? 's' : '') + ', ' : ''}${offer.settlement_days || 30}-day settlement.${lowDep} ${condStr} <strong style="color:var(--text);">Counter to a higher price unconditional — or decline and focus on stronger offers.</strong>`;
+  }
+
+  function generateAdvisorText(offers, listing) {
+    if (!offers.length) {
+      const watchers = listing.watcher_count || 0;
+      return `No offers received yet. You have <strong>${watchers} verified buyer${watchers !== 1 ? 's' : ''}</strong> watching your listing. DEED will notify all watchers 24 hours before your deadline to prompt action. <strong>Hold firm — the final 24 hours typically generate the majority of offers.</strong>`;
+    }
+    const top = offers[0];
+    const unconditional = offers.filter(o => !o.finance_condition && !o.building_pest_condition);
+    const atOrAbove = offers.filter(o => o.offer_price >= listing.asking_price);
+    const watchers = listing.watcher_count || 0;
+    let text = '';
+    if (unconditional.length && unconditional[0].offer_price >= listing.asking_price) {
+      const dep = unconditional[0].deposit_amount ? ` with ${formatPrice(unconditional[0].deposit_amount)} deposit confirmed` : '';
+      text = `You have <strong>${unconditional.length} unconditional offer${unconditional.length > 1 ? 's' : ''} at your asking price</strong> from a verified buyer${dep}. Unconditional offers complete at 94% vs 71% for conditional — this is maximum execution certainty. `;
+      if (offers.length > 1) text += `Offer #2 is ${formatPrice(offers[1].offer_price)} ${offers[1].finance_condition ? 'with a finance clause' : ''}. `;
+      const counterCeil = Math.round(listing.asking_price * 1.02 / 1000) * 1000;
+      text += `<strong>Recommend: accept offer #1, or counter at ${formatPrice(counterCeil)} to test the ceiling without losing the buyer.</strong>`;
+      if (watchers > offers.length) text += ` Extending your deadline by 7 days could attract ${Math.min(3, watchers - offers.length)}–${Math.min(5, watchers - offers.length + 2)} more offers from your ${watchers} active watchers.`;
+    } else if (atOrAbove.length) {
+      text = `You have <strong>${atOrAbove.length} offer${atOrAbove.length > 1 ? 's' : ''} at or above asking price</strong>, including the highest at ${formatPrice(top.offer_price)}. `;
+      if (top.finance_condition) text += `The top offer has a finance condition — confirm pre-approval status before committing. `;
+      text += `<strong>Strong position. Review conditions carefully before accepting.</strong>`;
+    } else {
+      const gap = listing.asking_price - top.offer_price;
+      text = `Your ${offers.length} offer${offers.length > 1 ? 's are' : ' is'} below asking price. The highest is ${formatPrice(top.offer_price)}, ${formatPrice(gap)} short of your target. `;
+      if (watchers > offers.length) text += `You still have ${watchers} watchers — more offers may come before the deadline. `;
+      text += `<strong>Hold your position. Counter only if you're prepared to accept, as it signals a floor price.</strong>`;
+    }
+    return text;
+  }
+
+  // ─── Render offer card HTML ───────────────────────────────────────────────
+  function renderOfferCard(offer, rank, listing, allOffers) {
+    const rankLabel = rank === 1 ? '#1 STRONGEST' : `#${rank}`;
+    const sc = strengthClass(offer.strength_score);
+    const score = offer.strength_score || 0;
+    const depStr = offer.deposit_amount ? `${formatPrice(offer.deposit_amount)} (${depositPct(offer)})` : 'Not specified';
+    const insight = generateOfferInsight(offer, rank, listing, allOffers);
+    return `
+    <div class="offer-card">
+      <div class="offer-header">
+        <div>
+          <p class="offer-rank">${rankLabel}</p>
+          <p class="offer-price">${formatPrice(offer.offer_price)}</p>
+          <p class="offer-type">${offerTypeLabel(offer)}</p>
+        </div>
+        <div class="offer-badges">
+          <span class="badge badge-verified">Verified buyer</span>
+          ${conditionBadge(offer)}
+        </div>
+      </div>
+      <div class="offer-body">
+        <div class="strength-wrap">
+          <div class="strength-header">
+            <span class="strength-label">Strength score</span>
+            <span class="strength-score ${sc}">${score}/100</span>
+          </div>
+          <div class="strength-bar"><div class="strength-fill ${sc}" style="width:${score}%"></div></div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:0.25rem;">${strengthSubtext(offer)}</div>
+        </div>
+        <div>
+          <div class="offer-detail-key">Settlement</div>
+          <div class="offer-detail-val">${offer.settlement_days || 30} days</div>
+        </div>
+        <div>
+          <div class="offer-detail-key">Deposit</div>
+          <div class="offer-detail-val">${depStr}</div>
+        </div>
+        <div class="offer-actions">
+          <button class="btn-accept" onclick="openAcceptModal(${rank - 1})">Accept →</button>
+          <button class="btn-counter" onclick="openModal('counter-modal')">Counter</button>
+          <button class="btn-decline" onclick="openModal('decline-modal')">Decline</button>
+        </div>
+      </div>
+      <div class="offer-insight">
+        <span class="ai-tag">◆ AI</span>
+        <span>${insight}</span>
+      </div>
+    </div>`;
+  }
+
+  // ─── Populate DOM from data ───────────────────────────────────────────────
+  function renderDashboard(listing, offers) {
+    document.getElementById('listing-address').textContent = listing.address || '';
+    document.getElementById('listing-suburb').textContent = [listing.suburb, listing.state || 'QLD', listing.postcode].filter(Boolean).join(' ');
+    if (listing.bedrooms)  document.getElementById('listing-beds').textContent = listing.bedrooms;
+    if (listing.bathrooms) document.getElementById('listing-baths').textContent = listing.bathrooms;
+    if (listing.land_size) document.getElementById('listing-land').textContent = listing.land_size;
+    document.getElementById('listing-price').textContent = formatPrice(listing.asking_price);
+
+    const listed = new Date(listing.created_at);
+    const today = new Date();
+    const diffDays = Math.floor((today - listed) / 86400000);
+    document.getElementById('listing-listed').textContent = diffDays === 0 ? 'Today' : diffDays === 1 ? 'Yesterday' : diffDays + ' days ago';
+
+    document.getElementById('view-listing-link').href = `listing.html?id=${listing.id}`;
+
+    if (listing.deadline) {
+      const deadlineDate = new Date(listing.deadline + 'T' + (listing.deadline_time || '17:00') + ':00+10:00');
+      startCountdown(deadlineDate);
+    }
+
+    document.getElementById('watcher-count').textContent = listing.watcher_count || 0;
+
+    const highestOffer = offers.length ? Math.max(...offers.map(o => o.offer_price)) : 0;
+    document.getElementById('stat-offers').textContent = offers.length;
+    document.getElementById('stat-watchers').textContent = listing.watcher_count || 0;
+    document.getElementById('stat-views').textContent = listing.view_count || 0;
+    document.getElementById('stat-highest').textContent = offers.length ? formatPriceShort(highestOffer) : '—';
+
+    document.getElementById('ai-advisor-text').innerHTML = generateAdvisorText(offers, listing);
+
+    currentListing = listing;
+    currentOffers = offers;
+
+    if (offers.length >= 2) {
+      const btn = document.getElementById('start-round-btn');
+      if (btn) btn.style.display = 'inline-flex';
+      document.getElementById('wr-modal-buyer-count').textContent = `all ${listing.watcher_count || 'verified'} buyers`;
+    }
+
+    const savedDeadline = sessionStorage.getItem('warRoomDeadline_' + listing.id);
+    if (savedDeadline && new Date(savedDeadline) > new Date()) activateWarRoom(savedDeadline);
+
+    loadTimingIntel(listing);
+
+    const container = document.getElementById('offers-container');
+    if (!offers.length) {
+      container.innerHTML = `
+        <div class="empty-offers">
+          <p class="empty-offers-title">No offers yet</p>
+          <p class="empty-offers-sub">DEED has notified your matched buyer pool. You have <strong>${listing.watcher_count || 0} verified buyers</strong> watching — offers typically arrive in the final 48 hours before your deadline.</p>
+        </div>`;
+    } else {
+      container.innerHTML = offers.map((offer, i) => renderOfferCard(offer, i + 1, listing, offers)).join('');
+    }
+  }
+
+  // ─── Accept flow ─────────────────────────────────────────────────────────
+  const DEMO_OFFER = {
+    offer_price: 1450000, deposit_amount: 145000, settlement_days: 30,
+    finance_condition: false, building_pest_condition: false,
+    buyer_name: 'Demo Buyer', buyer_email: '',
+  };
+  let currentAcceptOffer = null;
+
+  function openAcceptModal(idx) {
+    currentAcceptOffer = (idx >= 0 && currentOffers[idx]) ? currentOffers[idx] : DEMO_OFFER;
+    const o = currentAcceptOffer;
+    const price = '$' + Number(o.offer_price).toLocaleString('en-AU');
+    const cond = (!o.finance_condition && !o.building_pest_condition) ? 'Unconditional' :
+      [o.finance_condition && 'Finance condition', o.building_pest_condition && 'B&P condition'].filter(Boolean).join(' + ');
+    document.getElementById('accept-offer-summary').innerHTML =
+      `<strong>${price}</strong> · ${cond} · ${o.settlement_days || 30}-day settlement`;
+    document.getElementById('accept-step-1').style.display = '';
+    document.getElementById('accept-step-2').style.display = 'none';
+    document.getElementById('accept-step-3').style.display = 'none';
+    openModal('accept-modal');
+  }
+
+  async function confirmAcceptance() {
+    document.getElementById('accept-step-1').style.display = 'none';
+    document.getElementById('accept-step-2').style.display = '';
+
+    const offer = currentAcceptOffer || DEMO_OFFER;
+    const listing = currentListing || { address: '14 Headland Drive', suburb: 'Burleigh Heads', postcode: '4220', asking_price: 1450000, seller_name: 'Seller', seller_email: '' };
+
+    if (listing.id) {
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'offer_accepted', listing_id: listing.id, offer, listing }),
+      }).catch(() => {});
+    }
+
+    try {
+      const res = await fetch('/api/generate-contract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ offer, listing }),
+      });
+      const data = await res.json();
+      document.getElementById('contract-output').textContent = data.contract || 'Contract generation failed.';
+    } catch {
+      document.getElementById('contract-output').textContent = 'Could not generate contract. Contact support.';
+    }
+
+    document.getElementById('accept-step-2').style.display = 'none';
+    document.getElementById('accept-step-3').style.display = '';
+  }
+
+  function copyContract() {
+    const text = document.getElementById('contract-output').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      btn.textContent = '✓ Copied';
+      setTimeout(() => { btn.textContent = 'Copy contract text'; }, 2000);
+    });
+  }
+
+  // ─── War room ────────────────────────────────────────────────────────────
+  let warRoomInterval = null;
+  let currentListing = null;
+  let currentOffers = [];
+
+  function startWarRoomCountdown(deadline) {
+    function tick() {
+      const diff = new Date(deadline) - new Date();
+      if (diff <= 0) {
+        ['wr-hours','wr-mins','wr-secs'].forEach(id => document.getElementById(id).textContent = '00');
+        clearInterval(warRoomInterval);
+        return;
+      }
+      document.getElementById('wr-hours').textContent = String(Math.floor(diff / 3600000)).padStart(2,'0');
+      document.getElementById('wr-mins').textContent  = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+      document.getElementById('wr-secs').textContent  = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+    }
+    tick();
+    warRoomInterval = setInterval(tick, 1000);
+  }
+
+  function activateWarRoom(deadline) {
+    document.getElementById('war-room-banner').classList.add('active');
+    const deadlineDate = new Date(deadline);
+    const opts = { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' };
+    document.getElementById('wr-sub').textContent =
+      `All verified buyers have been notified — offers close ${deadlineDate.toLocaleString('en-AU', opts)} AEST. Every buyer sees the same information simultaneously.`;
+    startWarRoomCountdown(deadlineDate);
+    const btn = document.getElementById('start-round-btn');
+    if (btn) { btn.textContent = '⚡ Round active'; btn.disabled = true; btn.style.opacity = '0.6'; }
+  }
+
+  function confirmStartRound() {
+    closeModal('war-room-modal');
+    const deadline = new Date(Date.now() + 24 * 3600 * 1000);
+    sessionStorage.setItem('warRoomDeadline_' + (currentListing?.id || 'demo'), deadline.toISOString());
+    activateWarRoom(deadline);
+    if (currentListing?.id) {
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'offer_round', listing_id: currentListing.id, listing: currentListing, deadline: deadline.toISOString() }),
+      }).catch(() => {});
+    }
+  }
+
+  // ─── Timing intelligence ─────────────────────────────────────────────────
+  async function loadTimingIntel(listing) {
+    if (!listing?.suburb || !listing?.asking_price) return;
+    try {
+      const { data: buyers } = await sb
+        .from('buyers')
+        .select('id', { count: 'exact', head: true })
+        .contains('suburbs', [listing.suburb])
+        .gte('max_price', listing.asking_price);
+      const count = buyers?.length ?? 0;
+      document.getElementById('timing-buyers').textContent = count || '—';
+      const price = listing.asking_price;
+      const days = price < 500000 ? '12–18 days' : price < 900000 ? '16–24 days' : price < 1500000 ? '20–30 days' : '25–40 days';
+      document.getElementById('timing-days').textContent = days;
+    } catch {}
+  }
+
+  // ─── Main init ────────────────────────────────────────────────────────────
+  async function initDashboard() {
+    const params = new URLSearchParams(window.location.search);
+    const listingId = params.get('listing_id');
+
+    if (!listingId) {
+      const demoDeadline = new Date();
+      demoDeadline.setDate(demoDeadline.getDate() + 9);
+      startCountdown(demoDeadline);
+      return;
+    }
+
+    document.getElementById('listing-address').classList.add('loading-pulse');
+    document.getElementById('offers-container').innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-size:0.84rem;" class="loading-pulse">Loading offers…</div>';
+
+    const { data: listing, error: listingErr } = await sb
+      .from('listings').select('*').eq('id', listingId).single();
+
+    if (listingErr || !listing) {
+      document.getElementById('listing-address').classList.remove('loading-pulse');
+      document.getElementById('offers-container').innerHTML = '<div style="padding:2rem;text-align:center;color:#dc2626;font-size:0.84rem;">Could not load listing. Check the URL and try again.</div>';
+      return;
+    }
+
+    const { data: offers } = await sb
+      .from('offers').select('*').eq('listing_id', listingId).order('strength_score', { ascending: false });
+
+    document.getElementById('listing-address').classList.remove('loading-pulse');
+    renderDashboard(listing, offers || []);
+  }
+
+  initDashboard();
+
+  // Mobile nav
+  const hamburger = document.getElementById('nav-hamburger');
+  const mobileMenu = document.getElementById('nav-mobile-menu');
+  if (hamburger) {
+    hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+      if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) mobileMenu.classList.remove('open');
+    });
+  }
+</script>
+</body>
+</html>

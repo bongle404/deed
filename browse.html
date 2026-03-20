@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEED — Browse Properties</title>
+  <meta name="description" content="Browse private property listings across Queensland. No agents. Every buyer pre-qualified." />
+  <link rel="stylesheet" href="deed-ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+  <style>
+    /* ─────────────────────────────────────────────────
+       DEED BROWSE — Clean Portal Design
+       White background, mobile-first, search-hero
+    ───────────────────────────────────────────────── */
+
+    :root {
+      --blue:       #2563EB;
+      --blue-hover: #1d4ed8;
+      --blue-light: #3b82f6;
+      --blue-pale:  #eff6ff;
+      --blue-muted: rgba(37,99,235,0.10);
+      --page-bg:    #ffffff;
+      --section-bg: #f7f8fa;
+      --border:     #e5e7eb;
+      --text:       #111827;
+      --muted:      #6b7280;
+      --dim:        #9ca3af;
+    }
+
+    body {
+      background: var(--page-bg);
+      font-family: var(--font-body);
+      color: var(--text);
+    }
+
+    /* ── NAV ──────────────────────────────────────── */
+    .nav {
+      background: #fff !important;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 1.5rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 0;
+    }
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0.5rem 0.875rem;
+      border-radius: 8px;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--text); }
+    .nav-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .btn-nav-outline {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .btn-nav-blue {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #fff;
+      text-decoration: none;
+      padding: 0.5rem 1.125rem;
+      background: var(--blue);
+      border: 1px solid var(--blue);
+      border-radius: 8px;
+    }
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+    }
+    .nav-mobile-menu {
+      display: none;
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem 1.5rem;
+      z-index: 99;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    }
+    .nav-mobile-menu.open { display: block; }
+    .nav-mobile-menu a {
+      display: block;
+      padding: 0.875rem 0;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-mobile-menu a:last-child { border-bottom: none; }
+    .nav-mobile-cta {
+      margin-top: 1rem;
+      text-align: center;
+      padding: 0.875rem !important;
+      background: var(--blue);
+      color: #fff !important;
+      border-radius: 8px;
+    }
+    @media (max-width: 860px) {
+      .nav-links, .nav-actions { display: none; }
+      .nav-hamburger { display: flex; }
+    }
+
+    /* ── SEARCH HEADER ────────────────────────────── */
+    .search-header {
+      background: var(--section-bg);
+      padding: 2.5rem 3rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      max-width: 720px;
+    }
+
+    .search-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0 1rem;
+      gap: 0.75rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      box-shadow: var(--shadow-sm);
+    }
+    .search-box:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-muted);
+    }
+
+    .search-icon {
+      color: var(--dim);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--text);
+      padding: 0.85rem 0;
+    }
+    .search-input::placeholder { color: var(--dim); }
+
+    .search-clear {
+      background: none;
+      border: none;
+      color: var(--dim);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0;
+      transition: color 0.15s;
+      display: none;
+    }
+    .search-clear.visible { display: block; }
+    .search-clear:hover { color: var(--muted); }
+
+    .btn-search {
+      height: 44px;
+      padding: 0 1.25rem;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-search:hover { background: var(--blue-hover); }
+
+    .search-context {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .context-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .context-stat strong {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .context-divider {
+      width: 1px;
+      height: 1rem;
+      background: var(--border);
+    }
+
+    .context-badge {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      background: var(--blue-pale);
+      color: var(--blue);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    /* ── FILTER + SORT BAR ────────────────────────── */
+    .controls-bar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky;
+      top: 64px;
+      z-index: 90;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .controls-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .controls-left::-webkit-scrollbar { display: none; }
+
+    .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .filter-btn {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.4rem 0.875rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      min-height: 34px;
+    }
+    .filter-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .filter-btn.active {
+      background: var(--blue-pale);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .caret { font-size: 0.65rem; margin-left: 2px; }
+
+    .sort-select {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.4rem 2rem 0.4rem 0.85rem;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.65rem center;
+      transition: border-color 0.15s;
+      white-space: nowrap;
+    }
+    .sort-select:focus { border-color: var(--blue); }
+
+    .view-toggle {
+      display: flex;
+      background: var(--section-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .view-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.375rem 0.625rem;
+      font-size: 0.9rem;
+      transition: color 0.15s, background 0.15s;
+      line-height: 1;
+      min-height: 34px;
+      min-width: 34px;
+    }
+    .view-btn:hover { color: var(--text); }
+    .view-btn.active {
+      background: #fff;
+      color: var(--blue);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ── MAIN CONTENT ─────────────────────────────── */
+    .browse-body {
+      display: grid;
+      grid-template-columns: 1fr;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2.5rem 3rem;
+    }
+
+    /* Map placeholder (hidden by default) */
+    .map-pane { display: none; }
+
+    .browse-body.map-mode {
+      grid-template-columns: 1fr 420px;
+      gap: 0;
+      padding: 0;
+      max-width: none;
+    }
+
+    .browse-body.map-mode .results-pane {
+      padding: 1.5rem;
+      overflow-y: auto;
+      height: calc(100vh - 9.5rem);
+    }
+
+    .browse-body.map-mode .map-pane {
+      display: flex;
+      background: var(--section-bg);
+      height: calc(100vh - 9.5rem);
+      position: sticky;
+      top: 9.5rem;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.75rem;
+      border-left: 1px solid var(--border);
+    }
+
+    .map-placeholder-icon { font-size: 2.5rem; opacity: 0.25; }
+    .map-placeholder-text {
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .map-placeholder-sub {
+      font-size: 0.72rem;
+      color: var(--dim);
+    }
+
+    /* ── SUBURB INTEL CARD ────────────────────────── */
+    .suburb-intel {
+      background: var(--blue-pale);
+      border: 1px solid rgba(37,99,235,0.15);
+      border-radius: 12px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.75rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .suburb-intel-left h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+
+    .suburb-intel-left p {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .suburb-stats {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .suburb-stat-val {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+      color: var(--blue);
+      line-height: 1;
+    }
+
+    .suburb-stat-label {
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ── RESULTS HEADER ───────────────────────────── */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .results-count {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .results-count strong {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .btn-clear {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      transition: color 0.15s;
+    }
+    .btn-clear:hover { color: var(--blue); }
+
+    /* ── PROPERTY GRID ────────────────────────────── */
+    .prop-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .prop-grid.list-mode {
+      grid-template-columns: 1fr;
+    }
+
+    .prop-grid.list-mode .prop-card {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+    }
+
+    .prop-grid.list-mode .prop-card-image {
+      aspect-ratio: unset;
+      height: 100%;
+      min-height: 160px;
+    }
+
+    /* ── PROP CARD (white with border + shadow) ─── */
+    .prop-card {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .prop-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #d1d5db;
+      transform: translateY(-2px);
+    }
+
+    .prop-card-image {
+      aspect-ratio: 4/3;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prop-card-badges {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .prop-card-save {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: rgba(255,255,255,0.92);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      color: var(--muted);
+      transition: color 0.15s, background 0.15s;
+      box-shadow: var(--shadow-sm);
+    }
+    .prop-card-save:hover { color: #ef4444; }
+    .prop-card-save.saved { color: #ef4444; background: #fff; }
+
+    .prop-card-body { padding: 1.125rem 1.25rem 0.875rem; }
+
+    .prop-card-price {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      letter-spacing: 0.03em;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .prop-card-guide {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-top: 0.15rem;
+      margin-bottom: 0.625rem;
+    }
+
+    .prop-card-address {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .prop-card-suburb {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .prop-card-specs {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .prop-spec {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .prop-spec-val {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .prop-card-footer {
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .deed-verified {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: var(--blue-pale);
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+    }
+
+    .card-days-live {
+      font-size: 0.7rem;
+      color: var(--dim);
+    }
+
+    /* Badges */
+    .badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+    }
+    .badge-new {
+      background: var(--blue);
+      color: #fff;
+    }
+    .badge-under {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    /* ── SECTION DIVIDER ──────────────────────────── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 2.5rem 0 1.5rem;
+    }
+
+    .section-divider-label {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .section-divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── RECENTLY SOLD ────────────────────────────── */
+    .sold-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .sold-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s;
+    }
+    .sold-card:hover { box-shadow: var(--shadow); }
+
+    .sold-card-img {
+      height: 100px;
+      background: var(--section-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      opacity: 0.35;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sold-card-body { padding: 0.875rem; }
+
+    .sold-price {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      letter-spacing: 0.03em;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+
+    .sold-address {
+      font-size: 0.78rem;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-bottom: 0.5rem;
+    }
+
+    .sold-specs {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.72rem;
+      color: var(--dim);
+    }
+
+    .sold-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.62rem;
+      font-weight: 500;
+      background: #f0fdf4;
+      color: #16a34a;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+
+    /* ── EMPTY STATE ──────────────────────────────── */
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 5rem 2rem;
+      grid-column: 1 / -1;
+    }
+
+    .empty-state-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.25; }
+    .empty-state h3 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .empty-state p { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── FOOTER ───────────────────────────────────── */
+    .footer {
+      background: var(--section-bg);
+      border-top: 1px solid var(--border);
+      padding: 2rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .footer-links {
+      display: flex;
+      list-style: none;
+      gap: 1.5rem;
+    }
+    .footer-links a {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-note {
+      font-size: 0.75rem;
+      color: var(--dim);
+      text-align: right;
+    }
+
+    /* ── RESPONSIVE ───────────────────────────────── */
+    @media (max-width: 1100px) {
+      .prop-grid { grid-template-columns: repeat(2, 1fr); }
+      .sold-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 860px) {
+      .search-header { padding: 1.75rem 1.5rem; }
+      .controls-bar { padding: 0.625rem 1.25rem; top: 64px; }
+      .browse-body { padding: 1.5rem 1.25rem; }
+      .suburb-intel { grid-template-columns: 1fr; gap: 1.25rem; }
+      .suburb-stats { gap: 1.5rem; flex-wrap: wrap; }
+    }
+
+    @media (max-width: 640px) {
+      .prop-grid { grid-template-columns: 1fr; }
+      .sold-grid { grid-template-columns: repeat(2, 1fr); }
+      .prop-grid.list-mode .prop-card { grid-template-columns: 140px 1fr; }
+      .prop-grid.list-mode .prop-card-image { min-height: 120px; }
+      .search-row { flex-direction: column; align-items: stretch; }
+      .btn-search { width: 100%; }
+      .footer { flex-direction: column; align-items: flex-start; gap: 1rem; }
+      .footer-note { text-align: left; }
+    }
+
+    @media (max-width: 480px) {
+      .search-header { padding: 1.25rem 1rem; }
+      .controls-bar { position: relative; top: auto; }
+      .browse-body { padding: 1.25rem 1rem; }
+      .suburb-intel { padding: 1.25rem; }
+    }
+
+    /* ── SCROLL REVEAL ────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <a href="index.html" class="nav-logo">DEED</a>
+    <ul class="nav-links">
+      <li><a href="browse.html" class="active">Browse</a></li>
+      <li><a href="sell.html">Sell</a></li>
+      <li><a href="qualify.html">Pre-qualify</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="qualify.html" class="btn-nav-outline">Sign in</a>
+      <a href="qualify.html" class="btn-nav-blue">Get pre-qualified</a>
+    </div>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="nav-mobile-menu" id="nav-mobile-menu">
+    <a href="browse.html">Browse listings</a>
+    <a href="sell.html">Sell your property</a>
+    <a href="qualify.html">Buyer pre-qualification</a>
+    <a href="qualify.html" class="nav-mobile-cta">Get pre-qualified →</a>
+  </div>
+
+  <!-- SEARCH HEADER -->
+  <div class="search-header">
+    <div class="search-row">
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input
+          type="text"
+          class="search-input"
+          id="search-input"
+          placeholder="Suburb, postcode, or address…"
+          value="New Farm, QLD"
+          oninput="handleSearch(this)"
+        />
+        <button class="search-clear visible" id="search-clear" onclick="clearSearch()">✕</button>
+      </div>
+      <button class="btn-search">Search</button>
+    </div>
+
+    <div class="search-context">
+      <div class="context-stat">
+        <strong>12</strong> active listings
+      </div>
+      <div class="context-divider"></div>
+      <div class="context-stat">
+        <strong>3</strong> added this week
+      </div>
+      <div class="context-divider"></div>
+      <div class="context-stat">
+        Median price <strong>$875,000</strong>
+      </div>
+      <div class="context-divider"></div>
+      <span class="context-badge">QLD market</span>
+    </div>
+  </div>
+
+  <!-- CONTROLS BAR -->
+  <div class="controls-bar">
+    <div class="controls-left">
+      <button class="filter-btn active" id="filter-type" onclick="toggleFilter(this)">
+        Any type <span class="caret">▾</span>
+      </button>
+      <button class="filter-btn" id="filter-price" onclick="toggleFilter(this)">
+        Price <span class="caret">▾</span>
+      </button>
+      <button class="filter-btn" id="filter-beds" onclick="toggleFilter(this)">
+        Beds <span class="caret">▾</span>
+      </button>
+      <button class="filter-btn" id="filter-baths" onclick="toggleFilter(this)">
+        Baths <span class="caret">▾</span>
+      </button>
+      <button class="filter-btn" id="filter-land" onclick="toggleFilter(this)">
+        Land size <span class="caret">▾</span>
+      </button>
+      <button class="filter-btn" id="filter-more" onclick="toggleFilter(this)">
+        More filters <span class="caret">▾</span>
+      </button>
+    </div>
+
+    <div class="controls-right">
+      <select class="sort-select" id="sort-select" onchange="handleSort(this.value)">
+        <option value="newest">Newest</option>
+        <option value="price-high">Price: High → Low</option>
+        <option value="price-low">Price: Low → High</option>
+        <option value="deadline">Deadline soon</option>
+        <option value="settlement">Settlement date</option>
+      </select>
+
+      <div class="view-toggle">
+        <button class="view-btn active" id="btn-grid" onclick="setView('grid')" title="Grid view">⊞</button>
+        <button class="view-btn" id="btn-list" onclick="setView('list')" title="List view">≡</button>
+        <button class="view-btn" id="btn-map" onclick="setView('map')" title="Map view">⊕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BROWSE BODY -->
+  <div class="browse-body" id="browse-body">
+
+    <!-- RESULTS PANE -->
+    <div class="results-pane" id="results-pane">
+
+      <!-- Suburb intel -->
+      <div class="suburb-intel reveal">
+        <div class="suburb-intel-left">
+          <h3>NEW FARM, QLD 4005</h3>
+          <p>Inner-city riverside suburb · 2km to CBD · 12 active DEED listings</p>
+        </div>
+        <div class="suburb-stats">
+          <div>
+            <div class="suburb-stat-val">$875k</div>
+            <div class="suburb-stat-label">Median price</div>
+          </div>
+          <div>
+            <div class="suburb-stat-val">23</div>
+            <div class="suburb-stat-label">Days to sell</div>
+          </div>
+          <div>
+            <div class="suburb-stat-val">4.2%</div>
+            <div class="suburb-stat-label">Yr growth</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results count + active filters -->
+      <div class="results-header">
+        <p class="results-count" id="results-count"><strong>Loading…</strong></p>
+        <button class="btn-clear" id="clear-filters" onclick="clearAllFilters()" hidden>
+          Clear filters
+        </button>
+      </div>
+
+      <!-- PROPERTY GRID -->
+      <div class="prop-grid" id="prop-grid">
+        <!-- Populated by loadListings() -->
+      </div>
+
+      <!-- RECENTLY SOLD -->
+      <div class="section-divider">
+        <span class="section-divider-label">Recently sold via DEED</span>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="sold-grid">
+        <div class="sold-card reveal">
+          <div class="sold-card-img">🏡</div>
+          <div class="sold-card-body">
+            <div class="sold-price">$920,000</div>
+            <div class="sold-address">8 Moreton St, New Farm</div>
+            <div class="sold-specs">
+              <span>3 bd</span><span>2 ba</span><span>450m²</span>
+            </div>
+            <div class="sold-badge">✓ Sold via DEED · 1mo ago</div>
+          </div>
+        </div>
+        <div class="sold-card reveal" style="transition-delay:0.06s">
+          <div class="sold-card-img">🏘</div>
+          <div class="sold-card-body">
+            <div class="sold-price">$875,000</div>
+            <div class="sold-address">22 Stanley St, New Farm</div>
+            <div class="sold-specs">
+              <span>3 bd</span><span>1 ba</span><span>405m²</span>
+            </div>
+            <div class="sold-badge">✓ Sold via DEED · 2mo ago</div>
+          </div>
+        </div>
+        <div class="sold-card reveal" style="transition-delay:0.12s">
+          <div class="sold-card-img">🏠</div>
+          <div class="sold-card-body">
+            <div class="sold-price">$810,000</div>
+            <div class="sold-address">5 Merthyr Rd, New Farm</div>
+            <div class="sold-specs">
+              <span>3 bd</span><span>2 ba</span><span>390m²</span>
+            </div>
+            <div class="sold-badge">✓ Sold via DEED · 3mo ago</div>
+          </div>
+        </div>
+        <div class="sold-card reveal" style="transition-delay:0.18s">
+          <div class="sold-card-img">🏡</div>
+          <div class="sold-card-body">
+            <div class="sold-price">$1,050,000</div>
+            <div class="sold-address">31 Villiers St, New Farm</div>
+            <div class="sold-specs">
+              <span>4 bd</span><span>2 ba</span><span>607m²</span>
+            </div>
+            <div class="sold-badge">✓ Sold via DEED · 4mo ago</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /results-pane -->
+
+    <!-- MAP PANE (shown in map mode) -->
+    <div class="map-pane" id="map-pane">
+      <div class="map-placeholder-icon">🗺</div>
+      <p class="map-placeholder-text">Map view</p>
+      <p class="map-placeholder-sub">Google Maps integration coming soon</p>
+    </div>
+
+  </div><!-- /browse-body -->
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <a href="index.html" class="footer-logo">DEED</a>
+    <ul class="footer-links">
+      <li><a href="browse.html">Browse</a></li>
+      <li><a href="sell.html">Sell</a></li>
+      <li><a href="qualify.html">Pre-qualify</a></li>
+    </ul>
+    <div class="footer-note">
+      <p>Queensland, Australia</p>
+      <p>© 2026 Deed Pty Ltd</p>
+    </div>
+  </footer>
+
+  <script>
+    // ── SUPABASE ────────────────────────────────────
+    const db = supabase.createClient(
+      'https://jtpykhrdjkzhcbswrhzo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0cHlraHJkamt6aGNic3dyaHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTYxMjAsImV4cCI6MjA4OTQ5MjEyMH0.U3q_ktH3vN7loxEgUg-oJw9mXYYwhMC0aL6bK9YBVRI'
+    );
+
+    let allListings = [];
+
+    // Scroll-reveal
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 60);
+        }
+      });
+    }, { threshold: 0.06 });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // Save card (prevent link navigation)
+    function saveCard(e, btn) {
+      e.preventDefault();
+      e.stopPropagation();
+      btn.classList.toggle('saved');
+      btn.textContent = btn.classList.contains('saved') ? '♥' : '♡';
+    }
+
+    // Search clear
+    function handleSearch(input) {
+      document.getElementById('search-clear').classList.toggle('visible', input.value.length > 0);
+    }
+    function clearSearch() {
+      const input = document.getElementById('search-input');
+      input.value = '';
+      document.getElementById('search-clear').classList.remove('visible');
+      input.focus();
+    }
+
+    // Card image gradients — light/muted palette
+    const BG_GRADIENTS = [
+      'linear-gradient(135deg,#e8e4de 0%,#d4cfc8 100%)',
+      'linear-gradient(135deg,#dce8f0 0%,#bdd4e2 100%)',
+      'linear-gradient(135deg,#e4e8e4 0%,#c8d4c8 100%)',
+      'linear-gradient(135deg,#ece4e8 0%,#d4c8d0 100%)',
+      'linear-gradient(135deg,#e8ece4 0%,#d0d8c8 100%)',
+      'linear-gradient(135deg,#e4e8f0 0%,#c8d0e0 100%)',
+    ];
+    const EMOJIS = ['🏡','🏘','🏠','🏗','🏚','🏛'];
+
+    function daysAgo(dateStr) {
+      return Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+    }
+
+    function daysUntil(dateStr) {
+      if (!dateStr) return null;
+      return Math.ceil((new Date(dateStr) - Date.now()) / 86400000);
+    }
+
+    function renderCard(listing, idx) {
+      const price    = listing.asking_price ? '$' + listing.asking_price.toLocaleString('en-AU') : '—';
+      const suburb   = `${listing.suburb}${listing.postcode ? ' QLD ' + listing.postcode : ''}`;
+      const age      = daysAgo(listing.created_at);
+      const ageLabel = age === 0 ? 'Today' : age === 1 ? '1 day live' : `${age} days live`;
+      const deadline = daysUntil(listing.deadline);
+      const bg       = BG_GRADIENTS[idx % BG_GRADIENTS.length];
+      const emoji    = EMOJIS[idx % EMOJIS.length];
+      const delay    = (idx % 3) * 0.07;
+
+      // Badges
+      let badges = '';
+      if (age <= 2) badges += `<span class="badge badge-new">New</span>`;
+      if (listing.status === 'under_offer') badges += `<span class="badge badge-under">Under offer</span>`;
+      if (deadline !== null && deadline <= 3 && deadline >= 0) {
+        badges += `<span class="badge badge-under" style="background:#fee2e2;color:#991b1b;">Deadline ${deadline === 0 ? 'today' : deadline + ' days'}</span>`;
+      }
+
+      // Specs
+      const specs = [
+        listing.bedrooms   ? `<div class="prop-spec"><span class="prop-spec-val">${listing.bedrooms}</span> bd</div>` : '',
+        listing.bathrooms  ? `<div class="prop-spec"><span class="prop-spec-val">${listing.bathrooms}</span> ba</div>` : '',
+        listing.car_spaces != null ? `<div class="prop-spec"><span class="prop-spec-val">${listing.car_spaces}</span> car</div>` : '',
+        listing.land_size  ? `<div class="prop-spec"><span class="prop-spec-val">${listing.land_size}</span> m²</div>` : '',
+      ].join('');
+
+      const href = `listing.html?id=${listing.id}`;
+      return `
+        <a href="${href}" class="prop-card reveal" style="transition-delay:${delay}s">
+          <div class="prop-card-image">
+            <div style="width:100%;height:100%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:0.45;">${emoji}</div>
+            <div class="prop-card-badges">${badges}</div>
+            <button class="prop-card-save" onclick="saveCard(event, this)">♡</button>
+          </div>
+          <div class="prop-card-body">
+            <div class="prop-card-price">${price}</div>
+            <div class="prop-card-guide">Price guide</div>
+            <div class="prop-card-address">${listing.address}</div>
+            <div class="prop-card-suburb">${suburb}</div>
+            <div class="prop-card-specs">${specs}</div>
+          </div>
+          <div class="prop-card-footer">
+            <span class="deed-verified">DEED Verified</span>
+            <span class="card-days-live">${ageLabel}</span>
+          </div>
+        </a>`;
+    }
+
+    function renderEmpty(query) {
+      return `
+        <div style="grid-column:1/-1;padding:4rem 0;text-align:center;">
+          <div style="font-size:2rem;margin-bottom:1rem;opacity:0.25;">🏡</div>
+          <p style="font-size:0.95rem;color:var(--muted);margin-bottom:0.5rem;">
+            ${query ? `No listings matching "${query}"` : 'No listings yet'}
+          </p>
+          <p style="font-size:0.82rem;color:var(--dim);">
+            ${query ? 'Try a different suburb or clear your search.' : 'Be the first to list your property — <a href="sell.html" style="color:var(--blue);">sell with DEED</a>.'}
+          </p>
+        </div>`;
+    }
+
+    function renderGrid(listings, query) {
+      const grid  = document.getElementById('prop-grid');
+      const count = document.getElementById('results-count');
+      if (!listings.length) {
+        grid.innerHTML = renderEmpty(query);
+        count.innerHTML = '<strong>0 properties</strong>';
+      } else {
+        grid.innerHTML = listings.map((l, i) => renderCard(l, i)).join('');
+        const loc = listings[0]?.suburb || 'Queensland';
+        count.innerHTML = `<strong>${listings.length} ${listings.length === 1 ? 'property' : 'properties'}</strong> in ${loc}`;
+        // Re-run reveal observer on new elements
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+      }
+    }
+
+    async function loadListings(query) {
+      const grid = document.getElementById('prop-grid');
+      grid.innerHTML = `<div style="grid-column:1/-1;padding:3rem 0;text-align:center;color:var(--muted);font-size:0.88rem;">Loading listings…</div>`;
+
+      let q = db.from('listings').select('*').eq('status', 'active').order('created_at', { ascending: false });
+      if (query) q = q.ilike('suburb', `%${query}%`);
+
+      const { data, error } = await q;
+      if (error) {
+        console.error('Supabase error:', error);
+        grid.innerHTML = `<div style="grid-column:1/-1;padding:3rem 0;text-align:center;color:var(--muted);font-size:0.88rem;">Could not load listings.</div>`;
+        return;
+      }
+      allListings = data || [];
+
+      // Seed a demo listing when the DB is empty (prototype mode)
+      if (!allListings.length && !query) {
+        allListings = [{
+          id: 'demo',
+          created_at: new Date().toISOString(),
+          address: '14 Headland Drive',
+          suburb: 'Burleigh Heads',
+          postcode: '4220',
+          state: 'QLD',
+          property_type: 'House',
+          bedrooms: 4,
+          bathrooms: 2,
+          car_spaces: 2,
+          land_size: 612,
+          house_size: 248,
+          asking_price: 1450000,
+          price_description: 'Offers over $1,450,000',
+          description: 'Stunning family home metres from the beach. Architect-designed renovation, open-plan living, covered alfresco, saltwater pool.',
+          features: ['Pool','Aircon','Dishwasher','Outdoor kitchen'],
+          deadline: new Date(Date.now() + 7 * 86400000).toISOString().slice(0,10),
+          status: 'active',
+          paid: true,
+          offer_count: 3,
+          watcher_count: 14
+        }];
+      }
+
+      renderGrid(allListings, query);
+    }
+
+    // Load on page init
+    loadListings();
+
+    // Wire up search input with debounce
+    document.getElementById('search-input')?.addEventListener('input', function() {
+      const val = this.value.trim();
+      document.getElementById('search-clear').classList.toggle('visible', val.length > 0);
+      clearTimeout(this._debounce);
+      this._debounce = setTimeout(() => loadListings(val || null), 350);
+    });
+
+    // Filter toggle (visual only — no data filtering in this static prototype)
+    function toggleFilter(btn) {
+      btn.classList.toggle('active');
+      const anyActive = document.querySelectorAll('.filter-btn:not(#filter-type).active').length > 0;
+      document.getElementById('clear-filters').hidden = !anyActive;
+    }
+
+    function clearAllFilters() {
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        if (b.id !== 'filter-type') b.classList.remove('active');
+      });
+      document.getElementById('clear-filters').hidden = true;
+    }
+
+    // Sort (visual only)
+    function handleSort(val) {
+      console.log('Sort by:', val);
+    }
+
+    // View toggle: grid / list / map
+    function setView(mode) {
+      const grid   = document.getElementById('prop-grid');
+      const body   = document.getElementById('browse-body');
+      const btnGrid = document.getElementById('btn-grid');
+      const btnList = document.getElementById('btn-list');
+      const btnMap  = document.getElementById('btn-map');
+
+      grid.classList.remove('list-mode');
+      body.classList.remove('map-mode');
+      [btnGrid, btnList, btnMap].forEach(b => b.classList.remove('active'));
+
+      if (mode === 'list') {
+        grid.classList.add('list-mode');
+        btnList.classList.add('active');
+      } else if (mode === 'map') {
+        body.classList.add('map-mode');
+        btnMap.classList.add('active');
+      } else {
+        btnGrid.classList.add('active');
+      }
+    }
+
+    // Mobile hamburger
+    const hamburger = document.getElementById('nav-hamburger');
+    const mobileMenu = document.getElementById('nav-mobile-menu');
+    if (hamburger) {
+      hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+      document.addEventListener('click', (e) => {
+        if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) mobileMenu.classList.remove('open');
+      });
+    }
+  </script>
+</body>
+</html>

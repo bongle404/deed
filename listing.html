@@ -4,39 +4,44 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DEED — 14 Riverview Tce, New Farm</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+  <meta name="description" content="3 bed, 2 bath Queenslander in New Farm. Private sale via DEED — no agent, no commission." />
+  <link rel="stylesheet" href="deed-ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #070707; --surface: #0f0f0f; --surface-2: #161616;
-      --border: #1e1e1e; --border-2: #2a2a2a;
-      --text: #ede8df; --text-muted: #6b6459; --text-dim: #3d3830;
-      --gold: #c8922a; --gold-light: #e0b060; --gold-dim: #3a2a0e;
-      --green: #3dd68c; --green-dim: #0a2a1a; --red: #e05c4b;
-      --font-display: 'Bebas Neue', sans-serif;
-      --font-serif: 'Fraunces', serif;
-      --font-body: 'Outfit', sans-serif;
+      --blue:#2563EB; --blue-hover:#1d4ed8; --blue-light:#3b82f6;
+      --blue-pale:#eff6ff; --blue-muted:rgba(37,99,235,0.10);
+      --page-bg:#ffffff; --section-bg:#f7f8fa; --border:#e5e7eb;
+      --text:#111827; --muted:#6b7280; --dim:#9ca3af;
     }
-    body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; line-height: 1.6; }
-    body::before { content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); background-size: 200px; }
+    body { background:var(--page-bg); font-family:var(--font-body); color:var(--text); }
 
-    /* NAV */
-    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 3rem; border-bottom: 1px solid var(--border); background: rgba(7,7,7,0.95); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100; }
-    .nav-logo { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 0.12em; color: var(--text); text-decoration: none; }
-    .nav-back { font-size: 0.78rem; letter-spacing: 0.1em; color: var(--text-muted); text-decoration: none; transition: color 0.2s; display: flex; align-items: center; gap: 0.5rem; }
-    .nav-back:hover { color: var(--text); }
+    /* ── NAV ─────────────────────────────────── */
+    .nav { background:#fff !important; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; padding:0 1.5rem; height:64px; display:flex; align-items:center; justify-content:space-between; }
+    .nav-logo { font-family:var(--font-display); font-size:1.6rem; letter-spacing:0.06em; color:var(--text); text-decoration:none; }
+    .nav-links { display:flex; list-style:none; gap:0; margin:0; padding:0; }
+    .nav-links a { font-size:0.875rem; font-weight:500; color:var(--muted); text-decoration:none; padding:0.5rem 0.875rem; border-radius:8px; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-actions { display:flex; gap:0.5rem; align-items:center; }
+    .btn-nav-outline { font-size:0.875rem; font-weight:500; color:var(--text); text-decoration:none; padding:0.5rem 1rem; border:1px solid var(--border); border-radius:8px; background:#fff; }
+    .btn-nav-blue { font-size:0.875rem; font-weight:500; color:#fff; text-decoration:none; padding:0.5rem 1.125rem; background:var(--blue); border:1px solid var(--blue); border-radius:8px; }
+    .nav-hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:4px; }
+    .nav-hamburger span { display:block; width:22px; height:2px; background:var(--text); border-radius:2px; }
+    .nav-mobile-menu { display:none; position:fixed; top:64px; left:0; right:0; background:#fff; border-bottom:1px solid var(--border); padding:1rem 1.5rem 1.5rem; z-index:99; box-shadow:0 8px 24px rgba(0,0,0,0.10); }
+    .nav-mobile-menu.open { display:block; }
+    .nav-mobile-menu a { display:block; padding:0.875rem 0; font-size:1rem; font-weight:500; color:var(--text); text-decoration:none; border-bottom:1px solid var(--border); }
+    .nav-mobile-menu a:last-child { border-bottom:none; }
+    .nav-mobile-cta { margin-top:1rem; text-align:center; padding:0.875rem !important; background:var(--blue); color:#fff !important; border-radius:8px; }
+    @media (max-width:860px) { .nav-links,.nav-actions{display:none;} .nav-hamburger{display:flex;} }
 
-    /* HERO PHOTO */
+    /* ── HERO PHOTO ──────────────────────────── */
     .hero-photo {
-      height: 60vh;
-      min-height: 380px;
-      background: linear-gradient(160deg, #101010 0%, #181410 50%, #0d0c0a 100%);
+      height: 62vh;
+      min-height: 400px;
+      background: linear-gradient(160deg, #e5e7eb 0%, #d1d5db 50%, #e9eaec 100%);
       position: relative;
       overflow: hidden;
-      display: flex;
-      align-items: flex-end;
     }
     .hero-photo-placeholder {
       position: absolute;
@@ -47,310 +52,726 @@
       justify-content: center;
       gap: 0.75rem;
     }
-    .hero-photo-icon { font-size: 3rem; opacity: 0.15; }
-    .hero-photo-text { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
-    .hero-overlay {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      padding: 2rem 3rem;
-      background: linear-gradient(to top, rgba(7,7,7,0.95) 0%, transparent 100%);
+    .photo-icon { font-size: 3rem; opacity: 0.25; }
+    .photo-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .hero-photo-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 2.5rem 3rem 1.75rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.25) 60%, transparent 100%);
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
+      gap: 1.5rem;
     }
-    .hero-address h1 { font-family: var(--font-serif); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 300; color: var(--text); margin-bottom: 0.2rem; }
-    .hero-address p { font-size: 0.88rem; color: var(--text-muted); }
-    .hero-price { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3rem); letter-spacing: 0.05em; color: var(--gold-light); text-align: right; }
+    .hero-address { font-family: var(--font-display); font-size: clamp(1.6rem, 3.5vw, 2.6rem); letter-spacing: 0.02em; color: #fff; line-height: 1; margin-bottom: 0.4rem; }
+    .hero-suburb { font-size: 0.88rem; color: rgba(255,255,255,0.75); }
+    .hero-price-group { text-align: right; flex-shrink: 0; }
+    .hero-price-guide { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 0.2rem; }
+    .hero-price { font-family: var(--font-display); font-size: clamp(2rem, 4.5vw, 3.2rem); letter-spacing: 0.03em; color: #fff; line-height: 1; }
+    .hero-badges { position: absolute; top: 5.5rem; left: 3rem; display: flex; gap: 0.5rem; }
+    .hero-save {
+      position: absolute; top: 5.5rem; right: 3rem;
+      width: 2.5rem; height: 2.5rem;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; cursor: pointer;
+      color: rgba(255,255,255,0.75);
+      transition: background 0.15s, color 0.15s;
+    }
+    .hero-save:hover { background: rgba(255,255,255,0.28); color: #fff; }
+    .hero-save.saved { color: #ef4444; background: rgba(239,68,68,0.2); }
 
-    /* THUMBNAILS */
-    .photo-strip { display: flex; gap: 0.5rem; padding: 0.75rem 3rem; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
-    .photo-thumb { width: 80px; height: 56px; background: var(--surface-2); border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--text-dim); cursor: pointer; }
-    .photo-thumb:first-child { border-color: var(--gold); }
+    /* ── PHOTO STRIP ─────────────────────────── */
+    .photo-strip {
+      background: var(--section-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 3rem;
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .photo-strip::-webkit-scrollbar { display: none; }
+    .photo-thumb {
+      width: 88px; height: 60px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.62rem; letter-spacing: 0.1em; color: var(--dim);
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .photo-thumb:hover { border-color: var(--muted); }
+    .photo-thumb.active { border-color: var(--blue); color: var(--blue); }
 
-    /* LAYOUT */
-    .page-body { display: grid; grid-template-columns: 1fr 360px; gap: 0; align-items: start; }
-    .main-col { padding: 3rem; border-right: 1px solid var(--border); }
-    .sidebar-col { padding: 2rem; position: sticky; top: 73px; }
+    /* ── PAGE BODY ───────────────────────────── */
+    .page-body {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      align-items: start;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 3rem;
+      gap: 2.5rem;
+    }
+    .main-col { padding: 2.5rem 0; }
 
-    /* SPECS BAR */
-    .specs-bar { display: flex; gap: 0; border: 1px solid var(--border); margin-bottom: 3rem; }
-    .spec { flex: 1; padding: 1.2rem; border-right: 1px solid var(--border); text-align: center; }
+    /* Specs bar */
+    .specs-bar {
+      display: flex;
+      gap: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .spec { flex: 1; padding: 1.1rem 1rem; text-align: center; border-right: 1px solid var(--border); }
     .spec:last-child { border-right: none; }
-    .spec-val { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 0.05em; color: var(--text); line-height: 1; }
-    .spec-label { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.3rem; }
+    .spec-val { font-family: var(--font-display); font-size: 1.75rem; letter-spacing: 0.04em; color: var(--text); line-height: 1; }
+    .spec-label { font-size: 0.63rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 0.25rem; }
 
-    /* SECTION */
-    .section-title { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem; }
-    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-    .description { font-size: 0.92rem; color: var(--text-muted); line-height: 1.8; margin-bottom: 3rem; }
+    /* Content card */
+    .content-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .card-section-title {
+      font-size: 0.65rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .card-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .description { font-size: 0.9rem; color: var(--muted); line-height: 1.8; }
     .description p + p { margin-top: 1em; }
 
-    /* FEATURES */
-    .features-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 3rem; }
-    .feature-tag { font-size: 0.75rem; letter-spacing: 0.08em; color: var(--text-muted); border: 1px solid var(--border); padding: 0.4rem 0.9rem; }
+    /* Features */
+    .features-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .feature-tag {
+      font-size: 0.75rem; font-weight: 400; color: var(--muted);
+      background: var(--section-bg); border: 1px solid var(--border);
+      padding: 0.35rem 0.85rem; border-radius: 999px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .feature-tag:hover { border-color: var(--blue); color: var(--blue); }
 
-    /* COMPS */
-    .comps-table { width: 100%; border-collapse: collapse; margin-bottom: 3rem; }
-    .comps-table th { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border); }
-    .comps-table td { font-size: 0.84rem; padding: 0.9rem 0.8rem; border-bottom: 1px solid var(--border); color: var(--text-muted); }
-    .comp-price { color: var(--gold-light) !important; font-weight: 500; }
+    /* Comparable sales table */
+    .comps-table { width: 100%; border-collapse: collapse; }
+    .comps-table th { font-size: 0.62rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .comps-table td { font-size: 0.84rem; padding: 0.9rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--muted); }
+    .comps-table tr:last-child td { border-bottom: none; }
+    .comps-table tr:hover td { background: var(--section-bg); }
+    .comp-price { color: var(--blue) !important; font-weight: 500; }
+    .comp-price.high { color: #16a34a !important; }
 
-    /* DEED PROCESS */
-    .process-steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 3rem; }
-    .process-step { display: grid; grid-template-columns: 2.5rem 1fr; gap: 1rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+    /* DEED process steps */
+    .process-steps { display: flex; flex-direction: column; }
+    .process-step {
+      display: grid; grid-template-columns: 2.5rem 1fr;
+      gap: 1.25rem; padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border); align-items: start;
+    }
     .process-step:first-child { border-top: 1px solid var(--border); }
-    .process-num { font-family: var(--font-display); font-size: 1.2rem; color: var(--text-dim); letter-spacing: 0.05em; padding-top: 0.1rem; }
-    .process-text h4 { font-size: 0.88rem; color: var(--text); margin-bottom: 0.2rem; font-weight: 400; }
-    .process-text p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.55; }
+    .process-step:last-child { border-bottom: none; padding-bottom: 0; }
+    .process-num { font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0.06em; color: var(--dim); line-height: 1.4; }
+    .process-text h4 { font-size: 0.88rem; font-weight: 500; color: var(--text); margin-bottom: 0.3rem; }
+    .process-text p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
 
-    /* SIDEBAR */
-    .deadline-box { border: 1px solid var(--border-2); padding: 1.25rem; margin-bottom: 1.25rem; background: var(--surface-2); }
-    .deadline-label { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.4rem; }
-    .countdown { display: flex; gap: 0.75rem; align-items: baseline; }
-    .countdown-unit { text-align: center; }
-    .countdown-num { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.05em; color: var(--red); line-height: 1; display: block; }
-    .countdown-label { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); }
-    .countdown-sep { font-family: var(--font-display); font-size: 1.8rem; color: var(--text-dim); line-height: 1; }
+    /* ── SIDEBAR ─────────────────────────────── */
+    .sidebar-col { padding: 2.5rem 0; position: sticky; top: 80px; }
+    .sidebar-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      margin-bottom: 1.25rem;
+    }
 
-    .watchers-box { border: 1px solid var(--border); padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem; }
-    .watcher-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; flex-shrink: 0; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .watchers-text { font-size: 0.82rem; color: var(--text-muted); }
+    /* Countdown */
+    .deadline-card { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+    .deadline-label { font-size: 0.62rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; }
+    .countdown { display: flex; align-items: center; gap: 0.25rem; }
+    .countdown-unit {
+      flex: 1; text-align: center;
+      background: #fff7ed; border: 1px solid #fed7aa;
+      border-radius: 8px; padding: 0.6rem 0.25rem;
+    }
+    .countdown-num { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.04em; color: #ea580c; line-height: 1; display: block; }
+    .countdown-unit-label { font-size: 0.55rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #c2410c; margin-top: 0.15rem; }
+    .countdown-sep { font-family: var(--font-display); font-size: 1.4rem; color: var(--border); padding: 0 0.15rem; margin-bottom: 0.75rem; }
+
+    /* Watchers */
+    .watchers-bar { padding: 1rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid var(--border); }
+    .watcher-pulse { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0; animation: pulsate 2s ease-in-out infinite; }
+    @keyframes pulsate { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+    .watchers-text { font-size: 0.82rem; color: var(--muted); }
     .watchers-text strong { color: var(--text); }
 
-    .verified-requirement { border: 1px solid var(--gold-dim); background: var(--gold-dim); padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 0.75rem; }
-    .verified-icon { color: var(--gold); font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
-    .verified-text { font-size: 0.78rem; color: var(--gold-light); line-height: 1.5; }
-    .verified-text strong { display: block; margin-bottom: 0.2rem; }
+    /* Verified notice */
+    .verified-notice {
+      padding: 1rem 1.5rem;
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      background: var(--blue-pale); border-bottom: 1px solid #bfdbfe;
+    }
+    .verified-icon { font-size: 0.9rem; margin-top: 0.1rem; flex-shrink: 0; }
+    .verified-text { font-size: 0.78rem; color: #1e40af; line-height: 1.5; }
+    .verified-text strong { display: block; margin-bottom: 0.15rem; color: #1e3a8a; }
 
-    .btn-offer { display: block; width: 100%; font-family: var(--font-body); font-size: 0.9rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; background: var(--gold); color: var(--bg); border: none; padding: 1.1rem; cursor: pointer; text-decoration: none; text-align: center; transition: background 0.2s, transform 0.15s; margin-bottom: 0.75rem; }
-    .btn-offer:hover { background: var(--gold-light); transform: translateY(-1px); }
+    /* CTA area */
+    .cta-area { padding: 1.5rem; }
+    .btn-blue-lg {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; padding: 0.9rem 1.5rem;
+      background: var(--blue); color: #fff;
+      border: none; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 600; font-family: var(--font-body);
+      text-decoration: none; cursor: pointer;
+      transition: background 0.15s;
+      margin-bottom: 0.75rem;
+      min-height: 44px;
+    }
+    .btn-blue-lg:hover { background: var(--blue-hover); }
+    .btn-outline-lg {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; padding: 0.875rem 1.5rem;
+      background: #fff; color: var(--text);
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 0.875rem; font-weight: 500; font-family: var(--font-body);
+      text-decoration: none; cursor: pointer;
+      transition: border-color 0.15s;
+      min-height: 44px;
+    }
+    .btn-outline-lg:hover { border-color: var(--blue); color: var(--blue); }
+    .fee-note { text-align: center; font-size: 0.72rem; color: var(--dim); margin-top: 1rem; line-height: 1.5; }
 
-    .btn-enquire { display: block; width: 100%; font-family: var(--font-body); font-size: 0.82rem; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; background: none; color: var(--text-muted); border: 1px solid var(--border-2); padding: 0.9rem; cursor: pointer; text-decoration: none; text-align: center; transition: all 0.2s; margin-bottom: 1.25rem; }
-    .btn-enquire:hover { border-color: var(--text-muted); color: var(--text); }
+    /* Property details table */
+    .prop-details {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .prop-details-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.62rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .prop-detail-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+    .prop-detail-row:last-child { border-bottom: none; }
+    .detail-key { color: var(--muted); }
+    .detail-val { color: var(--text); font-weight: 400; }
+    .detail-val.positive { color: #15803d; font-weight: 500; }
 
-    .fee-note { font-size: 0.72rem; color: var(--text-dim); text-align: center; line-height: 1.5; }
+    /* Badge overrides */
+    .badge { font-size: 0.68rem; font-weight: 500; padding: 0.25rem 0.65rem; border-radius: 999px; }
+    .badge-new { background: var(--blue-pale); color: var(--blue); border: 1px solid #bfdbfe; }
+    .deed-verified { font-size: 0.68rem; font-weight: 500; padding: 0.25rem 0.65rem; border-radius: 999px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 
-    /* MOBILE */
-    @media (max-width: 900px) {
-      nav { padding: 1.25rem 1.5rem; }
-      .hero-overlay { padding: 1.5rem; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-      .photo-strip { padding: 0.75rem 1.5rem; }
-      .page-body { grid-template-columns: 1fr; }
-      .main-col { padding: 2rem 1.5rem; border-right: none; }
-      .sidebar-col { padding: 1.5rem; position: static; border-top: 1px solid var(--border); }
-      .specs-bar { flex-wrap: wrap; }
+    /* Reveal animation */
+    .reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease, transform 0.4s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ──────────────────────────── */
+    @media (max-width: 1024px) { .page-body { padding: 0 1.5rem; gap: 2rem; } }
+    @media (max-width: 860px) {
+      .hero-photo-overlay { padding: 2rem 1.5rem 1.5rem; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .hero-price-group { text-align: left; }
+      .hero-badges { top: 4.5rem; left: 1.5rem; }
+      .hero-save { top: 4.5rem; right: 1.5rem; }
+      .photo-strip { padding: 0.5rem 1rem; }
+      .page-body { grid-template-columns: 1fr; padding: 0; }
+      .main-col { padding: 1.5rem 1.25rem; }
+      .sidebar-col { position: static; padding: 0 1.25rem 2rem; }
       .spec { min-width: 50%; }
+    }
+    @media (max-width: 480px) {
+      .hero-photo { height: 45vh; min-height: 260px; }
+      .hero-photo-overlay { padding: 1.5rem 1rem 1rem; }
+      .hero-badges { left: 1rem; right: 1rem; }
+      .page-body { grid-template-columns: 1fr; padding: 0 1rem; }
+      .main-col { padding: 1rem 0; }
     }
   </style>
 </head>
 <body>
 
-<nav>
-  <a href="index.html" class="nav-logo">DEED</a>
-  <a href="index.html" class="nav-back">← All listings</a>
-</nav>
-
-<!-- HERO -->
-<div class="hero-photo">
-  <div class="hero-photo-placeholder">
-    <div class="hero-photo-icon">🏡</div>
-    <p class="hero-photo-text">Property photos load here</p>
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <a href="index.html" class="nav-logo">DEED</a>
+    <ul class="nav-links">
+      <li><a href="browse.html">Browse</a></li>
+      <li><a href="sell.html">Sell</a></li>
+      <li><a href="qualify.html">Pre-qualify</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="qualify.html" class="btn-nav-outline">Sign in</a>
+      <a href="qualify.html" class="btn-nav-blue">Get pre-qualified</a>
+    </div>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="nav-mobile-menu" id="nav-mobile-menu">
+    <a href="browse.html">Browse listings</a>
+    <a href="sell.html">Sell your property</a>
+    <a href="qualify.html">Buyer pre-qualification</a>
+    <a href="qualify.html" class="nav-mobile-cta">Get pre-qualified →</a>
   </div>
-  <div class="hero-overlay">
-    <div class="hero-address">
-      <h1>14 Riverview Terrace</h1>
-      <p>New Farm · Queensland 4005</p>
-    </div>
-    <div class="hero-price">$895,000</div>
-  </div>
-</div>
 
-<!-- PHOTO STRIP -->
-<div class="photo-strip">
-  <div class="photo-thumb" style="border-color:var(--gold);">Main</div>
-  <div class="photo-thumb">Living</div>
-  <div class="photo-thumb">Kitchen</div>
-  <div class="photo-thumb">Master</div>
-  <div class="photo-thumb">Deck</div>
-  <div class="photo-thumb">Garden</div>
-  <div class="photo-thumb">+6</div>
-</div>
-
-<div class="page-body">
-
-  <!-- MAIN -->
-  <div class="main-col">
-
-    <!-- SPECS -->
-    <div class="specs-bar">
-      <div class="spec"><div class="spec-val">3</div><div class="spec-label">Bed</div></div>
-      <div class="spec"><div class="spec-val">2</div><div class="spec-label">Bath</div></div>
-      <div class="spec"><div class="spec-val">1</div><div class="spec-label">Car</div></div>
-      <div class="spec"><div class="spec-val">405</div><div class="spec-label">Land m²</div></div>
-      <div class="spec"><div class="spec-val">198</div><div class="spec-label">House m²</div></div>
+  <!-- HERO PHOTO -->
+  <div class="hero-photo">
+    <div class="hero-photo-placeholder">
+      <div class="photo-icon">🏡</div>
+      <p class="photo-label">Property photos load here</p>
     </div>
 
-    <!-- DESCRIPTION -->
-    <p class="section-title">About this property</p>
-    <div class="description">
-      <p>A beautifully maintained Queenslander on a quiet street in the heart of New Farm, one block from the riverside parklands and walking distance to Merthyr Village. The home retains all original character — VJ walls, timber floors, pressed tin ceilings — while offering a fully updated kitchen and two renovated bathrooms.</p>
-      <p>The north-facing rear deck looks over a private tropical garden, perfect for entertaining year-round. The main bedroom features a generous walk-in robe and ensuite. A separate study makes for an ideal home office. The property sits on a 405m² block with rear lane access and a single lock-up garage.</p>
-      <p>New Farm Ferry Terminal is a 4-minute walk. The CBD is 10 minutes by ferry or 15 minutes by bike. This is the kind of home that comes to market once in a decade on this street.</p>
+    <div class="hero-badges">
+      <span class="badge badge-new">New listing</span>
+      <span class="deed-verified">DEED Verified</span>
     </div>
 
-    <!-- FEATURES -->
-    <p class="section-title">Features</p>
-    <div class="features-list">
-      <span class="feature-tag">Timber floors</span>
-      <span class="feature-tag">VJ walls</span>
-      <span class="feature-tag">Pressed tin ceilings</span>
-      <span class="feature-tag">Renovated kitchen</span>
-      <span class="feature-tag">Ducted air conditioning</span>
-      <span class="feature-tag">North-facing deck</span>
-      <span class="feature-tag">Tropical garden</span>
-      <span class="feature-tag">Walk-in robe</span>
-      <span class="feature-tag">Ensuite</span>
-      <span class="feature-tag">Study / home office</span>
-      <span class="feature-tag">Lock-up garage</span>
-      <span class="feature-tag">Rear lane access</span>
-      <span class="feature-tag">Solar panels (6.6kW)</span>
-    </div>
+    <button class="hero-save" id="save-btn" onclick="toggleSave(this)" title="Save property">♡</button>
 
-    <!-- COMPARABLE SALES -->
-    <p class="section-title">Recent comparable sales</p>
-    <table class="comps-table">
-      <thead>
-        <tr><th>Address</th><th>Sold price</th><th>Bed/Bath</th><th>Land</th><th>Sold</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>8 Moreton St, New Farm</td><td class="comp-price">$920,000</td><td>3 / 2</td><td>450m²</td><td>1mo ago</td></tr>
-        <tr><td>22 Stanley St, New Farm</td><td class="comp-price">$875,000</td><td>3 / 1</td><td>405m²</td><td>2mo ago</td></tr>
-        <tr><td>5 Merthyr Rd, New Farm</td><td class="comp-price">$810,000</td><td>3 / 2</td><td>390m²</td><td>3mo ago</td></tr>
-        <tr><td>31 Villiers St, New Farm</td><td class="comp-price">$1,050,000</td><td>4 / 2</td><td>607m²</td><td>4mo ago</td></tr>
-      </tbody>
-    </table>
-
-    <!-- HOW DEED WORKS -->
-    <p class="section-title">How DEED works</p>
-    <div class="process-steps">
-      <div class="process-step">
-        <span class="process-num">01</span>
-        <div class="process-text">
-          <h4>Only verified buyers can make offers</h4>
-          <p>Every buyer on DEED has submitted income and deposit verification. You know the offer is real before you read it.</p>
-        </div>
+    <div class="hero-photo-overlay">
+      <div class="hero-address-group">
+        <h1 class="hero-address" id="hero-address">14 Headland Drive</h1>
+        <p class="hero-suburb" id="hero-suburb">Burleigh Heads · Queensland 4220</p>
       </div>
-      <div class="process-step">
-        <span class="process-num">02</span>
-        <div class="process-text">
-          <h4>All offers arrive at the deadline</h4>
-          <p>Structured offers close on <strong id="deadline-text" style="color:var(--text);">—</strong>. The seller reviews all offers simultaneously — not first-come-first-served. This is how competitive tension works.</p>
-        </div>
-      </div>
-      <div class="process-step">
-        <span class="process-num">03</span>
-        <div class="process-text">
-          <h4>Conditions are locked in upfront</h4>
-          <p>Finance clause, building & pest, and settlement dates are specified in the offer. No ambiguous conditions that collapse deals three weeks later.</p>
-        </div>
-      </div>
-      <div class="process-step">
-        <span class="process-num">04</span>
-        <div class="process-text">
-          <h4>Your conveyancer handles the contract</h4>
-          <p>DEED's partner conveyancers prepare a REIQ-compliant contract of sale once an offer is accepted. Full legal protection, none of the agent markup.</p>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /main-col -->
-
-  <!-- SIDEBAR -->
-  <div class="sidebar-col">
-
-    <div class="deadline-box">
-      <p class="deadline-label">Offer deadline</p>
-      <div class="countdown">
-        <div class="countdown-unit">
-          <span class="countdown-num" id="cd-days">14</span>
-          <span class="countdown-label">days</span>
-        </div>
-        <span class="countdown-sep">:</span>
-        <div class="countdown-unit">
-          <span class="countdown-num" id="cd-hours">09</span>
-          <span class="countdown-label">hrs</span>
-        </div>
-        <span class="countdown-sep">:</span>
-        <div class="countdown-unit">
-          <span class="countdown-num" id="cd-mins">42</span>
-          <span class="countdown-label">min</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="watchers-box">
-      <div class="watcher-dot"></div>
-      <p class="watchers-text"><strong>11 pre-qualified buyers</strong> are watching this listing</p>
-    </div>
-
-    <div class="verified-requirement">
-      <span class="verified-icon">⚡</span>
-      <div class="verified-text">
-        <strong>Verified buyers only</strong>
-        Pre-qualification required to make an offer. Takes 3 minutes.
-      </div>
-    </div>
-
-    <a href="offer.html" class="btn-offer">Make an offer →</a>
-    <a href="qualify.html" class="btn-enquire">Get pre-qualified first</a>
-
-    <p class="fee-note">No agent. No commission.<br/>Seller paid $999 flat to list on DEED.</p>
-
-    <div style="margin-top:2rem;padding-top:2rem;border-top:1px solid var(--border);">
-      <p style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1rem;">Property details</p>
-      <div style="display:flex;flex-direction:column;gap:0.6rem;">
-        <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="color:var(--text-muted);">Type</span><span>Queenslander house</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="color:var(--text-muted);">Land</span><span>405m²</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="color:var(--text-muted);">Built</span><span>c. 1925 (renovated)</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="color:var(--text-muted);">Council</span><span>Brisbane City</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="color:var(--text-muted);">Rates</span><span>~$420/qtr</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="color:var(--text-muted);">Flood zone</span><span style="color:var(--green);">No flood overlay</span></div>
+      <div class="hero-price-group">
+        <p class="hero-price-guide" id="hero-price-guide">Price guide</p>
+        <p class="hero-price" id="hero-price">$1,450,000</p>
       </div>
     </div>
   </div>
 
-</div><!-- /page-body -->
+  <!-- PHOTO STRIP -->
+  <div class="photo-strip">
+    <div class="photo-thumb active">Main</div>
+    <div class="photo-thumb">Living</div>
+    <div class="photo-thumb">Kitchen</div>
+    <div class="photo-thumb">Master</div>
+    <div class="photo-thumb">Deck</div>
+    <div class="photo-thumb">Garden</div>
+    <div class="photo-thumb">+6</div>
+  </div>
 
-<script>
-  // Countdown to offer deadline (14 days from today)
-  const deadline = new Date();
-  deadline.setDate(deadline.getDate() + 14);
+  <!-- PAGE BODY -->
+  <div class="page-body">
 
-  // Format deadline text
-  const opts = { day: 'numeric', month: 'long', year: 'numeric' };
-  document.getElementById('deadline-text').textContent = deadline.toLocaleDateString('en-AU', opts);
+    <!-- MAIN CONTENT -->
+    <div class="main-col">
 
-  function updateCountdown() {
-    const now = new Date();
-    const diff = deadline - now;
-    if (diff <= 0) {
-      document.getElementById('cd-days').textContent = '00';
-      document.getElementById('cd-hours').textContent = '00';
-      document.getElementById('cd-mins').textContent = '00';
-      return;
+      <!-- SPECS BAR -->
+      <div class="specs-bar" id="specs-bar">
+        <div class="spec">
+          <div class="spec-val" id="spec-beds">4</div>
+          <div class="spec-label">Bed</div>
+        </div>
+        <div class="spec">
+          <div class="spec-val" id="spec-baths">2</div>
+          <div class="spec-label">Bath</div>
+        </div>
+        <div class="spec">
+          <div class="spec-val" id="spec-car">2</div>
+          <div class="spec-label">Car</div>
+        </div>
+        <div class="spec">
+          <div class="spec-val" id="spec-land">612</div>
+          <div class="spec-label">Land m²</div>
+        </div>
+        <div class="spec">
+          <div class="spec-val" id="spec-house">248</div>
+          <div class="spec-label">House m²</div>
+        </div>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <div class="content-card reveal">
+        <p class="card-section-title">About this property</p>
+        <div class="description" id="description">
+          <p>A stunning architect-renovated family home set metres from the Burleigh Heads beach and national park. The home has been completely transformed with an open-plan living and dining area that flows seamlessly to a covered alfresco deck and saltwater pool — designed for Queensland outdoor living.</p>
+          <p>The kitchen features stone benchtops, integrated appliances, and a butler's pantry. The master suite is positioned at the rear with direct pool access, a walk-in robe, and a fully tiled ensuite. Three additional bedrooms are serviced by a second bathroom upstairs.</p>
+          <p>Burleigh Heads village, James Street dining, and the beach are all within a 5-minute walk. Sold without an agent — the seller has priced to transact before the 7-day deadline.</p>
+        </div>
+      </div>
+
+      <!-- FEATURES -->
+      <div class="content-card reveal" id="features-card">
+        <p class="card-section-title">Features</p>
+        <div class="features-list" id="features-list">
+          <span class="feature-tag">Saltwater pool</span>
+          <span class="feature-tag">Covered alfresco</span>
+          <span class="feature-tag">Stone benchtops</span>
+          <span class="feature-tag">Butler's pantry</span>
+          <span class="feature-tag">Ducted aircon</span>
+          <span class="feature-tag">Walk-in robe</span>
+          <span class="feature-tag">Ensuite</span>
+          <span class="feature-tag">Double lock-up garage</span>
+          <span class="feature-tag">Solar panels (10kW)</span>
+          <span class="feature-tag">Integrated appliances</span>
+          <span class="feature-tag">Outdoor kitchen</span>
+          <span class="feature-tag">650m to beach</span>
+        </div>
+      </div>
+
+      <!-- COMPARABLE SALES -->
+      <div class="content-card reveal">
+        <p class="card-section-title">Recent comparable sales</p>
+        <table class="comps-table">
+          <thead>
+            <tr>
+              <th>Address</th>
+              <th>Sold price</th>
+              <th>Bed/Bath</th>
+              <th>Land</th>
+              <th>Sold</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>3 Palm Ave, Burleigh Heads</td>
+              <td class="comp-price high">$1,520,000</td>
+              <td>4 / 2</td>
+              <td>607m²</td>
+              <td>3wk ago</td>
+            </tr>
+            <tr>
+              <td>19 Goodwin Tce, Burleigh Heads</td>
+              <td class="comp-price">$1,410,000</td>
+              <td>4 / 2</td>
+              <td>580m²</td>
+              <td>6wk ago</td>
+            </tr>
+            <tr>
+              <td>7 Albatross Ave, Burleigh Heads</td>
+              <td class="comp-price">$1,375,000</td>
+              <td>3 / 2</td>
+              <td>558m²</td>
+              <td>2mo ago</td>
+            </tr>
+            <tr>
+              <td>31 Seacrest Dr, Burleigh Heads</td>
+              <td class="comp-price">$1,650,000</td>
+              <td>5 / 3</td>
+              <td>720m²</td>
+              <td>3mo ago</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- HOW DEED WORKS -->
+      <div class="content-card reveal">
+        <p class="card-section-title">How DEED works</p>
+        <div class="process-steps">
+          <div class="process-step">
+            <span class="process-num">01</span>
+            <div class="process-text">
+              <h4>Only verified buyers can make offers</h4>
+              <p>Every buyer on DEED has submitted income and deposit verification. You know the offer is real before you read it.</p>
+            </div>
+          </div>
+          <div class="process-step">
+            <span class="process-num">02</span>
+            <div class="process-text">
+              <h4>All offers arrive at the deadline</h4>
+              <p>Structured offers close on <strong id="deadline-text" style="color:var(--text);">—</strong>. The seller reviews all offers simultaneously — not first-come-first-served. This is how competitive tension works.</p>
+            </div>
+          </div>
+          <div class="process-step">
+            <span class="process-num">03</span>
+            <div class="process-text">
+              <h4>Conditions are locked in upfront</h4>
+              <p>Finance clause, building & pest, and settlement dates are specified in the offer. No ambiguous conditions that collapse deals three weeks later.</p>
+            </div>
+          </div>
+          <div class="process-step">
+            <span class="process-num">04</span>
+            <div class="process-text">
+              <h4>Your conveyancer handles the contract</h4>
+              <p>DEED's partner conveyancers prepare a REIQ-compliant contract of sale once an offer is accepted. Full legal protection, none of the agent markup.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main-col -->
+
+    <!-- SIDEBAR -->
+    <div class="sidebar-col">
+
+      <!-- Main CTA card -->
+      <div class="sidebar-card">
+
+        <!-- Countdown -->
+        <div class="deadline-card">
+          <p class="deadline-label">Offer deadline closes in</p>
+          <div class="countdown">
+            <div class="countdown-unit">
+              <span class="countdown-num" id="cd-days">14</span>
+              <span class="countdown-unit-label">days</span>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit">
+              <span class="countdown-num" id="cd-hours">09</span>
+              <span class="countdown-unit-label">hrs</span>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit">
+              <span class="countdown-num" id="cd-mins">42</span>
+              <span class="countdown-unit-label">min</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Watchers -->
+        <div class="watchers-bar">
+          <div class="watcher-pulse"></div>
+          <p class="watchers-text"><strong id="watchers-count">11 pre-qualified buyers</strong> are watching this listing</p>
+        </div>
+
+        <!-- Verified notice -->
+        <div class="verified-notice">
+          <span class="verified-icon">⚡</span>
+          <div class="verified-text">
+            <strong>Verified buyers only</strong>
+            Pre-qualification required to make an offer. Takes 3 minutes.
+          </div>
+        </div>
+
+        <!-- CTAs -->
+        <div class="cta-area">
+          <a href="offer.html?listing_id=demo" class="btn-blue-lg" id="offer-btn">
+            Make an offer →
+          </a>
+          <a href="qualify.html" class="btn-outline-lg">
+            Get pre-qualified first
+          </a>
+          <p class="fee-note">No agent. No commission.<br/>Seller paid $999 flat to list on DEED.</p>
+        </div>
+
+      </div><!-- /sidebar-card -->
+
+      <!-- Property details -->
+      <div class="prop-details reveal">
+        <div class="prop-details-header">Property details</div>
+        <div class="prop-detail-row">
+          <span class="detail-key">Type</span>
+          <span class="detail-val" id="detail-type">House</span>
+        </div>
+        <div class="prop-detail-row">
+          <span class="detail-key">Land</span>
+          <span class="detail-val" id="detail-land">612m²</span>
+        </div>
+        <div class="prop-detail-row">
+          <span class="detail-key">Suburb</span>
+          <span class="detail-val" id="detail-suburb">Burleigh Heads QLD 4220</span>
+        </div>
+        <div class="prop-detail-row">
+          <span class="detail-key">Beds / Baths</span>
+          <span class="detail-val" id="detail-beds-baths">4 bd / 2 ba</span>
+        </div>
+        <div class="prop-detail-row" id="detail-row-built">
+          <span class="detail-key">Built</span>
+          <span class="detail-val">2018 (renovated 2023)</span>
+        </div>
+        <div class="prop-detail-row" id="detail-row-council">
+          <span class="detail-key">Council</span>
+          <span class="detail-val">Gold Coast City</span>
+        </div>
+        <div class="prop-detail-row" id="detail-row-rates">
+          <span class="detail-key">Rates</span>
+          <span class="detail-val">~$680/qtr</span>
+        </div>
+        <div class="prop-detail-row" id="detail-row-flood">
+          <span class="detail-key">Flood zone</span>
+          <span class="detail-val positive">No flood overlay</span>
+        </div>
+      </div>
+
+    </div><!-- /sidebar-col -->
+
+  </div><!-- /page-body -->
+
+  <!-- FOOTER -->
+  <footer style="background:var(--section-bg);border-top:1px solid var(--border);padding:2rem 3rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;margin-top:2rem;">
+    <a href="index.html" style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:0.06em;color:var(--text);text-decoration:none;">DEED</a>
+    <ul style="display:flex;list-style:none;gap:1.5rem;margin:0;padding:0;">
+      <li><a href="browse.html" style="font-size:0.875rem;color:var(--muted);text-decoration:none;">Browse</a></li>
+      <li><a href="sell.html" style="font-size:0.875rem;color:var(--muted);text-decoration:none;">Sell</a></li>
+      <li><a href="qualify.html" style="font-size:0.875rem;color:var(--muted);text-decoration:none;">Pre-qualify</a></li>
+    </ul>
+    <div style="font-size:0.75rem;color:var(--dim);text-align:right;">
+      <p>Queensland, Australia</p>
+      <p>© 2026 Deed Pty Ltd</p>
+    </div>
+  </footer>
+
+  <script>
+    // ── SUPABASE ─────────────────────────────────
+    const db = supabase.createClient(
+      'https://jtpykhrdjkzhcbswrhzo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0cHlraHJkamt6aGNic3dyaHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTYxMjAsImV4cCI6MjA4OTQ5MjEyMH0.U3q_ktH3vN7loxEgUg-oJw9mXYYwhMC0aL6bK9YBVRI'
+    );
+
+    async function loadListing() {
+      const id = new URLSearchParams(window.location.search).get('id');
+      if (!id || id === 'demo') return; // keep hardcoded demo content
+
+      const { data: l, error } = await db.from('listings').select('*').eq('id', id).single();
+      if (error || !l) return;
+
+      document.title = `DEED — ${l.address}`;
+      document.getElementById('hero-address').textContent = l.address;
+      document.getElementById('hero-suburb').textContent = `${l.suburb} · Queensland${l.postcode ? ' ' + l.postcode : ''}`;
+      document.getElementById('hero-price').textContent = l.asking_price ? '$' + l.asking_price.toLocaleString('en-AU') : '—';
+      document.getElementById('hero-price-guide').textContent = l.price_description || 'Price guide';
+
+      const age = Math.floor((Date.now() - new Date(l.created_at)) / 86400000);
+      const badgesEl = document.querySelector('.hero-badges');
+      badgesEl.innerHTML = (age <= 2 ? '<span class="badge badge-new">New listing</span>' : '') +
+        '<span class="deed-verified">DEED Verified</span>';
+
+      const setSpec = (id, val) => {
+        const el = document.getElementById(id);
+        if (val != null) el.textContent = val;
+        else el.closest('.spec').style.display = 'none';
+      };
+      setSpec('spec-beds', l.bedrooms);
+      setSpec('spec-baths', l.bathrooms);
+      setSpec('spec-car', l.car_spaces);
+      setSpec('spec-land', l.land_size);
+      setSpec('spec-house', l.house_size);
+
+      if (l.description) {
+        document.getElementById('description').innerHTML =
+          l.description.split('\n\n').map(p => `<p>${p}</p>`).join('') ||
+          `<p>${l.description}</p>`;
+      }
+
+      if (l.features && l.features.length) {
+        document.getElementById('features-list').innerHTML =
+          l.features.map(f => `<span class="feature-tag">${f}</span>`).join('');
+      } else {
+        document.getElementById('features-card').style.display = 'none';
+      }
+
+      const wc = l.watcher_count || 0;
+      document.getElementById('watchers-count').textContent =
+        `${wc} pre-qualified buyer${wc !== 1 ? 's' : ''}`;
+
+      document.getElementById('offer-btn').href = `offer.html?listing_id=${l.id}`;
+      updateDetails(l);
+
+      if (l.deadline) {
+        deadlineDate = new Date(l.deadline + 'T17:00:00');
+        updateCountdown();
+        const opts = { day: 'numeric', month: 'long', year: 'numeric' };
+        document.getElementById('deadline-text').textContent = deadlineDate.toLocaleDateString('en-AU', opts);
+      }
+
+      if (l.photos && l.photos.length > 0) {
+        const heroEl = document.querySelector('.hero-photo');
+        heroEl.style.cssText += ';background-image:url(' + l.photos[0] + ');background-size:cover;background-position:center;';
+        document.querySelector('.hero-photo-placeholder').style.display = 'none';
+
+        const strip = document.querySelector('.photo-strip');
+        strip.innerHTML = l.photos.slice(0, 9).map((url, i) =>
+          `<div class="photo-thumb${i === 0 ? ' active' : ''}" onclick="setHeroPhoto('${url}', this)" style="background-image:url(${url});background-size:cover;background-position:center;"></div>`
+        ).join('');
+        if (l.photos.length > 9) {
+          strip.innerHTML += `<div class="photo-thumb">+${l.photos.length - 9}</div>`;
+        }
+      }
+
+      sessionStorage.setItem('deedListingId', l.id);
     }
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
-    document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
-    document.getElementById('cd-mins').textContent = String(mins).padStart(2, '0');
-  }
-  updateCountdown();
-  setInterval(updateCountdown, 60000);
-</script>
+
+    function updateDetails(l) {
+      if (l.property_type) document.getElementById('detail-type').textContent = l.property_type;
+      if (l.land_size)     document.getElementById('detail-land').textContent = l.land_size + 'm²';
+      document.getElementById('detail-suburb').textContent =
+        `${l.suburb}${l.postcode ? ' QLD ' + l.postcode : ''}`;
+      document.getElementById('detail-beds-baths').textContent =
+        `${l.bedrooms || '—'} bd / ${l.bathrooms || '—'} ba`;
+      ['detail-row-built','detail-row-council','detail-row-rates','detail-row-flood']
+        .forEach(id => document.getElementById(id).style.display = 'none');
+    }
+
+    let deadlineDate = (() => {
+      const d = new Date();
+      d.setDate(d.getDate() + 14);
+      return d;
+    })();
+
+    loadListing();
+
+    // Scroll-reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    function toggleSave(btn) {
+      btn.classList.toggle('saved');
+      btn.textContent = btn.classList.contains('saved') ? '♥' : '♡';
+    }
+
+    const opts = { day: 'numeric', month: 'long', year: 'numeric' };
+    document.getElementById('deadline-text').textContent = deadlineDate.toLocaleDateString('en-AU', opts);
+
+    function updateCountdown() {
+      const diff = deadlineDate - new Date();
+      if (diff <= 0) {
+        ['cd-days', 'cd-hours', 'cd-mins'].forEach(id => document.getElementById(id).textContent = '00');
+        return;
+      }
+      document.getElementById('cd-days').textContent  = String(Math.floor(diff / 86400000)).padStart(2,'0');
+      document.getElementById('cd-hours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+      document.getElementById('cd-mins').textContent  = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 60000);
+
+    function setHeroPhoto(url, thumbEl) {
+      const heroEl = document.querySelector('.hero-photo');
+      heroEl.style.backgroundImage = 'url(' + url + ')';
+      document.querySelectorAll('.photo-thumb').forEach(t => t.classList.remove('active'));
+      thumbEl.classList.add('active');
+    }
+
+    document.querySelectorAll('.photo-thumb').forEach(thumb => {
+      if (!thumb.getAttribute('onclick')) {
+        thumb.addEventListener('click', () => {
+          document.querySelectorAll('.photo-thumb').forEach(t => t.classList.remove('active'));
+          thumb.classList.add('active');
+        });
+      }
+    });
+
+    // Mobile nav
+    const hamburger = document.getElementById('nav-hamburger');
+    const mobileMenu = document.getElementById('nav-mobile-menu');
+    if (hamburger) {
+      hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+      document.addEventListener('click', (e) => {
+        if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) mobileMenu.classList.remove('open');
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,0 +1,11 @@
+{
+  "name": "deed",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.0",
+    "@supabase/storage-js": "^2.99.3",
+    "sharp": "^0.34.5",
+    "stripe": "^16.0.0"
+  }
+}

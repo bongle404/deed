@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Listing Published — DEED</title>
+  <link rel="stylesheet" href="deed-ui.css" />
+  <style>
+    :root {
+      --blue:#2563EB; --blue-hover:#1d4ed8; --blue-light:#3b82f6;
+      --blue-pale:#eff6ff; --blue-muted:rgba(37,99,235,0.10);
+      --page-bg:#ffffff; --section-bg:#f7f8fa; --border:#e5e7eb;
+      --text:#111827; --muted:#6b7280; --dim:#9ca3af;
+    }
+    body { background:var(--page-bg); font-family:var(--font-body); color:var(--text); min-height:100vh; display:flex; flex-direction:column; margin:0; }
+
+    /* ── NAV ─────────────────────────────────── */
+    .nav { background:#fff !important; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; padding:0 1.5rem; height:64px; display:flex; align-items:center; justify-content:space-between; }
+    .nav-logo { font-family:var(--font-display); font-size:1.6rem; letter-spacing:0.06em; color:var(--text); text-decoration:none; }
+    .nav-links { display:flex; list-style:none; gap:0; margin:0; padding:0; }
+    .nav-links a { font-size:0.875rem; font-weight:500; color:var(--muted); text-decoration:none; padding:0.5rem 0.875rem; border-radius:8px; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-actions { display:flex; gap:0.5rem; align-items:center; }
+    .btn-nav-outline { font-size:0.875rem; font-weight:500; color:var(--text); text-decoration:none; padding:0.5rem 1rem; border:1px solid var(--border); border-radius:8px; background:#fff; }
+    .btn-nav-blue { font-size:0.875rem; font-weight:500; color:#fff; text-decoration:none; padding:0.5rem 1.125rem; background:var(--blue); border:1px solid var(--blue); border-radius:8px; }
+    .nav-hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:4px; }
+    .nav-hamburger span { display:block; width:22px; height:2px; background:var(--text); border-radius:2px; }
+    .nav-mobile-menu { display:none; position:fixed; top:64px; left:0; right:0; background:#fff; border-bottom:1px solid var(--border); padding:1rem 1.5rem 1.5rem; z-index:99; box-shadow:0 8px 24px rgba(0,0,0,0.10); }
+    .nav-mobile-menu.open { display:block; }
+    .nav-mobile-menu a { display:block; padding:0.875rem 0; font-size:1rem; font-weight:500; color:var(--text); text-decoration:none; border-bottom:1px solid var(--border); }
+    .nav-mobile-menu a:last-child { border-bottom:none; }
+    .nav-mobile-cta { margin-top:1rem; text-align:center; padding:0.875rem !important; background:var(--blue); color:#fff !important; border-radius:8px; }
+    @media (max-width:860px) { .nav-links,.nav-actions{display:none;} .nav-hamburger{display:flex;} }
+
+    /* ── PAGE ────────────────────────────────── */
+    .success-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 72px 24px 80px;
+    }
+
+    /* Tick animation */
+    .tick-wrap {
+      width: 76px; height: 76px; border-radius: 50%;
+      background: #f0fdf4; border: 2px solid #22c55e;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px;
+      animation: tickPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    .tick-wrap svg {
+      width: 32px; height: 32px;
+      stroke: #22c55e; stroke-width: 2.5; fill: none;
+      stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: 60; stroke-dashoffset: 60;
+      animation: drawTick 0.45s 0.35s ease forwards;
+    }
+    @keyframes tickPop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes drawTick { to { stroke-dashoffset: 0; } }
+
+    /* Headline */
+    .eyebrow {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+      color: #16a34a; margin-bottom: 10px;
+      opacity: 0; animation: fadeUp 0.4s 0.5s ease forwards;
+    }
+    .big-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 6vw, 4.2rem);
+      letter-spacing: 0.01em; line-height: 1; text-align: center;
+      color: var(--text); margin-bottom: 14px;
+      opacity: 0; animation: fadeUp 0.4s 0.6s ease forwards;
+    }
+    .big-title .accent { color: var(--blue); }
+    .sub {
+      font-size: 15px; color: var(--muted); text-align: center;
+      max-width: 460px; line-height: 1.65; margin-bottom: 44px;
+      opacity: 0; animation: fadeUp 0.4s 0.7s ease forwards;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Receipt card */
+    .receipt-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      width: 100%; max-width: 500px; overflow: hidden; margin-bottom: 36px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      opacity: 0; animation: fadeUp 0.4s 0.8s ease forwards;
+    }
+    .receipt-top {
+      background: var(--section-bg); border-bottom: 1px solid var(--border);
+      padding: 14px 22px; display: flex; align-items: center; gap: 8px;
+    }
+    .receipt-top-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+    .receipt-ref { margin-left: auto; font-size: 11px; color: var(--dim); font-family: monospace; }
+    .receipt-rows { padding: 6px 0; }
+    .receipt-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 22px; }
+    .receipt-row .rl { font-size: 13px; color: var(--muted); }
+    .receipt-row .rv { font-size: 13px; color: var(--text); text-align: right; }
+    .receipt-row .rv.addr { font-weight: 500; font-size: 14px; }
+    .receipt-row .rv.price { font-family: var(--font-display); font-size: 20px; color: var(--blue); letter-spacing: 0.01em; }
+    .receipt-row .rv.green { color: #16a34a; font-weight: 500; }
+    .receipt-row .rv.saved { color: #16a34a; }
+    .receipt-divider { border: none; border-top: 1px solid var(--border); margin: 2px 22px; }
+    .receipt-row .rv.status { display: flex; align-items: center; gap: 6px; color: #16a34a; font-weight: 500; }
+    .receipt-row .rv.status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #22c55e; display: inline-block; flex-shrink: 0; }
+
+    /* Next steps */
+    .next-section { width: 100%; max-width: 500px; opacity: 0; animation: fadeUp 0.4s 0.92s ease forwards; }
+    .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+    .steps-list { display: flex; flex-direction: column; }
+    .step-row { display: flex; gap: 14px; position: relative; }
+    .step-row:not(:last-child)::after {
+      content: ''; position: absolute; left: 14px; top: 30px;
+      width: 1px; height: calc(100% - 4px); background: var(--border);
+    }
+    .step-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1px solid var(--border); background: #fff;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 500; color: var(--muted);
+      margin-top: 3px; z-index: 1;
+    }
+    .step-dot.done { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+    .step-body { padding-bottom: 24px; }
+    .step-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+    .step-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+    /* CTAs */
+    .cta-row {
+      display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+      width: 100%; max-width: 500px; margin-top: 36px;
+      opacity: 0; animation: fadeUp 0.4s 1.05s ease forwards;
+    }
+    .cta-row a { flex: 1; min-width: 140px; text-align: center; }
+    .btn-blue-cta {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0.75rem 1.5rem; background: var(--blue); color: #fff;
+      border: 1px solid var(--blue); border-radius: 10px;
+      font-size: 0.875rem; font-weight: 500; font-family: var(--font-body);
+      text-decoration: none; transition: background 0.15s; min-height: 44px;
+    }
+    .btn-blue-cta:hover { background: var(--blue-hover); }
+    .btn-outline-cta {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0.75rem 1.5rem; background: #fff; color: var(--text);
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 0.875rem; font-weight: 500; font-family: var(--font-body);
+      text-decoration: none; transition: border-color 0.15s; min-height: 44px;
+    }
+    .btn-outline-cta:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* Share */
+    .share-row {
+      display: flex; align-items: center; gap: 10px; margin-top: 24px;
+      opacity: 0; animation: fadeUp 0.4s 1.15s ease forwards;
+    }
+    .share-lbl { font-size: 12px; color: var(--muted); }
+    .share-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 999px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font-size: 12px; font-family: var(--font-body);
+      cursor: pointer; text-decoration: none; transition: border-color 0.2s, color 0.2s;
+    }
+    .share-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .share-btn svg { width: 11px; height: 11px; }
+
+    /* Footer note */
+    .foot {
+      margin-top: 52px; padding-top: 20px; border-top: 1px solid var(--border);
+      width: 100%; max-width: 500px; text-align: center;
+      font-size: 12px; color: var(--dim); line-height: 1.65;
+      opacity: 0; animation: fadeUp 0.4s 1.25s ease forwards;
+    }
+    .foot a { color: var(--muted); text-decoration: none; }
+    .foot a:hover { color: var(--blue); }
+
+    @media (max-width: 480px) {
+      .success-page { padding: 3rem 1rem; }
+      .receipt-card, .next-section, .cta-row { max-width: 100%; }
+      .sub { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <a href="index.html" class="nav-logo">DEED</a>
+  <ul class="nav-links">
+    <li><a href="browse.html">Browse</a></li>
+    <li><a href="sell.html">Sell</a></li>
+    <li><a href="qualify.html">Pre-qualify</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="qualify.html" class="btn-nav-outline">Sign in</a>
+    <a href="qualify.html" class="btn-nav-blue">Get pre-qualified</a>
+  </div>
+  <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-mobile-menu" id="nav-mobile-menu">
+  <a href="browse.html">Browse listings</a>
+  <a href="sell.html">Sell your property</a>
+  <a href="qualify.html">Buyer pre-qualification</a>
+  <a href="qualify.html" class="nav-mobile-cta">Get pre-qualified →</a>
+</div>
+
+<div class="success-page">
+
+  <div class="tick-wrap">
+    <svg viewBox="0 0 24 24">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  </div>
+
+  <p class="eyebrow">Listing live</p>
+  <h1 class="big-title">YOUR HOME IS<br><span class="accent">ON THE MARKET</span></h1>
+  <p class="sub">Payment received. Your listing is now live and visible to DEED-verified buyers across Queensland.</p>
+
+  <div class="receipt-card">
+    <div class="receipt-top">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2">
+        <rect x="5" y="2" width="14" height="20" rx="2"/>
+        <line x1="9" y1="7" x2="15" y2="7"/>
+        <line x1="9" y1="11" x2="15" y2="11"/>
+        <line x1="9" y1="15" x2="12" y2="15"/>
+      </svg>
+      <span class="receipt-top-label">Listing receipt</span>
+      <span class="receipt-ref" id="refNum">REF-——</span>
+    </div>
+    <div class="receipt-rows">
+      <div class="receipt-row">
+        <span class="rl">Property</span>
+        <span class="rv addr" id="propAddress">14 Riverview Terrace, Broadbeach</span>
+      </div>
+      <hr class="receipt-divider">
+      <div class="receipt-row">
+        <span class="rl">Asking price</span>
+        <span class="rv price" id="askingPrice">$895,000</span>
+      </div>
+      <div class="receipt-row">
+        <span class="rl">Offer deadline</span>
+        <span class="rv" id="deadline">Sunday 6 April 2025, 5:00 PM</span>
+      </div>
+      <div class="receipt-row">
+        <span class="rl">Listing type</span>
+        <span class="rv">DEED Private Sale</span>
+      </div>
+      <hr class="receipt-divider">
+      <div class="receipt-row">
+        <span class="rl">DEED flat fee</span>
+        <span class="rv">$999.00</span>
+      </div>
+      <div class="receipt-row">
+        <span class="rl">Commission saved</span>
+        <span class="rv saved" id="commSaved">~$22,375</span>
+      </div>
+      <hr class="receipt-divider">
+      <div class="receipt-row">
+        <span class="rl">Payment</span>
+        <span class="rv status">Confirmed</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="next-section">
+    <p class="section-label">What happens next</p>
+    <div class="steps-list">
+      <div class="step-row">
+        <div class="step-dot done">✓</div>
+        <div class="step-body">
+          <p class="step-title">Listing live on DEED</p>
+          <p class="step-desc">Your property is visible to buyers now. DEED-verified buyers can save your listing and submit offers.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot">2</div>
+        <div class="step-body">
+          <p class="step-title">Buyers get pre-qualified</p>
+          <p class="step-desc">Before any buyer can submit an offer, DEED verifies their borrowing capacity and identity. You only see serious, verified buyers.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot">3</div>
+        <div class="step-body">
+          <p class="step-title">Offers arrive in your dashboard</p>
+          <p class="step-desc">Each offer shows the price, conditions, buyer strength score, and settlement date. Compare them side by side on your timeline.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot">4</div>
+        <div class="step-body">
+          <p class="step-title">Accept, counter, or decline</p>
+          <p class="step-desc">When you're ready, accept the best offer. DEED generates the contract. No agent, no negotiation theatre.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-row">
+    <a href="dashboard.html" class="btn-blue-cta">View your dashboard</a>
+    <a href="listing.html" class="btn-outline-cta">View your listing</a>
+  </div>
+
+  <div class="share-row">
+    <span class="share-lbl">Share:</span>
+    <button class="share-btn" onclick="copyLink()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      </svg>
+      Copy link
+    </button>
+    <a href="https://www.facebook.com/sharer/sharer.php" target="_blank" class="share-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+      </svg>
+      Facebook
+    </a>
+  </div>
+
+  <div class="foot">
+    A receipt has been sent to your email. Questions? <a href="mailto:hello@deed.com.au">hello@deed.com.au</a><br>
+    DEED is a private property sale platform. We are not a licensed real estate agent.
+  </div>
+
+</div>
+
+<script>
+  document.getElementById('refNum').textContent = 'REF-' + Math.random().toString(36).slice(2,8).toUpperCase();
+
+  const stored = JSON.parse(sessionStorage.getItem('deedListing') || sessionStorage.getItem('deed_listing_data') || '{}');
+  if (stored.address) document.getElementById('propAddress').textContent = stored.address;
+  if (stored.price) {
+    const p = parseInt(stored.price);
+    document.getElementById('askingPrice').textContent = '$' + p.toLocaleString();
+    document.getElementById('commSaved').textContent = '~$' + Math.round(p * 0.025).toLocaleString();
+  }
+  if (stored.deadline) {
+    const d = new Date(stored.deadline);
+    document.getElementById('deadline').textContent = d.toLocaleDateString('en-AU', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    }) + ', 5:00 PM';
+  }
+
+  const formData = sessionStorage.getItem('deed_listing_data');
+  if (formData) {
+    fetch('https://formspree.io/f/xdawbnba', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: formData,
+    }).catch(e => console.error('Formspree:', e));
+    sessionStorage.removeItem('deed_listing_data');
+  }
+
+  const sessionId = new URLSearchParams(window.location.search).get('session_id');
+  if (sessionId) {
+    document.getElementById('refNum').textContent = sessionId.slice(0, 20) + '…';
+  }
+
+  function copyLink() {
+    const url = window.location.origin + '/listing.html';
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.querySelector('[onclick="copyLink()"]');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+      setTimeout(() => { btn.innerHTML = orig; }, 2000);
+    });
+  }
+
+  // Mobile nav
+  const hamburger = document.getElementById('nav-hamburger');
+  const mobileMenu = document.getElementById('nav-mobile-menu');
+  if (hamburger) {
+    hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+      if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) mobileMenu.classList.remove('open');
+    });
+  }
+</script>
+
+</body>
+</html>
