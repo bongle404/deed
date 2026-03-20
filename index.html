@@ -283,60 +283,112 @@
 
     /* ── HOW IT WORKS ──────────────────────── */
     .how-section {
-      background: var(--light-bg);
-      padding: 7rem 3rem;
+      background: linear-gradient(to bottom, #111111 0%, #F7F5F2 120px);
+      padding: 7rem 3rem 7rem;
     }
-    .how-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-      margin-top: 1rem;
+    .how-section-header {
+      text-align: center;
+      margin-bottom: 5rem;
     }
-    .how-card {
-      background: var(--light-surface);
-      border: 1px solid var(--light-border);
-      border-radius: var(--radius-lg);
-      padding: 2.5rem;
-      box-shadow: var(--shadow-sm);
-      transition: box-shadow var(--trans), transform var(--trans);
+    .how-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--light-muted);
+      margin-bottom: 1rem;
     }
-    .how-card:hover {
-      box-shadow: var(--shadow-md);
-      transform: translateY(-3px);
-    }
-    .how-number {
+    .how-headline {
       font-family: var(--font-display);
-      font-size: 4rem;
-      letter-spacing: 0.05em;
-      color: var(--light-border-2);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      letter-spacing: 0.02em;
+      color: var(--light-text);
       line-height: 1;
-      margin-bottom: 1.5rem;
     }
-    .how-title {
+    .how-timeline {
+      position: relative;
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .how-timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--blue-muted), transparent);
+      transform: translateX(-50%);
+    }
+    .how-step {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr;
+      align-items: center;
+      gap: 0;
+      padding: 3rem 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .how-step.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .how-step:nth-child(2) { transition-delay: 0.15s; }
+    .how-step:nth-child(3) { transition-delay: 0.3s; }
+
+    /* Odd steps: content left, empty right */
+    .how-step:nth-child(odd) .how-step-content  { grid-column: 1; text-align: right; padding-right: 2.5rem; }
+    .how-step:nth-child(odd) .how-step-node     { grid-column: 2; }
+    .how-step:nth-child(odd) .how-step-spacer   { grid-column: 3; }
+
+    /* Even steps: empty left, content right */
+    .how-step:nth-child(even) .how-step-spacer  { grid-column: 1; }
+    .how-step:nth-child(even) .how-step-node    { grid-column: 2; }
+    .how-step:nth-child(even) .how-step-content { grid-column: 3; text-align: left; padding-left: 2.5rem; }
+
+    .how-step-node {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .how-step-node-inner {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-full);
+      background: var(--blue-pale);
+      border: 2px solid var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .how-step-num {
       font-family: var(--font-display);
-      font-size: 1.5rem;
+      font-size: 1.25rem;
+      letter-spacing: 0.05em;
+      color: var(--blue);
+      line-height: 1;
+    }
+    .how-step-content {}
+    .how-step-title {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
       letter-spacing: 0.02em;
       color: var(--light-text);
       line-height: 1.1;
-      margin-bottom: 0.9rem;
+      margin-bottom: 0.75rem;
     }
-    .how-body {
+    .how-step-body {
       font-size: 0.88rem;
       color: var(--light-muted);
       line-height: 1.75;
+      max-width: 340px;
     }
-    .how-tag {
-      display: inline-block;
-      margin-top: 1.5rem;
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--gold);
-      background: var(--gold-pale);
-      padding: 0.3rem 0.75rem;
-      border-radius: var(--radius-pill);
-    }
+    .how-step:nth-child(odd)  .how-step-body { margin-left: auto; }
+    .how-step:nth-child(even) .how-step-body { margin-right: auto; }
 
     /* ── WHY AGENTS FAIL ───────────────────── */
     .truth-section {
@@ -638,7 +690,6 @@
       .calc-section { padding: 5rem 1.5rem; }
       .calc-comparison { gap: 1rem; }
       .how-section, .truth-section, .waitlist-section { padding: 5rem 1.5rem; }
-      .how-grid { grid-template-columns: 1fr; }
       .truth-grid { grid-template-columns: 1fr; gap: 3rem; }
       .waitlist-inner { grid-template-columns: 1fr; gap: 3rem; }
       .field-row { grid-template-columns: 1fr; }
@@ -649,7 +700,6 @@
     @media (max-width: 480px) {
       .hero { padding: 0 1rem 3rem; }
       .stats-strip-inner { grid-template-columns: repeat(2, 1fr); }
-      .how-grid { grid-template-columns: 1fr; }
       .calc-section { padding: 3rem 1rem; }
       .calc-input { width: 160px; font-size: 1.6rem; }
       .calc-dollar { font-size: 1.6rem; }
@@ -800,25 +850,34 @@
 
   <!-- HOW IT WORKS -->
   <section class="how-section">
-    <p class="section-label muted-light">How it works</p>
-    <div class="how-grid">
-      <div class="how-card reveal">
-        <p class="how-number">01</p>
-        <h3 class="how-title">Buyers pre-qualify before they ever contact you</h3>
-        <p class="how-body">Every buyer on DEED submits income verification, deposit confirmation, and borrowing capacity before they can make an offer. You see a verified badge and their price range — no weekends wasted on people who can't get finance.</p>
-        <span class="how-tag">AI Verification</span>
+    <div class="how-section-header">
+      <p class="how-eyebrow">How it works</p>
+      <h2 class="how-headline">SIMPLE. PRIVATE. YOURS.</h2>
+    </div>
+    <div class="how-timeline" id="how-timeline">
+      <div class="how-step">
+        <div class="how-step-content">
+          <h3 class="how-step-title">LIST YOUR PROPERTY</h3>
+          <p class="how-step-body">AI-guided listing flow walks you through pricing, photos checklist, and property details. Go live in under 10 minutes with market-comparable data built in.</p>
+        </div>
+        <div class="how-step-node"><div class="how-step-node-inner"><span class="how-step-num">01</span></div></div>
+        <div class="how-step-spacer"></div>
       </div>
-      <div class="how-card reveal" style="transition-delay: 0.1s">
-        <p class="how-number">02</p>
-        <h3 class="how-title">List with real pricing data, not an agent's anchor</h3>
-        <p class="how-body">Your listing includes comparable sales from the Queensland market. Set your price with evidence. Pre-qualified buyers in your suburb are notified the moment you go live — demand before you even launch.</p>
-        <span class="how-tag">Price Intelligence</span>
+      <div class="how-step">
+        <div class="how-step-spacer"></div>
+        <div class="how-step-node"><div class="how-step-node-inner"><span class="how-step-num">02</span></div></div>
+        <div class="how-step-content">
+          <h3 class="how-step-title">WE QUALIFY YOUR BUYERS</h3>
+          <p class="how-step-body">Identity verified, finance pre-checked before any buyer can contact you. No tyre-kickers, no wasted weekends. You see a verified badge and borrowing range before the first message.</p>
+        </div>
       </div>
-      <div class="how-card reveal" style="transition-delay: 0.2s">
-        <p class="how-number">03</p>
-        <h3 class="how-title">Managed from offer to settlement, without an agent</h3>
-        <p class="how-body">Structured offer deadlines create competitive tension between buyers. Post-offer, a built-in pipeline tracks finance confirmation, building & pest, and settlement. Your conveyancer handles the legal — DEED handles the rest.</p>
-        <span class="how-tag">Deal Pipeline</span>
+      <div class="how-step">
+        <div class="how-step-content">
+          <h3 class="how-step-title">NEGOTIATE AND SETTLE</h3>
+          <p class="how-step-body">Built-in offer management creates competitive tension between buyers. Post-offer, a pipeline tracks finance confirmation, building & pest, and settlement milestones. Your conveyancer handles legal — DEED handles everything else.</p>
+        </div>
+        <div class="how-step-node"><div class="how-step-node-inner"><span class="how-step-num">03</span></div></div>
+        <div class="how-step-spacer"></div>
       </div>
     </div>
   </section>
@@ -1073,6 +1132,17 @@
 
     const statsStrip = document.getElementById('stats-strip');
     if (statsStrip) statsObserver.observe(statsStrip);
+
+    /* ── HOW IT WORKS REVEAL ────────────────── */
+    const howObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.how-step').forEach(el => howObserver.observe(el));
   </script>
 </body>
 </html>
