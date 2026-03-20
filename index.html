@@ -1060,48 +1060,160 @@
     .footer-note { font-size: 0.75rem; color: var(--dim); text-align: right; }
 
     /* ── RESPONSIVE ───────────────────────────────── */
+    /* ── MOBILE STICKY CTA ────────────────────────── */
+    .mobile-sticky-cta {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 1.25rem;
+      z-index: 200;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.10);
+    }
+    .mobile-sticky-cta-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.625rem;
+    }
+    .mobile-sticky-cta a {
+      display: block;
+      text-align: center;
+      padding: 0.875rem 0.5rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      font-family: var(--font-body);
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    .mobile-sticky-buy {
+      background: var(--section-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .mobile-sticky-sell {
+      background: var(--blue);
+      color: #fff !important;
+    }
+
     @media (max-width: 860px) {
+      /* Nav */
       .nav-links, .nav-actions { display: none; }
       .nav-hamburger { display: flex; }
 
-      .hero { grid-template-columns: 1fr; min-height: auto; }
-      .hero-left { padding: 2rem 1.25rem 2.5rem; }
-      .hero-right { display: none; }
-      .hero-stats { gap: 1.25rem; }
+      /* Body padding for sticky bar */
+      body { padding-bottom: 76px; }
+
+      /* Sticky CTA shows */
+      .mobile-sticky-cta { display: block; }
+
+      /* Hero: image becomes full-bleed background, content overlaid */
+      .hero {
+        display: block;
+        position: relative;
+        min-height: auto;
+      }
+      .hero-right {
+        display: block;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        height: 100%;
+      }
+      /* Override the bottom-vignette with a white gradient for readability */
+      .hero-right::after {
+        background: linear-gradient(
+          to bottom,
+          rgba(255,255,255,0.05) 0%,
+          rgba(255,255,255,0.80) 35%,
+          rgba(255,255,255,1.00) 62%
+        );
+      }
+      /* Floating cards: hide on mobile */
+      .hero-listing-card,
+      .hero-saving-badge { display: none; }
+      /* Hero content above the image */
+      .hero-left {
+        position: relative;
+        z-index: 1;
+        padding: 2.75rem 1.25rem 2.5rem;
+      }
+      /* Headline over the photo area — bold + legible */
+      .hero-eyebrow { background: rgba(239,246,255,0.9); }
+      .hero-headline { font-size: clamp(2rem, 8vw, 2.75rem); }
+
+      /* Search */
       .search-row { flex-direction: column; }
-      .search-btn { width: 100%; justify-content: center; height: 48px; }
+      .search-btn { width: 100%; justify-content: center; height: 52px; font-size: 1rem; }
       .sell-panel-inner { flex-direction: column; }
-      .lifestyle-break { height: 360px; }
 
-      .trust-bar { gap: 1rem; justify-content: flex-start; }
+      /* Hero stats: horizontal scroll on small screens */
+      .hero-stats {
+        display: flex;
+        gap: 0.75rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 0.25rem;
+      }
+      .hero-stats::-webkit-scrollbar { display: none; }
+      .hero-stat { flex-shrink: 0; }
 
-      .stats-strip-inner { grid-template-columns: repeat(2, 1fr); }
-      .strip-item { border-right: none; padding-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.15); }
+      /* Trust bar: 2x2 grid */
+      .trust-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.625rem;
+        padding: 0.875rem 1.25rem;
+        justify-items: start;
+      }
+
+      /* Stats strip: 2x2 */
+      .stats-strip { padding: 2rem 1.25rem; }
+      .stats-strip-inner { grid-template-columns: repeat(2, 1fr); gap: 0; }
+      .strip-item {
+        padding: 1.25rem 1rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+      }
       .strip-item:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.2); }
       .strip-item:nth-last-child(-n+2) { border-bottom: none; }
 
-      .how-cards { grid-template-columns: 1fr; gap: 1rem; }
+      /* Sections: tighter padding on mobile */
+      .section { padding: 3rem 1.25rem; }
 
+      /* How it works: single col */
+      .how-cards { grid-template-columns: 1fr; gap: 0.875rem; }
+      .how-card { padding: 1.25rem; }
+      .how-card-num { font-size: 2.5rem; margin-bottom: 0.625rem; }
+
+      /* Lifestyle break: taller for more impact */
+      .lifestyle-break { height: 420px; }
+      .lifestyle-stat { font-size: clamp(3.5rem, 15vw, 5rem); }
+
+      /* Comparison table: stack layout */
       .compare-layout { grid-template-columns: 1fr; gap: 2rem; }
       .compare-table tbody td:first-child { white-space: normal; }
 
-      .cta-section-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+      /* Waitlist */
+      .cta-section { padding: 3rem 1.25rem; }
+      .cta-section-inner { grid-template-columns: 1fr; gap: 2rem; }
       .wf-row { grid-template-columns: 1fr; }
 
-      .footer { flex-direction: column; align-items: flex-start; }
+      /* Footer */
+      .footer { flex-direction: column; align-items: flex-start; gap: 0.875rem; }
       .footer-note { text-align: left; }
     }
 
     @media (max-width: 480px) {
-      .hero-headline { font-size: 2.25rem; }
       .search-tabs { width: 100%; }
       .search-tab { flex: 1; text-align: center; }
       .search-box { border-radius: var(--radius-lg); }
-      .hero-stats { flex-direction: column; gap: 0.75rem; }
-      .stats-strip-inner { grid-template-columns: 1fr 1fr; }
-      .strip-item:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.2); padding-right: 1rem; }
-      .trust-bar-item:not(:first-child) { display: none; }
-      .trust-bar-item:first-child::after { content: ' · AI-qualified buyers · $999 flat fee'; }
+      .trust-bar { grid-template-columns: 1fr; }
+      .calc-cols { grid-template-columns: 1fr; gap: 0.5rem; }
+      .calc-vs { display: none; }
     }
 
     /* ── ANIMATIONS ───────────────────────────────── */
@@ -1483,6 +1595,14 @@
       <p>© 2026 Deed Pty Ltd · Private property sales, done properly.</p>
     </div>
   </footer>
+
+  <!-- MOBILE STICKY CTA -->
+  <div class="mobile-sticky-cta">
+    <div class="mobile-sticky-cta-inner">
+      <a href="browse.html" class="mobile-sticky-buy">Browse listings</a>
+      <a href="sell.html" class="mobile-sticky-sell">List — $999 →</a>
+    </div>
+  </div>
 
   <script>
     /* ── MOBILE NAV ─────────────────────────────── */
