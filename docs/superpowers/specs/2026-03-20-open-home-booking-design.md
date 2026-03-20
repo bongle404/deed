@@ -22,11 +22,11 @@ Buyers on a listing page can register for an open home inspection without leavin
 **Hardcoded demo slots (JS constant):**
 ```js
 const OPEN_HOME_SLOTS = [
-  { id: 'sat-1', label: 'Saturday 21 March', time: '10:00 – 10:30am' },
-  { id: 'sun-1', label: 'Sunday 22 March',   time: '1:00 – 1:30pm'  },
+  { id: 'sat-1', day: 'Saturday 21 March', time: '10:00 – 10:30am', label: 'Saturday 21 March · 10:00–10:30am' },
+  { id: 'sun-1', day: 'Sunday 22 March',   time: '1:00 – 1:30pm',   label: 'Sunday 22 March · 1:00–1:30pm'   },
 ];
 ```
-These are defined in a `const` at the top of the listing script block, making them easy to replace with a Supabase fetch in a future iteration.
+`label` is the pre-formatted string stored in Supabase and used verbatim in emails and the success screen — this prevents "undefined" in any display context. If `OPEN_HOME_SLOTS` is empty, the "Book an inspection" button does not render. These are defined in a `const` at the top of the listing script block, making them easy to replace with a Supabase fetch in a future iteration.
 
 **JS responsibilities:**
 - Render slot cards dynamically from `OPEN_HOME_SLOTS`
@@ -55,22 +55,29 @@ These are defined in a `const` at the top of the listing script block, making th
 **Validation:**
 - All five fields required; reject with 400 if any missing
 - Email format check (regex)
-- Phone: strip spaces, must be 10 digits starting with 0 or +61
+- Phone: strip all spaces and hyphens before validation. Accept either format:
+  - Australian mobile starting with `0`: exactly 10 digits, e.g. `0412345678`
+  - International format starting with `+61`: `+61` followed by 9 digits, e.g. `+61412345678`
+  - Regex: `/^(0\d{9}|\+61\d{9})$/` applied after stripping spaces/hyphens
 
 **Supabase write:**
 Insert row into `open_home_bookings`. Use `SUPABASE_SERVICE_KEY` env var (same key used elsewhere in the project).
 
 **Resend emails:**
 1. **Buyer confirmation** — subject: "You're booked in · 14 Headland Drive, Burleigh Heads"
-   - Slot time and date
-   - Property address
+   - Slot time and date (from `slot_label`)
+   - Property address (hardcoded for demo: "14 Headland Drive, Burleigh Heads QLD 4220")
    - Parking note: "Street parking available on Headland Drive"
    - Note: seller contact details will be sent the morning of your inspection
-2. **Seller notification** — subject: "New inspection booking · [slot label]"
+2. **Seller notification** — subject: "New inspection booking · [slot_label]"
    - Buyer name, email, phone
    - Slot they selected
 
-Seller email address hardcoded as env var `SELLER_EMAIL` for the demo. In production, pulled from the listing record.
+Property address for demo is hardcoded in the API file. In production it would be fetched from the listing record by `listing_id`. Seller email hardcoded as env var `SELLER_EMAIL` for demo; in production, derived from the listing record. This architectural gap is acceptable for demo scope.
+
+If the Resend call fails, the booking is still written to Supabase and a 200 is returned. The failure is logged to console. For demo, this is acceptable — the seller can query Supabase directly if needed. Production would add a retry queue.
+
+**Rate limiting:** No rate limiting for demo. Explicitly deferred. Production must add per-IP rate limiting (e.g. 3 requests/minute) to prevent Supabase flooding and Resend quota abuse.
 
 **Response:**
 - `200 { success: true }` on success
@@ -101,7 +108,7 @@ No RLS required for demo. In production: sellers can read bookings for their own
 ### Screen 1 — Slot picker
 - Header: "Book an inspection" + close button
 - Subheading: "14 Headland Drive, Burleigh Heads"
-- Two slot cards side by side (flex row, equal width)
+- Two slot cards side by side on desktop (flex row, equal width). On mobile (< 480px), cards stack vertically (flex column, full width).
   - Each card: day label (large), time (small), calendar icon
   - Selected state: gold border + gold text
 - Clicking a slot immediately advances to screen 2 (no separate "next" button)
@@ -131,6 +138,8 @@ No RLS required for demo. In production: sellers can read bookings for their own
 | Validation error from API | Show specific message from API response |
 | Resend email fails | Booking is still written to Supabase; API returns 200. Email failure is logged server-side but does not block the buyer. |
 | Slot no longer available | Not enforced for demo (no capacity limits). Future: add `max_capacity` per slot and reject if full. |
+| Duplicate booking (same email + slot) | Not enforced for demo — duplicates are allowed to keep the flow simple. Future: unique constraint on `(listing_id, slot_id, email)`. |
+| Supabase insert fails (credentials, RLS, table missing) | API returns 500 with `{ error: "Booking failed" }`. Inline error shown in modal. |
 
 ---
 
@@ -149,5 +158,9 @@ No RLS required for demo. In production: sellers can read bookings for their own
 - Submit with all fields valid → row appears in Supabase, both emails received
 - Submit with missing field → inline validation error, no API call made
 - Submit with invalid email → inline validation error
+- Submit with invalid phone → inline validation error
 - Close modal mid-flow → state resets (selected slot cleared, form cleared) on next open
+- Back from screen 2 to screen 1 → slot selection preserved; selecting a different slot overwrites the previous selection
 - Network failure simulation → error message shown, form re-enabled
+- Supabase failure (500 from API) → error message shown, form re-enabled
+- Empty `OPEN_HOME_SLOTS` array → "Book an inspection" button does not render
