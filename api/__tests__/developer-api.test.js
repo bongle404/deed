@@ -1,6 +1,7 @@
 // Mock setup — must mirror broker-register.test.js pattern
 const mockFrom = jest.fn();
 const mockInsert = jest.fn();
+const mockInsertSelect = jest.fn();
 const mockSelect = jest.fn();
 const mockEq = jest.fn();
 const mockSingle = jest.fn();
@@ -40,7 +41,9 @@ beforeEach(() => {
   mockSelect.mockReturnValue({ eq: mockEq });
   mockEq.mockReturnValue({ single: mockSingle, eq: mockEq });
   mockSingle.mockResolvedValue({ data: null, error: null });
-  mockInsert.mockResolvedValue({ error: null });
+  // mockInsert returns a thenable that also exposes .select() for .insert().select().single() chains
+  mockInsertSelect.mockReturnValue({ single: mockSingle });
+  mockInsert.mockReturnValue(Object.assign(Promise.resolve({ error: null }), { select: mockInsertSelect }));
 });
 
 // ── register ──────────────────────────────────────────────────────
@@ -123,8 +126,8 @@ describe('action=create-project', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'uid-1' } }, error: null });
     mockSingle
       .mockResolvedValueOnce({ data: { id: 'dev-1' }, error: null }) // developer lookup
-      .mockResolvedValueOnce({ data: null, error: null }); // slug collision check
-    mockInsert.mockResolvedValue({ data: [{ id: 'proj-1', slug: 'azure-residences' }], error: null });
+      .mockResolvedValueOnce({ data: null, error: null })             // slug collision check
+      .mockResolvedValueOnce({ data: { id: 'proj-1', slug: 'azure-residences' }, error: null }); // insert().select().single()
     const res = makeRes();
     await handler(makeReq('POST', { action: 'create-project' }, {
       name: 'Azure Residences', type: 'otp', suburb: 'Burleigh Heads',
@@ -132,6 +135,22 @@ describe('action=create-project', () => {
     }, { authorization: 'Bearer valid' }), res);
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ slug: 'azure-residences' }));
+  });
+
+  test('returns 201 with -2 suffix when first slug is taken', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'uid-1' } }, error: null });
+    mockSingle
+      .mockResolvedValueOnce({ data: { id: 'dev-1' }, error: null })
+      .mockResolvedValueOnce({ data: { id: 'existing' }, error: null })
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: { id: 'proj-1', slug: 'azure-residences-2' }, error: null }); // insert().select().single()
+    const res = makeRes();
+    await handler(makeReq('POST', { action: 'create-project' }, {
+      name: 'Azure Residences', type: 'otp', suburb: 'Burleigh Heads',
+      price_from: 620000, total_units: 24,
+    }, { authorization: 'Bearer valid' }), res);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ slug: expect.stringContaining('azure-residences') }));
   });
 });
 

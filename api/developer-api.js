@@ -136,25 +136,31 @@ async function handleCreateProject(req, res) {
 
   // Generate collision-safe slug
   const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  if (!baseSlug) {
+    return res.status(400).json({ error: 'Project name must contain at least one letter or number' });
+  }
   let slug = baseSlug;
   let suffix = 2;
-  while (true) {
+  let attempts = 0;
+  while (attempts < 10) {
     const { data: existing } = await supabase.from('projects').select('id').eq('slug', slug).single();
     if (!existing) break;
     slug = `${baseSlug}-${suffix++}`;
+    attempts++;
+  }
+  if (attempts >= 10) {
+    return res.status(409).json({ error: 'Could not generate unique slug. Try a different project name.' });
   }
 
-  const insertResult = await supabase.from('projects').insert([{
+  const { data: projectData, error } = await supabase.from('projects').insert([{
     developer_id: developer.id,
     slug, name, type, suburb,
-    price_from: parseInt(price_from),
-    total_units: parseInt(total_units),
-    units_available: parseInt(total_units),
+    price_from: parseInt(price_from) || 0,
+    total_units: parseInt(total_units) || 1,
+    units_available: parseInt(total_units) || 1,
     description: description || null,
     completion_date: completion_date || null,
-  }]);
-  const error = insertResult.error;
-  const project = insertResult.data?.[0] || null;
+  }]).select().single();
 
   if (error) {
     console.error('Project insert error:', error);
@@ -164,18 +170,22 @@ async function handleCreateProject(req, res) {
   // Insert units for completed stock
   if (type === 'completed' && Array.isArray(unitList) && unitList.length > 0) {
     const unitRows = unitList.map(u => ({
-      project_id: project.id,
+      project_id: projectData.id,
       unit_number: u.unit_number,
       beds: u.beds || null,
       baths: u.baths || null,
       car_spaces: u.car_spaces || null,
       size_sqm: u.size_sqm || null,
-      price: parseInt(u.price),
+      price: parseInt(u.price) || 0,
     }));
-    await supabase.from('units').insert(unitRows);
+    const { error: unitError } = await supabase.from('units').insert(unitRows);
+    if (unitError) {
+      console.error('Unit insert error:', unitError);
+      return res.status(500).json({ error: 'Project created but failed to save units. Contact support.' });
+    }
   }
 
-  return res.status(201).json({ slug, id: project.id });
+  return res.status(201).json({ slug: projectData.slug, id: projectData.id });
 }
 
 // ── GET PROJECT ───────────────────────────────────────────────────
