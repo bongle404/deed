@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEED — Developer Portal</title>
+  <link rel="stylesheet" href="/deed-ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root {
+      --blue: #2563EB; --blue-hover: #1d4ed8; --blue-pale: #eff6ff;
+      --border: #e5e7eb; --text: #111827; --muted: #6b7280; --dim: #9ca3af;
+      --page-bg: #ffffff; --section-bg: #f7f8fa;
+    }
+    * { box-sizing: border-box; }
+    body { background: var(--page-bg); font-family: var(--font-body, 'DM Sans', sans-serif); color: var(--text); margin: 0; }
+
+    /* NAV */
+    .nav { background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+      padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-family: var(--font-display, 'Bebas Neue', sans-serif); font-size: 1.6rem; letter-spacing: 0.06em; color: var(--text); text-decoration: none; }
+    .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+    .btn-text { background: none; border: none; font-size: 0.875rem; color: var(--muted); cursor: pointer; padding: 0.5rem; min-height: 44px; }
+    .btn-text:hover { color: var(--text); }
+
+    /* LAYOUT */
+    .container { max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem; }
+    @media (max-width: 768px) { .container { padding: 2rem 1rem; } }
+
+    /* REGISTRATION PANEL */
+    .reg-panel { max-width: 480px; margin: 0 auto; }
+    .page-title { font-family: var(--font-display, 'Bebas Neue', sans-serif); font-size: 2.5rem; letter-spacing: 0.04em; margin: 0 0 0.5rem; }
+    .page-sub { font-size: 1rem; color: var(--muted); margin: 0 0 2.5rem; line-height: 1.6; }
+    .card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 2rem; }
+    @media (max-width: 768px) { .card { padding: 1.25rem; } }
+    .card-title { font-size: 1rem; font-weight: 700; margin: 0 0 1.5rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.875rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; }
+    .form-group input, .form-group select { border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.65rem 0.875rem; font-size: 0.9rem; font-family: inherit; outline: none; min-height: 44px; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .btn-primary { display: inline-flex; align-items: center; justify-content: center; background: var(--blue);
+      color: #fff; font-size: 0.9rem; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 8px;
+      border: none; cursor: pointer; width: 100%; min-height: 48px; }
+    .btn-primary:hover { background: var(--blue-hover); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .success-msg { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+      padding: 1rem 1.25rem; color: #166534; font-size: 0.9rem; margin-top: 1rem; }
+    .error-msg { display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
+      padding: 0.875rem 1.25rem; color: #dc2626; font-size: 0.875rem; margin-top: 0.75rem; }
+
+    /* DASHBOARD */
+    .dash-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+    .dash-title { font-family: var(--font-display, 'Bebas Neue', sans-serif); font-size: 2rem; letter-spacing: 0.04em; margin: 0; }
+    .dash-sub { font-size: 0.875rem; color: var(--muted); margin: 0.25rem 0 0; }
+    .status-badge { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 12px; border-radius: 20px; }
+    .status-active { background: #f0fdf4; color: #166534; }
+    .status-pending { background: #fefce8; color: #854d0e; }
+    .section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 1rem; }
+    .project-grid { display: grid; gap: 1rem; margin-bottom: 2.5rem; }
+    .project-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+    .project-card-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+    .project-card-title { font-size: 1rem; font-weight: 700; margin: 0; }
+    .project-card-sub { font-size: 0.825rem; color: var(--muted); margin: 0.2rem 0 0; }
+    .badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .badge { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 4px; }
+    .badge-otp { background: #eff6ff; color: #1d4ed8; }
+    .badge-completed { background: #f0fdf4; color: #166534; }
+    .badge-draft { background: #f3f4f6; color: var(--muted); }
+    .badge-live { background: #f0fdf4; color: #166534; }
+    .badge-sold-out { background: #fef2f2; color: #dc2626; }
+    .project-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+    @media (max-width: 480px) { .project-stats { grid-template-columns: 1fr 1fr; } }
+    .project-stat { text-align: center; }
+    .project-stat-value { font-size: 1.2rem; font-weight: 700; }
+    .project-stat-label { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+    .project-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .btn-sm { font-size: 0.8rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 6px; min-height: 36px;
+      border: 1px solid var(--border); background: #fff; cursor: pointer; color: var(--text); }
+    .btn-sm:hover { background: var(--section-bg); }
+    .btn-sm-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .btn-sm-primary:hover { background: var(--blue-hover); }
+    .units-note { font-size: 0.75rem; color: var(--muted); font-style: italic; margin-top: 0.5rem; }
+    .add-project-btn { width: 100%; min-height: 48px; margin-bottom: 2.5rem; }
+
+    /* ADD PROJECT FORM */
+    .add-project-form { display: none; background: var(--section-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+    @media (max-width: 768px) { .add-project-form { padding: 1.25rem; } }
+    .add-form-title { font-size: 1rem; font-weight: 700; margin: 0 0 1.25rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); border: 1px dashed var(--border); border-radius: 10px; }
+    .empty-state p { margin: 0 0 1.5rem; }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 4rem 1rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">DEED</a>
+  <div class="nav-actions">
+    <button class="btn-text" id="logout-btn" style="display:none;" onclick="logout()">Sign out</button>
+  </div>
+</nav>
+
+<!-- LOADING STATE -->
+<div id="app-loading" class="loading">Loading…</div>
+
+<!-- REGISTRATION VIEW -->
+<div id="reg-view" style="display:none;">
+  <div class="container">
+    <div class="reg-panel">
+      <h1 class="page-title">Developer Portal</h1>
+      <p class="page-sub">List your developments on DEED. Zero upfront cost — platform fee on settlement only.</p>
+      <div class="card">
+        <div class="card-title">Apply for access</div>
+        <form id="reg-form">
+          <div class="form-group">
+            <label>Full name</label>
+            <input type="text" id="reg-name" placeholder="Jane Smith" required />
+          </div>
+          <div class="form-group">
+            <label>Company name</label>
+            <input type="text" id="reg-company" placeholder="Smith Developments Pty Ltd" required />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="reg-email" placeholder="jane@smithdev.com.au" required />
+          </div>
+          <div class="form-group">
+            <label>Phone (optional)</label>
+            <input type="tel" id="reg-phone" placeholder="0400 000 000" />
+          </div>
+          <div class="form-group">
+            <label>Project types</label>
+            <select id="reg-types">
+              <option value="completed">Completed stock only</option>
+              <option value="otp">Off-the-plan only</option>
+              <option value="both">Both</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-primary" id="reg-submit" style="margin-top:0.5rem;">Apply for access</button>
+          <div class="success-msg" id="reg-success">
+            Application received. We'll review your details and be in touch within 24 hours.
+          </div>
+          <div class="error-msg" id="reg-error"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD VIEW -->
+<div id="dash-view" style="display:none;">
+  <div class="container">
+    <div class="dash-header">
+      <div>
+        <h1 class="dash-title" id="dash-name">Developer Portal</h1>
+        <p class="dash-sub" id="dash-company"></p>
+      </div>
+      <span class="status-badge" id="dash-status-badge"></span>
+    </div>
+
+    <button class="btn-primary add-project-btn" onclick="toggleAddForm()">+ Add project</button>
+
+    <!-- ADD PROJECT FORM -->
+    <div class="add-project-form" id="add-project-form">
+      <div class="add-form-title">New project</div>
+      <form id="new-project-form">
+        <div class="form-group">
+          <label>Project name</label>
+          <input type="text" id="np-name" placeholder="Azure Residences" required />
+        </div>
+        <div class="form-row" style="margin-bottom:0.875rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Type</label>
+            <select id="np-type" onchange="toggleOTPFields()">
+              <option value="completed">Completed stock</option>
+              <option value="otp">Off-the-plan</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Suburb</label>
+            <input type="text" id="np-suburb" placeholder="Burleigh Heads" required />
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:0.875rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Price from ($)</label>
+            <input type="number" id="np-price" placeholder="620000" required />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Total units</label>
+            <input type="number" id="np-units" placeholder="24" required />
+          </div>
+        </div>
+        <div class="form-group" id="otp-date-field" style="display:none;">
+          <label>Est. completion</label>
+          <input type="text" id="np-completion" placeholder="Q4 2027" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="np-description" placeholder="Brief project description" />
+        </div>
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:0.5rem;">
+          <button type="submit" class="btn-sm btn-sm-primary" id="np-submit" style="min-height:44px; min-width:140px;">Create project</button>
+          <button type="button" class="btn-sm" onclick="toggleAddForm()" style="min-height:44px;">Cancel</button>
+        </div>
+        <div class="error-msg" id="np-error"></div>
+      </form>
+    </div>
+
+    <!-- PROJECT LIST -->
+    <div class="section-label">Your Projects</div>
+    <div id="project-list" class="project-grid">
+      <div class="loading" style="padding:2rem;">Loading projects…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://jtpykhrdjkzhcbswrhzo.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0cHlraHJkamt6aGNic3dyaHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTYxMjAsImV4cCI6MjA4OTQ5MjEyMH0.U3q_ktH3vN7loxEgUg-oJw9mXYYwhMC0aL6bK9YBVRI';
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let session = null;
+  let developer = null;
+
+  async function init() {
+    const { data: { session: s } } = await sb.auth.getSession();
+    session = s;
+
+    if (session) {
+      await loadDashboard();
+    } else {
+      document.getElementById('app-loading').style.display = 'none';
+      document.getElementById('reg-view').style.display = 'block';
+    }
+
+    // Handle auth state changes (magic link redirect)
+    sb.auth.onAuthStateChange(async (event, s) => {
+      if (event === 'SIGNED_IN' && s) {
+        session = s;
+        document.getElementById('reg-view').style.display = 'none';
+        await loadDashboard();
+      }
+    });
+  }
+
+  async function loadDashboard() {
+    document.getElementById('app-loading').style.display = 'block';
+    document.getElementById('dash-view').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'block';
+
+    const res = await fetch('/api/developer-api?action=dashboard', {
+      headers: { 'Authorization': `Bearer ${session.access_token}` },
+    });
+
+    document.getElementById('app-loading').style.display = 'none';
+
+    if (!res.ok) {
+      document.getElementById('reg-view').style.display = 'block';
+      return;
+    }
+
+    const data = await res.json();
+    developer = data.developer;
+
+    document.getElementById('dash-name').textContent = developer.name;
+    document.getElementById('dash-company').textContent = developer.company;
+    const badge = document.getElementById('dash-status-badge');
+    badge.textContent = developer.status.charAt(0).toUpperCase() + developer.status.slice(1);
+    badge.className = `status-badge status-${developer.status === 'approved' || developer.status === 'active' ? 'active' : 'pending'}`;
+
+    renderProjects(data.projects || []);
+    document.getElementById('dash-view').style.display = 'block';
+  }
+
+  function renderProjects(projects) {
+    const list = document.getElementById('project-list');
+    if (!projects.length) {
+      list.innerHTML = `<div class="empty-state"><p>No projects yet. Add your first development above.</p></div>`;
+      return;
+    }
+    list.innerHTML = projects.map(p => `
+      <div class="project-card">
+        <div class="project-card-header">
+          <div>
+            <div class="project-card-title">${p.name}</div>
+            <div class="project-card-sub">${p.suburb}</div>
+          </div>
+          <div class="badges">
+            <span class="badge badge-${p.type}">${p.type === 'otp' ? 'Off-the-plan' : 'Completed stock'}</span>
+            <span class="badge badge-${p.status.replace('_','-')}">${p.status.charAt(0).toUpperCase() + p.status.slice(1).replace('_',' ')}</span>
+          </div>
+        </div>
+        <div class="project-stats">
+          <div class="project-stat">
+            <div class="project-stat-value">${p.units_available}</div>
+            <div class="project-stat-label">Units available*</div>
+          </div>
+          <div class="project-stat">
+            <div class="project-stat-value">—</div>
+            <div class="project-stat-label">EOIs / Offers</div>
+          </div>
+          <div class="project-stat">
+            <div class="project-stat-value">—</div>
+            <div class="project-stat-label">Settled</div>
+          </div>
+        </div>
+        <div class="project-actions">
+          ${p.status === 'live' ? `<a href="/projects/${p.slug}" class="btn-sm btn-sm-primary" target="_blank">View project page</a>` : ''}
+          ${p.status === 'draft' ? `<button class="btn-sm btn-sm-primary" onclick="submitForReview('${p.id}', '${p.name}')">Submit for review</button>` : ''}
+        </div>
+        <div class="units-note">* Units available is manually updated. Edit your project to update this number.</div>
+      </div>
+    `).join('');
+  }
+
+  function toggleAddForm() {
+    const form = document.getElementById('add-project-form');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function toggleOTPFields() {
+    const type = document.getElementById('np-type').value;
+    document.getElementById('otp-date-field').style.display = type === 'otp' ? 'block' : 'none';
+  }
+
+  function submitForReview(projectId, projectName) {
+    alert(`To go live: email deed@deed-sooty.vercel.app with your project name (${projectName}) and we'll review and activate it within 24 hours.`);
+  }
+
+  document.getElementById('reg-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('reg-submit');
+    const errEl = document.getElementById('reg-error');
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    errEl.style.display = 'none';
+
+    const res = await fetch('/api/developer-api?action=register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('reg-name').value,
+        company: document.getElementById('reg-company').value,
+        email: document.getElementById('reg-email').value,
+        phone: document.getElementById('reg-phone').value,
+        project_types: [document.getElementById('reg-types').value],
+      }),
+    });
+
+    if (res.ok) {
+      document.getElementById('reg-form').querySelectorAll('.form-group, .card-title').forEach(el => el.style.display = 'none');
+      btn.style.display = 'none';
+      document.getElementById('reg-success').style.display = 'block';
+    } else {
+      const data = await res.json();
+      errEl.textContent = data.error === 'Email already registered' ? 'That email is already registered.' : 'Something went wrong. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Apply for access';
+    }
+  });
+
+  document.getElementById('new-project-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('np-submit');
+    const errEl = document.getElementById('np-error');
+    btn.disabled = true; btn.textContent = 'Creating…';
+    errEl.style.display = 'none';
+
+    const res = await fetch('/api/developer-api?action=create-project', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        name: document.getElementById('np-name').value,
+        type: document.getElementById('np-type').value,
+        suburb: document.getElementById('np-suburb').value,
+        price_from: document.getElementById('np-price').value,
+        total_units: document.getElementById('np-units').value,
+        description: document.getElementById('np-description').value,
+        completion_date: document.getElementById('np-completion').value || null,
+      }),
+    });
+
+    btn.disabled = false; btn.textContent = 'Create project';
+
+    if (res.ok) {
+      document.getElementById('new-project-form').reset();
+      toggleAddForm();
+      await loadDashboard();
+    } else {
+      const data = await res.json();
+      errEl.textContent = data.error || 'Failed to create project.';
+      errEl.style.display = 'block';
+    }
+  });
+
+  async function logout() {
+    await sb.auth.signOut();
+    session = null;
+    developer = null;
+    document.getElementById('dash-view').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'none';
+    document.getElementById('reg-view').style.display = 'block';
+  }
+
+  init();
+</script>
+</body>
+</html>
