@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DEED — List Your Property</title>
   <link rel="stylesheet" href="deed-ui.css" />
-  <script src="https://js.stripe.com/v3/"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
@@ -888,34 +887,50 @@
         </div>
       </div>
 
-      <!-- ── STEP 6: PAYMENT ── -->
+      <!-- ── STEP 6: GO LIVE ── -->
       <div class="step-panel" id="step-6">
         <p class="step-eyebrow">Step 06</p>
-        <h2 class="step-heading">PAY &<br/><span class="accent">PUBLISH</span></h2>
-        <p class="step-sub">One flat fee. No commission when it sells. Your listing goes live to verified buyers immediately after payment.</p>
+        <h2 class="step-heading">ALMOST<br/><span class="accent">LIVE</span></h2>
+        <p class="step-sub">Your listing is ready. Review the platform fee terms below, then go live.</p>
 
-        <div class="payment-summary">
-          <div class="payment-line"><span class="payment-key">DEED listing fee</span><span class="payment-val">$1,499.00</span></div>
-          <div class="payment-line"><span class="payment-key">Agent commission</span><span class="payment-val green">$0</span></div>
-          <div class="payment-line"><span class="payment-key">Ongoing platform fee</span><span class="payment-val green">$0</span></div>
-          <div class="payment-line total"><span class="payment-key">Total today</span><span class="payment-val big">$1,499</span></div>
+        <!-- Platform fee confirmation screen -->
+        <div style="text-align:center; padding: 1rem 0 2rem;">
+          <div style="width:56px;height:56px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+            <svg width="24" height="24" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2 style="font-family:var(--font-display,'Bebas Neue',sans-serif);font-size:2rem;letter-spacing:0.04em;margin:0 0 0.5rem;">Your listing is ready</h2>
+          <p style="font-size:1rem;color:var(--muted,#6b7280);margin:0 0 2rem;line-height:1.6;">
+            DEED's platform fee is payable on settlement of sale.<br />We'll be in touch when your property sells.
+          </p>
         </div>
 
-        <div class="info-card" style="padding:1.25rem;margin-bottom:1.5rem;">
-          <p style="font-size:0.65rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">What you get</p>
-          <div class="checklist">
-            <div class="checklist-item"><span class="checklist-check">✓</span>Live listing to all verified buyers in your suburb</div>
-            <div class="checklist-item"><span class="checklist-check">✓</span>Offer management dashboard with strength scoring</div>
-            <div class="checklist-item"><span class="checklist-check">✓</span>Comparable sales data throughout your campaign</div>
-            <div class="checklist-item"><span class="checklist-check">✓</span>Post-offer pipeline to settlement</div>
-            <div class="checklist-item"><span class="checklist-check">✓</span>REIQ-compliant contract via partner conveyancers</div>
+        <div style="background:#f7f8fa;border:1px solid #e5e7eb;border-radius:10px;padding:1.25rem;margin-bottom:1.5rem;">
+          <div style="font-size:0.825rem;color:#6b7280;margin-bottom:0.75rem;font-weight:600;">What happens next</div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+              <div style="width:22px;height:22px;background:#2563EB;color:#fff;border-radius:50%;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+              <div style="font-size:0.875rem;">Your listing goes live and is matched to verified buyers in your suburb.</div>
+            </div>
+            <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+              <div style="width:22px;height:22px;background:#2563EB;color:#fff;border-radius:50%;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+              <div style="font-size:0.875rem;">Qualified buyers contact you directly — no open homes, no tyre-kickers.</div>
+            </div>
+            <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+              <div style="width:22px;height:22px;background:#2563EB;color:#fff;border-radius:50%;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+              <div style="font-size:0.875rem;">When your property sells, DEED's platform fee is due on settlement.</div>
+            </div>
           </div>
         </div>
 
-        <button class="btn-blue" id="pay-btn" onclick="handlePayment()" style="width:100%;justify-content:center;">
-          Pay $1,499 and publish listing →
+        <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;margin-bottom:1.5rem;">
+          <input type="checkbox" id="fee-acknowledgement" required style="margin-top:3px;width:18px;height:18px;flex-shrink:0;accent-color:#2563EB;" />
+          <span style="font-size:0.875rem;line-height:1.5;">I understand that DEED's platform fee is due on settlement of sale.</span>
+        </label>
+
+        <button id="go-live-btn" type="button" onclick="goLive()"
+          style="width:100%;min-height:52px;background:#2563EB;color:#fff;font-size:1rem;font-weight:700;border:none;border-radius:10px;cursor:pointer;">
+          Confirm &amp; Go Live
         </button>
-        <p style="font-size:0.72rem;color:var(--dim);text-align:center;margin-top:0.75rem;">Secure payment via Stripe · SSL encrypted</p>
 
         <div class="step-actions">
           <button class="btn-ghost-light" onclick="prevStep(6)">← Review listing</button>
@@ -1122,11 +1137,16 @@
     btn.disabled = false;
   }
 
-  // ── Payment & Supabase submit ───────────────────────────────────────────
-  async function handlePayment() {
-    const btn = document.getElementById('pay-btn');
+  // ── Go Live & Supabase submit ──────────────────────────────────────────
+  async function goLive() {
+    const ack = document.getElementById('fee-acknowledgement');
+    if (!ack.checked) {
+      ack.reportValidity();
+      return;
+    }
+    const btn = document.getElementById('go-live-btn');
     btn.disabled = true;
-    btn.textContent = 'Saving listing…';
+    btn.textContent = 'Going live…';
 
     const address      = document.getElementById('address').value;
     const suburb       = document.getElementById('suburb').value;
@@ -1202,22 +1222,15 @@
         }).catch(() => {});
       }
 
-      btn.textContent = 'Redirecting to payment…';
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ listing_id: listingId, price, address }),
-      });
-      const checkoutData = await res.json();
-      if (checkoutData.url) {
-        window.location.href = checkoutData.url;
-      } else {
-        window.location.href = listingId ? `dashboard.html?listing_id=${listingId}` : 'success.html';
-      }
+      // The listing was already saved to Supabase above.
+      // Redirect to dashboard after brief delay.
+      setTimeout(() => {
+        window.location.href = '/dashboard.html';
+      }, 1000);
     } catch (err) {
       console.error('Error:', err);
       btn.disabled = false;
-      btn.textContent = 'Pay $1,499 and publish listing →';
+      btn.textContent = 'Confirm & Go Live';
     }
   }
 </script>
