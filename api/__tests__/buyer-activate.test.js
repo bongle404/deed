@@ -1,15 +1,12 @@
 const mockUpdate = jest.fn();
-const mockSelect = jest.fn();
-const mockEqUpdate = jest.fn(() => ({ eq: jest.fn(() => ({ eq: jest.fn(() => mockUpdate) })) }));
-const mockEqSelect = jest.fn(() => ({ eq: mockSelect }));
-const mockFrom = jest.fn((table) => ({
-  update: jest.fn(() => ({ eq: jest.fn(() => ({ eq: jest.fn(() => ({ eq: mockUpdate })) })) })),
-  select: jest.fn(() => ({ eq: mockEqSelect() })),
-}));
 const mockEmails = { send: jest.fn() };
 
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({ from: mockFrom })),
+  createClient: jest.fn(() => ({
+    from: jest.fn(() => ({
+      update: mockUpdate,
+    })),
+  })),
 }));
 jest.mock('resend', () => ({
   Resend: jest.fn(() => ({ emails: mockEmails })),
@@ -42,16 +39,13 @@ test('returns 400 when token is missing', async () => {
 });
 
 test('returns 410 when no rows updated (token invalid/expired/used)', async () => {
-  // Simulate atomic update that matches 0 rows
-  mockFrom.mockReturnValueOnce({
-    update: jest.fn(() => ({
-      eq: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          eq: jest.fn(() => Promise.resolve({ data: [], error: null, count: 0 })),
-        })),
-      })),
-    })),
-  });
+  // Build chain mock: .update().eq().eq().gt().select() => { data: [], error: null }
+  const mockSelect = jest.fn().mockResolvedValue({ data: [], error: null });
+  const mockGt = jest.fn(() => ({ select: mockSelect }));
+  const mockEq2 = jest.fn(() => ({ gt: mockGt }));
+  const mockEq1 = jest.fn(() => ({ eq: mockEq2 }));
+  mockUpdate.mockReturnValue({ eq: mockEq1 });
+
   const res = makeRes();
   await handler(makeReq({ token: 'bad-token', name: 'Jane', suburbs: ['Burleigh'] }), res);
   expect(res.status).toHaveBeenCalledWith(410);

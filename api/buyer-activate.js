@@ -21,9 +21,8 @@ module.exports = async function handler(req, res) {
   const now = new Date().toISOString();
 
   // Atomic update: WHERE activation_token = token AND activation_complete = false
-  // AND activation_token_expires_at > now. Uses three eq conditions; expiry is
-  // enforced via a server-side RLS policy / DB constraint so the WHERE clause
-  // here guards the race condition on the token itself.
+  // AND activation_token_expires_at > now. Uses .gt() for the timestamp comparison
+  // to guard against expired or already-used tokens.
   const { data, error } = await supabase
     .from('buyers')
     .update({
@@ -38,7 +37,8 @@ module.exports = async function handler(req, res) {
     })
     .eq('activation_token', token)
     .eq('activation_complete', false)
-    .eq('activation_token_expired', false);
+    .gt('activation_token_expires_at', now)
+    .select('email, verified_amount, broker_id, brokers(email, name)');
 
   if (error) {
     console.error('Activation update error:', error);
