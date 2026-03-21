@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEED — Project</title>
+  <link rel="stylesheet" href="/deed-ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root {
+      --blue: #2563EB; --blue-hover: #1d4ed8;
+      --border: #e5e7eb; --text: #111827; --muted: #6b7280; --dim: #9ca3af;
+      --page-bg: #ffffff; --section-bg: #f7f8fa;
+    }
+    * { box-sizing: border-box; }
+    body { background: var(--page-bg); font-family: var(--font-body, 'DM Sans', sans-serif); color: var(--text); margin: 0; }
+
+    /* NAV */
+    .nav { background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+      padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-family: var(--font-display, 'Bebas Neue', sans-serif); font-size: 1.6rem; letter-spacing: 0.06em; color: var(--text); text-decoration: none; }
+
+    /* HERO */
+    .hero { position: relative; height: 420px; overflow: hidden; background: #1a1a1a; }
+    @media (max-width: 768px) { .hero { height: 280px; } }
+    .hero-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
+    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%); }
+    .hero-content { position: absolute; bottom: 2rem; left: 2rem; right: 2rem; color: #fff; }
+    @media (max-width: 768px) { .hero-content { bottom: 1.25rem; left: 1.25rem; right: 1.25rem; } }
+    .hero-badge { display: inline-block; background: var(--blue); color: #fff; font-size: 0.7rem;
+      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; margin-bottom: 0.75rem; }
+    .hero-title { font-family: var(--font-display, 'Bebas Neue', sans-serif); font-size: 3rem; line-height: 1; margin: 0 0 0.25rem; letter-spacing: 0.04em; }
+    @media (max-width: 768px) { .hero-title { font-size: 2rem; } }
+    .hero-sub { font-size: 1rem; opacity: 0.85; margin: 0 0 1rem; }
+    .hero-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.9rem; opacity: 0.9; }
+    .hero-ctas { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.25rem; }
+    @media (max-width: 768px) { .hero-ctas { flex-direction: column; } }
+    .btn-primary { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--blue); color: #fff;
+      font-size: 0.9rem; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none;
+      border: none; cursor: pointer; min-height: 44px; }
+    .btn-primary:hover { background: var(--blue-hover); }
+    .btn-secondary { display: inline-flex; align-items: center; background: rgba(255,255,255,0.15);
+      color: #fff; font-size: 0.9rem; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.3); cursor: pointer; min-height: 44px; }
+
+    /* CONTENT */
+    .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+    @media (max-width: 768px) { .container { padding: 1.5rem 1rem; } }
+    .section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 1rem; }
+    .overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+    @media (max-width: 768px) { .overview-grid { grid-template-columns: 1fr 1fr; } }
+    .stat-card { background: var(--section-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.25rem; }
+    .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+    .description { font-size: 1rem; line-height: 1.7; color: var(--text); margin-bottom: 2.5rem; }
+    .interest-badge { display: inline-flex; align-items: center; gap: 0.4rem; background: #f0fdf4;
+      color: #166534; border: 1px solid #bbf7d0; border-radius: 20px; font-size: 0.8rem;
+      font-weight: 600; padding: 4px 12px; margin-bottom: 1.5rem; }
+
+    /* EOI FORM */
+    .eoi-section { background: var(--section-bg); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 2.5rem; }
+    @media (max-width: 768px) { .eoi-section { padding: 1.25rem; } }
+    .eoi-title { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.5rem; }
+    .eoi-sub { font-size: 0.875rem; color: var(--muted); margin: 0 0 1.5rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+    @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+    .form-group input { border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.875rem;
+      font-size: 0.9rem; font-family: inherit; outline: none; min-height: 44px; }
+    .form-group input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .form-submit { width: 100%; min-height: 48px; font-size: 1rem; font-weight: 700; margin-top: 1rem; }
+    .success-msg { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+      padding: 1rem 1.25rem; color: #166534; font-size: 0.9rem; margin-top: 1rem; }
+
+    /* UNIT GRID */
+    .units-section { margin-bottom: 2.5rem; }
+    .units-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    @media (max-width: 768px) { .units-grid { grid-template-columns: 1fr; } }
+    .unit-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+    .unit-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+    .unit-number { font-weight: 700; font-size: 1rem; }
+    .unit-status { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 2px 8px; border-radius: 4px; }
+    .unit-status.available { background: #f0fdf4; color: #166534; }
+    .unit-status.under_offer { background: #fefce8; color: #854d0e; }
+    .unit-status.sold { background: #f3f4f6; color: var(--muted); }
+    .unit-specs { font-size: 0.825rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .unit-price { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+    .btn-offer { width: 100%; min-height: 44px; background: var(--blue); color: #fff; font-size: 0.875rem;
+      font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
+    .btn-offer:hover { background: var(--blue-hover); }
+    .btn-offer:disabled { background: var(--dim); cursor: not-allowed; }
+
+    /* OFFER MODAL */
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; overflow-y: auto; }
+    .modal-backdrop.open { display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; }
+    .modal { background: #fff; border-radius: 12px; padding: 2rem; width: 100%; max-width: 480px; margin: auto; }
+    @media (max-width: 768px) { .modal { padding: 1.25rem; } }
+    .modal-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 1.25rem; }
+    .modal-close { float: right; background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--muted); margin-top: -4px; }
+
+    /* RENDERS */
+    .renders-strip { display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 2.5rem; }
+    .renders-strip img { height: 180px; width: auto; border-radius: 8px; flex-shrink: 0; }
+    @media (max-width: 768px) { .renders-strip img { height: 140px; } }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 4rem 1rem; color: var(--muted); }
+    .error-state { text-align: center; padding: 4rem 1rem; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">DEED</a>
+  <a href="/browse.html" style="font-size:0.875rem; color: var(--muted); text-decoration:none;">Browse listings</a>
+</nav>
+
+<div id="project-loading" class="loading">Loading project…</div>
+<div id="project-error" class="error-state" style="display:none;">
+  <p style="color:var(--muted);">Project not found.</p>
+  <a href="/browse.html" class="btn-primary" style="display:inline-flex; margin-top:1rem;">Browse listings</a>
+</div>
+
+<div id="project-content" style="display:none;">
+  <!-- HERO -->
+  <div class="hero">
+    <img id="hero-img" src="" alt="" class="hero-img" />
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge" id="project-type-badge">New Development</div>
+      <h1 class="hero-title" id="project-name"></h1>
+      <p class="hero-sub" id="project-sub"></p>
+      <div class="hero-meta" id="project-meta"></div>
+      <div class="hero-ctas" id="project-ctas"></div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="container">
+    <div class="interest-badge" id="interest-badge" style="display:none;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span id="interest-count-text"></span>
+    </div>
+
+    <div class="section-label">Project Overview</div>
+    <div class="overview-grid" id="overview-grid"></div>
+    <div class="description" id="project-description"></div>
+
+    <!-- RENDERS -->
+    <div id="renders-section" style="display:none;">
+      <div class="section-label">Gallery</div>
+      <div class="renders-strip" id="renders-strip"></div>
+    </div>
+
+    <!-- OTP EOI SECTION -->
+    <div id="eoi-section" class="eoi-section" style="display:none;">
+      <h2 class="eoi-title">Register your interest</h2>
+      <p class="eoi-sub">No obligation. We'll notify you when units open for offer.</p>
+      <form id="eoi-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full name</label>
+            <input type="text" id="eoi-name" placeholder="Jane Smith" required />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="eoi-email" placeholder="jane@example.com" required />
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Phone (optional)</label>
+          <input type="tel" id="eoi-phone" placeholder="0400 000 000" />
+        </div>
+        <button type="submit" class="btn-primary form-submit" id="eoi-submit">Register interest</button>
+        <div class="success-msg" id="eoi-success">
+          You're registered. We'll be in touch when units open for offer.
+        </div>
+      </form>
+    </div>
+
+    <!-- COMPLETED STOCK UNITS SECTION -->
+    <div id="units-section" class="units-section" style="display:none;">
+      <div class="section-label">Available Units</div>
+      <div class="units-grid" id="units-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- OFFER MODAL (completed stock) -->
+<div class="modal-backdrop" id="offer-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeOfferModal()">×</button>
+    <h3 class="modal-title" id="modal-title">Make an offer</h3>
+    <form id="offer-form">
+      <input type="hidden" id="offer-unit-id" />
+      <input type="hidden" id="offer-project-id" />
+      <div class="form-group" style="margin-bottom:0.75rem;">
+        <label>Your name</label>
+        <input type="text" id="offer-name" required />
+      </div>
+      <div class="form-group" style="margin-bottom:0.75rem;">
+        <label>Email</label>
+        <input type="email" id="offer-email" required />
+      </div>
+      <div class="form-group" style="margin-bottom:0.75rem;">
+        <label>Offer price ($)</label>
+        <input type="number" id="offer-price" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Settlement (days)</label>
+          <input type="number" id="offer-settlement" placeholder="30" />
+        </div>
+        <div class="form-group">
+          <label>Deposit (%)</label>
+          <input type="number" id="offer-deposit" placeholder="10" />
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:0.75rem;">
+        <label>Message (optional)</label>
+        <input type="text" id="offer-message" placeholder="Any notes for the developer" />
+      </div>
+      <button type="submit" class="btn-primary form-submit" id="offer-submit">Submit offer</button>
+      <div class="success-msg" id="offer-success">Offer submitted. The developer will be in touch.</div>
+    </form>
+  </div>
+</div>
+
+<script>
+  let currentProject = null;
+
+  // Extract slug from URL path: /projects/azure-residences → azure-residences
+  function getSlug() {
+    const parts = window.location.pathname.split('/');
+    return parts[parts.length - 1] || parts[parts.length - 2];
+  }
+
+  function formatPrice(p) {
+    return '$' + parseInt(p).toLocaleString('en-AU');
+  }
+
+  async function loadProject() {
+    const slug = getSlug();
+    if (!slug) { showError(); return; }
+
+    try {
+      const res = await fetch(`/api/developer-api?action=get-project&slug=${encodeURIComponent(slug)}`);
+      if (!res.ok) { showError(); return; }
+      const project = await res.json();
+      currentProject = project;
+      renderProject(project);
+    } catch (e) {
+      showError();
+    }
+  }
+
+  function showError() {
+    document.getElementById('project-loading').style.display = 'none';
+    document.getElementById('project-error').style.display = 'block';
+  }
+
+  function renderProject(p) {
+    document.title = `DEED — ${p.name}`;
+
+    // Hero
+    if (p.renders && p.renders.length > 0) {
+      document.getElementById('hero-img').src = p.renders[0];
+      document.getElementById('hero-img').alt = p.name;
+    } else {
+      document.querySelector('.hero').style.background = '#1e3a5f';
+    }
+    document.getElementById('project-type-badge').textContent = p.type === 'otp' ? 'Off the Plan' : 'New Development';
+    document.getElementById('project-name').textContent = p.name;
+    document.getElementById('project-sub').textContent = `${p.suburb} · ${p.developers?.company || ''}`;
+    document.getElementById('project-meta').innerHTML = `
+      <span>From ${formatPrice(p.price_from)}</span>
+      <span>${p.total_units} residences</span>
+      ${p.completion_date ? `<span>Est. ${p.completion_date}</span>` : ''}
+    `;
+
+    // CTAs
+    const ctaContainer = document.getElementById('project-ctas');
+    if (p.type === 'otp') {
+      ctaContainer.innerHTML = `<button class="btn-primary" onclick="document.getElementById('eoi-section').scrollIntoView({behavior:'smooth'})">Register interest</button>`;
+    } else {
+      ctaContainer.innerHTML = `<button class="btn-primary" onclick="document.getElementById('units-section').scrollIntoView({behavior:'smooth'})">View available units</button>`;
+    }
+
+    // Interest badge
+    if (p.interest_count > 0) {
+      const badge = document.getElementById('interest-badge');
+      badge.style.display = 'inline-flex';
+      const label = p.type === 'otp'
+        ? `${p.interest_count} ${p.interest_count === 1 ? 'person' : 'people'} registered interest`
+        : `${p.interest_count} verified buyers in the queue`;
+      document.getElementById('interest-count-text').textContent = label;
+    }
+
+    // Overview stats
+    const grid = document.getElementById('overview-grid');
+    const stats = [
+      { label: 'Starting from', value: formatPrice(p.price_from) },
+      { label: 'Total residences', value: p.total_units },
+      { label: p.type === 'otp' ? 'Est. completion' : 'Available now', value: p.type === 'otp' ? (p.completion_date || 'TBA') : p.units_available },
+    ];
+    grid.innerHTML = stats.map(s => `
+      <div class="stat-card">
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-value">${s.value}</div>
+      </div>
+    `).join('');
+
+    // Description
+    document.getElementById('project-description').textContent = p.description || '';
+
+    // Renders gallery
+    if (p.renders && p.renders.length > 1) {
+      const strip = document.getElementById('renders-strip');
+      strip.innerHTML = p.renders.map(r => `<img src="${r}" alt="${p.name}" />`).join('');
+      document.getElementById('renders-section').style.display = 'block';
+    }
+
+    // OTP EOI form
+    if (p.type === 'otp') {
+      document.getElementById('eoi-section').style.display = 'block';
+    }
+
+    // Completed stock unit grid
+    if (p.type === 'completed' && p.units && p.units.length > 0) {
+      const grid = document.getElementById('units-grid');
+      grid.innerHTML = p.units.map(u => `
+        <div class="unit-card">
+          <div class="unit-header">
+            <div class="unit-number">Unit ${u.unit_number}</div>
+            <div class="unit-status ${u.status}">${u.status === 'under_offer' ? 'Under offer' : u.status.charAt(0).toUpperCase() + u.status.slice(1)}</div>
+          </div>
+          <div class="unit-specs">${[u.beds && `${u.beds}bd`, u.baths && `${u.baths}ba`, u.car_spaces && `${u.car_spaces} car`, u.size_sqm && `${u.size_sqm}m²`].filter(Boolean).join(' · ')}</div>
+          <div class="unit-price">${formatPrice(u.price)}</div>
+          <button class="btn-offer" onclick="openOfferModal('${u.id}', '${u.unit_number}', '${p.id}')"
+            ${u.status !== 'available' ? 'disabled' : ''}>
+            ${u.status === 'available' ? 'Make offer' : u.status === 'under_offer' ? 'Under offer' : 'Sold'}
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('units-section').style.display = 'block';
+    }
+
+    // Show content
+    document.getElementById('project-loading').style.display = 'none';
+    document.getElementById('project-content').style.display = 'block';
+  }
+
+  // EOI form submission
+  document.getElementById('eoi-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('eoi-submit');
+    btn.disabled = true; btn.textContent = 'Registering…';
+
+    const res = await fetch('/api/developer-api?action=register-interest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        project_id: currentProject.id,
+        name: document.getElementById('eoi-name').value,
+        email: document.getElementById('eoi-email').value,
+        phone: document.getElementById('eoi-phone').value,
+      }),
+    });
+
+    if (res.ok) {
+      document.getElementById('eoi-form').querySelector('.form-row').style.display = 'none';
+      document.getElementById('eoi-form').querySelectorAll('.form-group').forEach(el => el.style.display = 'none');
+      btn.style.display = 'none';
+      document.getElementById('eoi-success').style.display = 'block';
+    } else {
+      btn.disabled = false; btn.textContent = 'Register interest';
+      alert('Something went wrong. Please try again.');
+    }
+  });
+
+  // Offer modal
+  function openOfferModal(unitId, unitNumber, projectId) {
+    document.getElementById('offer-unit-id').value = unitId;
+    document.getElementById('offer-project-id').value = projectId;
+    document.getElementById('modal-title').textContent = `Make an offer — Unit ${unitNumber}`;
+    document.getElementById('offer-modal').classList.add('open');
+  }
+  function closeOfferModal() {
+    document.getElementById('offer-modal').classList.remove('open');
+  }
+  document.getElementById('offer-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeOfferModal();
+  });
+
+  document.getElementById('offer-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('offer-submit');
+    btn.disabled = true; btn.textContent = 'Submitting…';
+
+    const res = await fetch('/api/developer-api?action=submit-offer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        unit_id: document.getElementById('offer-unit-id').value,
+        project_id: document.getElementById('offer-project-id').value,
+        buyer_name: document.getElementById('offer-name').value,
+        buyer_email: document.getElementById('offer-email').value,
+        offer_price: document.getElementById('offer-price').value,
+        settlement_days: document.getElementById('offer-settlement').value || null,
+        deposit_percent: document.getElementById('offer-deposit').value || null,
+        message: document.getElementById('offer-message').value || null,
+      }),
+    });
+
+    if (res.ok) {
+      document.getElementById('offer-form').querySelectorAll('.form-group, .form-row').forEach(el => el.style.display = 'none');
+      btn.style.display = 'none';
+      document.getElementById('offer-success').style.display = 'block';
+    } else {
+      btn.disabled = false; btn.textContent = 'Submit offer';
+      alert('Something went wrong. Please try again.');
+    }
+  });
+
+  loadProject();
+</script>
+</body>
+</html>
