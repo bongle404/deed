@@ -216,8 +216,46 @@ async function handleGetProject(req, res) {
   });
 }
 async function handleRegisterInterest(req, res) {
-  return res.status(501).json({ error: 'Not implemented' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { project_id, name, email, phone } = req.body || {};
+  if (!project_id || !name || !email) return res.status(400).json({ error: 'Missing required fields' });
+
+  const { error } = await supabase.from('project_interests').insert([{
+    project_id, name, email, phone: phone || null,
+  }]);
+
+  if (error) {
+    console.error('Interest insert error:', error);
+    return res.status(500).json({ error: 'Registration failed' });
+  }
+
+  return res.status(201).json({ success: true });
 }
+
 async function handleSubmitOffer(req, res) {
-  return res.status(501).json({ error: 'Not implemented' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { unit_id, project_id, buyer_name, buyer_email, offer_price, settlement_days, deposit_percent, message } = req.body || {};
+  if (!unit_id || !project_id || !buyer_name || !buyer_email || !offer_price) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const { error } = await supabase.from('unit_offers').insert([{
+    unit_id, project_id, buyer_name, buyer_email,
+    offer_price: parseInt(offer_price),
+    settlement_days: settlement_days ? parseInt(settlement_days) : null,
+    deposit_percent: deposit_percent ? parseFloat(deposit_percent) : null,
+    message: message || null,
+  }]);
+
+  if (error) {
+    console.error('Unit offer insert error:', error);
+    return res.status(500).json({ error: 'Failed to submit offer' });
+  }
+
+  // Update unit status to under_offer
+  await supabase.from('units').update({ status: 'under_offer' }).eq('id', unit_id);
+
+  return res.status(201).json({ success: true });
 }

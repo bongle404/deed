@@ -35,15 +35,19 @@ function makeRes() {
   return res;
 }
 
+const mockUpdate = jest.fn().mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: null }) });
+
 beforeEach(() => {
   jest.clearAllMocks();
-  mockFrom.mockReturnValue({ insert: mockInsert, select: mockSelect });
+  mockFrom.mockReturnValue({ insert: mockInsert, select: mockSelect, update: mockUpdate });
   mockSelect.mockReturnValue({ eq: mockEq });
   mockEq.mockReturnValue({ single: mockSingle, eq: mockEq });
   mockSingle.mockResolvedValue({ data: null, error: null });
   // mockInsert returns a thenable that also exposes .select() for .insert().select().single() chains
   mockInsertSelect.mockReturnValue({ single: mockSingle });
   mockInsert.mockReturnValue(Object.assign(Promise.resolve({ error: null }), { select: mockInsertSelect }));
+  // Reset mockUpdate's inner eq mock on each test
+  mockUpdate.mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: null }) });
 });
 
 // ── register ──────────────────────────────────────────────────────
@@ -182,6 +186,56 @@ describe('action=get-project', () => {
     const res = makeRes();
     await handler(makeReq('GET', { action: 'get-project', slug: 'azure-residences' }), res);
     expect(res.status).toHaveBeenCalledWith(200);
+  });
+});
+
+// ── register-interest ─────────────────────────────────────────────
+describe('action=register-interest', () => {
+  test('returns 405 for non-POST', async () => {
+    const res = makeRes();
+    await handler(makeReq('GET', { action: 'register-interest' }), res);
+    expect(res.status).toHaveBeenCalledWith(405);
+  });
+
+  test('returns 400 when required fields missing', async () => {
+    const res = makeRes();
+    await handler(makeReq('POST', { action: 'register-interest' }, { name: 'Bob' }), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  test('returns 201 on success', async () => {
+    mockInsert.mockResolvedValue({ error: null });
+    const res = makeRes();
+    await handler(makeReq('POST', { action: 'register-interest' }, {
+      project_id: 'proj-1', name: 'Bob Smith', email: 'bob@example.com', phone: '0411111111',
+    }), res);
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+});
+
+// ── submit-offer ──────────────────────────────────────────────────
+describe('action=submit-offer', () => {
+  test('returns 405 for non-POST', async () => {
+    const res = makeRes();
+    await handler(makeReq('GET', { action: 'submit-offer' }), res);
+    expect(res.status).toHaveBeenCalledWith(405);
+  });
+
+  test('returns 400 when required fields missing', async () => {
+    const res = makeRes();
+    await handler(makeReq('POST', { action: 'submit-offer' }, { unit_id: 'u-1' }), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  test('returns 201 on success', async () => {
+    mockInsert.mockResolvedValue({ error: null });
+    const res = makeRes();
+    await handler(makeReq('POST', { action: 'submit-offer' }, {
+      unit_id: 'u-1', project_id: 'proj-1',
+      buyer_name: 'Jane Doe', buyer_email: 'jane@example.com',
+      offer_price: 650000, settlement_days: 30, deposit_percent: 10,
+    }), res);
+    expect(res.status).toHaveBeenCalledWith(201);
   });
 });
 
