@@ -1080,6 +1080,41 @@
 
     let allListings = [];
 
+    // ── PROJECTS ─────────────────────────────────────
+    async function loadProjects() {
+      const { data: projects } = await db
+        .from('projects')
+        .select('id, slug, name, suburb, type, price_from, units_available, renders, status')
+        .eq('status', 'live')
+        .order('created_at', { ascending: false });
+      return projects || [];
+    }
+
+    function renderProjectCard(project) {
+      return `
+        <a href="/projects/${project.slug}" class="prop-card" style="text-decoration:none;">
+          <div class="prop-card-image" style="position:relative;">
+            <img src="${project.renders && project.renders[0] ? project.renders[0] : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600'}"
+              alt="${project.name}" style="width:100%;height:100%;object-fit:cover;display:block;" />
+            <div style="position:absolute;top:10px;left:10px;background:#2563EB;color:#fff;font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:3px 9px;border-radius:4px;">
+              New Development
+            </div>
+          </div>
+          <div class="prop-card-body">
+            <div class="prop-card-price">From $${parseInt(project.price_from).toLocaleString('en-AU')}</div>
+            <div class="prop-card-guide">${project.type || 'Development'}</div>
+            <div class="prop-card-address">${project.name}</div>
+            <div class="prop-card-suburb">${project.suburb}</div>
+            <div class="prop-card-specs">
+              <div class="prop-spec"><span class="prop-spec-val">${project.units_available}</span> units available</div>
+            </div>
+          </div>
+          <div class="prop-card-footer">
+            <span class="deed-verified">DEED Project</span>
+          </div>
+        </a>`;
+    }
+
     // Scroll-reveal
     const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
@@ -1190,16 +1225,19 @@
         </div>`;
     }
 
-    function renderGrid(listings, query) {
+    function renderGrid(listings, query, projects = []) {
       const grid  = document.getElementById('prop-grid');
       const count = document.getElementById('results-count');
-      if (!listings.length) {
+      const projectCards  = projects.map(renderProjectCard).join('');
+      const listingCards  = listings.map((l, i) => renderCard(l, i)).join('');
+      if (!listings.length && !projects.length) {
         grid.innerHTML = renderEmpty(query);
         count.innerHTML = '<strong>0 properties</strong>';
       } else {
-        grid.innerHTML = listings.map((l, i) => renderCard(l, i)).join('');
+        grid.innerHTML = projectCards + listingCards;
         const loc = listings[0]?.suburb || 'Queensland';
-        count.innerHTML = `<strong>${listings.length} ${listings.length === 1 ? 'property' : 'properties'}</strong> in ${loc}`;
+        const total = listings.length + projects.length;
+        count.innerHTML = `<strong>${total} ${total === 1 ? 'property' : 'properties'}</strong>${listings.length ? ' in ' + loc : ''}`;
         // Re-run reveal observer on new elements
         document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
       }
@@ -1212,7 +1250,8 @@
       let q = db.from('listings').select('*').eq('status', 'active').order('created_at', { ascending: false });
       if (query) q = q.ilike('suburb', `%${query}%`);
 
-      const { data, error } = await q;
+      const [{ data, error }, projects] = await Promise.all([q, loadProjects()]);
+
       if (error) {
         console.error('Supabase error:', error);
         grid.innerHTML = `<div style="grid-column:1/-1;padding:3rem 0;text-align:center;color:var(--muted);font-size:0.88rem;">Could not load listings.</div>`;
@@ -1247,7 +1286,7 @@
         }];
       }
 
-      renderGrid(allListings, query);
+      renderGrid(allListings, query, projects);
     }
 
     // Load on page init
