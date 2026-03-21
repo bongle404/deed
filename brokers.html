@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEED — Broker Partner Portal</title>
+  <link rel="stylesheet" href="deed-ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root {
+      --blue:#2563EB; --blue-hover:#1d4ed8; --blue-pale:#eff6ff; --blue-muted:rgba(37,99,235,0.10);
+      --border:#e5e7eb; --text:#111827; --muted:#6b7280; --dim:#9ca3af;
+    }
+    body { background:#f7f8fa; font-family:var(--font-body); color:var(--text); }
+    .nav {
+      background:#fff; border-bottom:1px solid var(--border); height:64px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 2rem; position:sticky; top:0; z-index:100;
+    }
+    .nav-logo { font-family:var(--font-display); font-size:1.5rem; letter-spacing:0.06em; color:var(--text); text-decoration:none; }
+    .nav-right { display:flex; align-items:center; gap:1rem; }
+    .btn-logout {
+      font-size:0.8rem; color:var(--muted); background:none; border:none;
+      cursor:pointer; padding:0.4rem 0.75rem;
+    }
+    .btn-logout:hover { color:var(--text); }
+    .page { max-width:1000px; margin:0 auto; padding:3rem 2rem; }
+    .landing-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:4rem;
+      align-items:start;
+    }
+    .landing-eyebrow {
+      font-size:0.65rem; font-weight:600; letter-spacing:0.14em;
+      text-transform:uppercase; color:var(--blue); margin-bottom:0.75rem;
+    }
+    .landing-heading {
+      font-family:var(--font-display); font-size:2.5rem;
+      letter-spacing:0.03em; line-height:1.05; margin-bottom:1rem;
+    }
+    .landing-sub { font-size:0.95rem; color:var(--muted); line-height:1.65; margin-bottom:2rem; }
+    .value-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.75rem; }
+    .value-list li {
+      font-size:0.875rem; color:var(--text); padding-left:1.25rem; position:relative;
+    }
+    .value-list li::before {
+      content:'✓'; position:absolute; left:0; color:var(--blue); font-weight:600;
+    }
+    .form-card {
+      background:#fff; border:1px solid var(--border); border-radius:16px;
+      padding:2rem; box-shadow:0 2px 12px rgba(0,0,0,0.04);
+    }
+    .form-card-title { font-size:1rem; font-weight:600; margin-bottom:1.5rem; }
+    .form-field { margin-bottom:1.1rem; }
+    .form-label { display:block; font-size:0.78rem; font-weight:500; color:var(--text); margin-bottom:0.35rem; }
+    .form-input {
+      width:100%; padding:0.6rem 0.875rem; border:1px solid var(--border);
+      border-radius:8px; font-size:0.875rem; font-family:inherit; color:var(--text);
+      box-sizing:border-box; transition:border-color 0.15s;
+    }
+    .form-input:focus { outline:none; border-color:var(--blue); }
+    .btn-primary {
+      width:100%; padding:0.8rem; background:var(--blue); color:#fff;
+      border:none; border-radius:10px; font-size:0.9rem; font-weight:600;
+      cursor:pointer; transition:background 0.15s; margin-top:0.25rem;
+    }
+    .btn-primary:hover { background:var(--blue-hover); }
+    .btn-primary:disabled { opacity:0.6; cursor:not-allowed; }
+    .form-toggle {
+      text-align:center; margin-top:1rem; font-size:0.8rem; color:var(--muted);
+    }
+    .form-toggle a { color:var(--blue); text-decoration:none; cursor:pointer; font-weight:500; }
+    .form-success {
+      background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px;
+      padding:1.5rem; text-align:center;
+    }
+    .form-success h3 { font-size:0.95rem; font-weight:600; color:#15803d; margin-bottom:0.5rem; }
+    .form-success p { font-size:0.82rem; color:#166534; }
+    .inline-error { font-size:0.78rem; color:#dc2626; margin-top:0.4rem; }
+    .pending-wrap { max-width:480px; margin:0 auto; text-align:center; padding:4rem 0; }
+    .pending-icon { font-size:2.5rem; margin-bottom:1rem; }
+    .pending-heading { font-family:var(--font-display); font-size:1.8rem; letter-spacing:0.03em; margin-bottom:0.75rem; }
+    .pending-sub { font-size:0.875rem; color:var(--muted); line-height:1.65; }
+    .dash-header { margin-bottom:2rem; }
+    .dash-name { font-family:var(--font-display); font-size:1.8rem; letter-spacing:0.03em; }
+    .dash-brokerage { font-size:0.82rem; color:var(--muted); margin-top:0.2rem; }
+    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:2rem; }
+    .stat-card {
+      background:#fff; border:1px solid var(--border); border-radius:12px;
+      padding:1.25rem 1.5rem;
+    }
+    .stat-val { font-family:var(--font-display); font-size:2rem; letter-spacing:0.04em; color:var(--blue); line-height:1; }
+    .stat-label { font-size:0.7rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-top:0.25rem; }
+    .table-wrap {
+      background:#fff; border:1px solid var(--border); border-radius:12px;
+      overflow:hidden; margin-bottom:1.5rem;
+    }
+    .table-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.25rem 1.5rem; border-bottom:1px solid var(--border);
+    }
+    .table-header-title { font-size:0.875rem; font-weight:600; }
+    .btn-add {
+      padding:0.5rem 1rem; background:var(--blue); color:#fff;
+      border:none; border-radius:8px; font-size:0.8rem; font-weight:600;
+      cursor:pointer; transition:background 0.15s;
+    }
+    .btn-add:hover { background:var(--blue-hover); }
+    table { width:100%; border-collapse:collapse; }
+    th {
+      font-size:0.65rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase;
+      color:var(--dim); padding:0.75rem 1.5rem; text-align:left;
+      border-bottom:1px solid var(--border);
+    }
+    td { padding:1rem 1.5rem; font-size:0.875rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    .badge-active { font-size:0.68rem; font-weight:500; padding:0.2rem 0.6rem; border-radius:999px; background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+    .badge-pending { font-size:0.68rem; font-weight:500; padding:0.2rem 0.6rem; border-radius:999px; background:#fffbeb; color:#92400e; border:1px solid #fde68a; }
+    .btn-resend {
+      font-size:0.75rem; color:var(--blue); background:none; border:1px solid var(--blue);
+      border-radius:6px; padding:0.25rem 0.6rem; cursor:pointer; transition:background 0.15s;
+    }
+    .btn-resend:hover { background:var(--blue-pale); }
+    .btn-resend:disabled { opacity:0.4; cursor:not-allowed; }
+    .empty-state { padding:3rem; text-align:center; color:var(--muted); font-size:0.875rem; }
+    .add-buyer-form {
+      background:var(--blue-pale); border:1px solid #bfdbfe;
+      border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; display:none;
+    }
+    .add-buyer-form.open { display:block; }
+    .add-buyer-title { font-size:0.875rem; font-weight:600; margin-bottom:1.25rem; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .add-buyer-actions { display:flex; gap:0.75rem; margin-top:0.75rem; }
+    .btn-submit-buyer {
+      padding:0.65rem 1.5rem; background:var(--blue); color:#fff; border:none;
+      border-radius:8px; font-size:0.875rem; font-weight:600; cursor:pointer;
+    }
+    .btn-submit-buyer:disabled { opacity:0.6; cursor:not-allowed; }
+    .btn-cancel {
+      padding:0.65rem 1rem; background:#fff; color:var(--muted); border:1px solid var(--border);
+      border-radius:8px; font-size:0.875rem; cursor:pointer;
+    }
+    .form-error { font-size:0.78rem; color:#dc2626; margin-top:0.5rem; }
+    @media (max-width:768px) {
+      .landing-grid { grid-template-columns:1fr; gap:2rem; }
+      .stats-row { grid-template-columns:1fr; }
+      .form-row { grid-template-columns:1fr; }
+      .page { padding:2rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">DEED</a>
+  <div class="nav-right">
+    <span id="nav-broker-name" style="font-size:0.8rem;color:var(--muted);display:none;"></span>
+    <button class="btn-logout" id="logout-btn" style="display:none;" onclick="logout()">Log out</button>
+  </div>
+</nav>
+
+<div id="state-loading" class="page" style="text-align:center;padding-top:4rem;color:var(--muted);">
+  Loading…
+</div>
+
+<!-- STATE 1: LANDING -->
+<div id="state-landing" class="page" style="display:none;">
+  <div class="landing-grid">
+    <div>
+      <p class="landing-eyebrow">Broker Partner Programme</p>
+      <h1 class="landing-heading">HELP YOUR CLIENTS<br/>FIND THE DEAL.</h1>
+      <p class="landing-sub">Register pre-approved buyers on DEED and they'll be notified the moment a matching property lists — before it goes anywhere else. You get a faster path from pre-approval to settlement.</p>
+      <ul class="value-list">
+        <li>Register a client in under 60 seconds</li>
+        <li>Client receives a co-branded activation email</li>
+        <li>Your buyers show as formally pre-approved to sellers</li>
+        <li>You're notified when your client makes an offer</li>
+      </ul>
+    </div>
+    <div>
+      <div class="form-card" id="register-card">
+        <p class="form-card-title" id="form-card-title">Apply to join</p>
+        <div id="register-form">
+          <div class="form-field">
+            <label class="form-label">Full name</label>
+            <input type="text" id="reg-name" class="form-input" placeholder="Jane Smith" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Email</label>
+            <input type="email" id="reg-email" class="form-input" placeholder="jane@brokerage.com.au" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Brokerage name</label>
+            <input type="text" id="reg-brokerage" class="form-input" placeholder="ABC Finance" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">ASIC licence number</label>
+            <input type="text" id="reg-asic" class="form-input" placeholder="Credit Representative No." />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Phone <span style="color:var(--dim)">(optional)</span></label>
+            <input type="tel" id="reg-phone" class="form-input" placeholder="04xx xxx xxx" />
+          </div>
+          <div id="reg-error" class="inline-error" style="display:none;"></div>
+          <button class="btn-primary" id="reg-btn" onclick="submitRegistration()">Apply to join →</button>
+          <div class="form-toggle">Already approved? <a onclick="showLoginForm()">Log in</a></div>
+        </div>
+        <div id="login-form" style="display:none;">
+          <div class="form-field">
+            <label class="form-label">Your email address</label>
+            <input type="email" id="login-email" class="form-input" placeholder="you@brokerage.com.au" />
+          </div>
+          <div id="login-error" class="inline-error" style="display:none;"></div>
+          <button class="btn-primary" id="login-btn" onclick="sendMagicLink()">Send login link →</button>
+          <div class="form-toggle"><a onclick="showRegisterForm()">← Back to registration</a></div>
+        </div>
+        <div id="reg-success" style="display:none;" class="form-success">
+          <h3>Application received</h3>
+          <p>We'll verify your ASIC licence and email you within 24 hours.</p>
+        </div>
+        <div id="login-success" style="display:none;" class="form-success">
+          <h3>Check your inbox</h3>
+          <p>We've sent a login link to <strong id="login-email-sent"></strong>. It expires in 1 hour.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATE 2: PENDING APPROVAL -->
+<div id="state-pending" class="page" style="display:none;">
+  <div class="pending-wrap">
+    <div class="pending-icon">⏳</div>
+    <h2 class="pending-heading">APPLICATION UNDER REVIEW</h2>
+    <p class="pending-sub">Your licence is being verified. You'll receive an email once approved — usually within 24 hours.</p>
+  </div>
+</div>
+
+<!-- STATE 3: DASHBOARD -->
+<div id="state-dashboard" class="page" style="display:none;">
+  <div class="dash-header">
+    <h1 class="dash-name" id="dash-name">Welcome</h1>
+    <p class="dash-brokerage" id="dash-brokerage"></p>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-val" id="stat-submitted">—</div>
+      <div class="stat-label">Buyers submitted</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="stat-activated">—</div>
+      <div class="stat-label">Buyers activated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="stat-pending">—</div>
+      <div class="stat-label">Pending activation</div>
+    </div>
+  </div>
+  <div class="add-buyer-form" id="add-buyer-form">
+    <p class="add-buyer-title">Register a pre-approved buyer</p>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Client name</label>
+        <input type="text" id="ab-name" class="form-input" placeholder="Jane Smith" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Client email</label>
+        <input type="email" id="ab-email" class="form-input" placeholder="jane@email.com" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Pre-approved amount (AUD)</label>
+        <input type="number" id="ab-amount" class="form-input" placeholder="750000" min="100000" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Lender <span style="color:var(--dim)">(optional)</span></label>
+        <input type="text" id="ab-lender" class="form-input" placeholder="Commonwealth Bank" />
+      </div>
+    </div>
+    <div class="form-field" style="max-width:280px;">
+      <label class="form-label">Pre-approval expiry <span style="color:var(--dim)">(optional)</span></label>
+      <input type="date" id="ab-expiry" class="form-input" />
+    </div>
+    <div id="ab-error" class="form-error" style="display:none;"></div>
+    <div class="add-buyer-actions">
+      <button class="btn-submit-buyer" id="ab-submit" onclick="submitBuyer()">Register buyer →</button>
+      <button class="btn-cancel" onclick="closeAddForm()">Cancel</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <span class="table-header-title">Your buyers</span>
+      <button class="btn-add" onclick="openAddForm()">+ Add a buyer</button>
+    </div>
+    <div id="buyers-table-body">
+      <div class="empty-state">No buyers registered yet. Add your first pre-approved client above.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://jtpykhrdjkzhcbswrhzo.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0cHlraHJkamt6aGNic3dyaHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTYxMjAsImV4cCI6MjA4OTQ5MjEyMH0.U3q_ktH3vN7loxEgUg-oJw9mXYYwhMC0aL6bK9YBVRI';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let currentSession = null;
+
+  function fmt(n) {
+    if (!n) return '—';
+    if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return '$' + Math.round(n / 1000) + 'k';
+    return '$' + n.toLocaleString('en-AU');
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  async function init() {
+    const { data: { session } } = await db.auth.getSession();
+    currentSession = session;
+
+    if (!session) {
+      showState('landing');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/get-broker-status', {
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) { showState('landing'); return; }
+      const broker = await res.json();
+
+      document.getElementById('nav-broker-name').textContent = broker.name;
+      document.getElementById('nav-broker-name').style.display = '';
+      document.getElementById('logout-btn').style.display = '';
+
+      if (broker.status === 'pending') {
+        showState('pending');
+      } else if (broker.status === 'approved') {
+        document.getElementById('dash-name').textContent = broker.name;
+        document.getElementById('dash-brokerage').textContent = broker.brokerage;
+        showState('dashboard');
+        loadBuyers();
+      } else {
+        showState('landing');
+      }
+    } catch (err) {
+      showState('landing');
+    }
+  }
+
+  function showState(state) {
+    document.getElementById('state-loading').style.display = 'none';
+    document.getElementById('state-landing').style.display = state === 'landing' ? 'block' : 'none';
+    document.getElementById('state-pending').style.display = state === 'pending' ? 'block' : 'none';
+    document.getElementById('state-dashboard').style.display = state === 'dashboard' ? 'block' : 'none';
+  }
+
+  function showRegisterForm() {
+    document.getElementById('register-form').style.display = 'block';
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('reg-success').style.display = 'none';
+    document.getElementById('login-success').style.display = 'none';
+    document.getElementById('form-card-title').textContent = 'Apply to join';
+  }
+
+  function showLoginForm() {
+    document.getElementById('register-form').style.display = 'none';
+    document.getElementById('login-form').style.display = 'block';
+    document.getElementById('form-card-title').textContent = 'Log in to your portal';
+  }
+
+  async function submitRegistration() {
+    const btn = document.getElementById('reg-btn');
+    const errEl = document.getElementById('reg-error');
+    errEl.style.display = 'none';
+
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const brokerage = document.getElementById('reg-brokerage').value.trim();
+    const asic_licence = document.getElementById('reg-asic').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
+
+    if (!name || !email || !brokerage || !asic_licence) {
+      errEl.textContent = 'Please fill in all required fields.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Submitting…';
+
+    try {
+      const res = await fetch('/api/broker-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, brokerage, asic_licence, phone }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 409) {
+        errEl.textContent = 'An account with this email already exists. Use the login form below.';
+        errEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Apply to join →';
+        return;
+      }
+
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Registration failed. Please try again.';
+        errEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Apply to join →';
+        return;
+      }
+
+      localStorage.setItem('deedBrokerEmail', email);
+      document.getElementById('register-form').style.display = 'none';
+      document.getElementById('reg-success').style.display = 'block';
+
+    } catch (err) {
+      errEl.textContent = 'Something went wrong. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Apply to join →';
+    }
+  }
+
+  async function sendMagicLink() {
+    const btn = document.getElementById('login-btn');
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
+
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) {
+      errEl.textContent = 'Please enter your email address.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Sending…';
+
+    const { error } = await db.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/brokers.html` },
+    });
+
+    if (error) {
+      errEl.textContent = 'Failed to send login link. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Send login link →';
+      return;
+    }
+
+    document.getElementById('login-email-sent').textContent = email;
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('login-success').style.display = 'block';
+  }
+
+  async function logout() {
+    await db.auth.signOut();
+    currentSession = null;
+    document.getElementById('nav-broker-name').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'none';
+    showState('landing');
+  }
+
+  async function loadBuyers() {
+    if (!currentSession) return;
+    try {
+      const res = await fetch('/api/get-broker-buyers', {
+        headers: { 'Authorization': `Bearer ${currentSession.access_token}` },
+      });
+      if (!res.ok) return;
+      const buyers = await res.json();
+      renderBuyersTable(buyers);
+    } catch (err) {
+      console.error('Failed to load buyers:', err);
+    }
+  }
+
+  function renderBuyersTable(buyers) {
+    const total = buyers.length;
+    const activated = buyers.filter(b => b.activation_complete).length;
+    const pending = total - activated;
+
+    document.getElementById('stat-submitted').textContent = total;
+    document.getElementById('stat-activated').textContent = activated;
+    document.getElementById('stat-pending').textContent = pending;
+
+    const container = document.getElementById('buyers-table-body');
+
+    if (buyers.length === 0) {
+      container.innerHTML = '<div class="empty-state">No buyers registered yet. Add your first pre-approved client above.</div>';
+      return;
+    }
+
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Pre-approved</th>
+            <th>Status</th>
+            <th>Registered</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${buyers.map(b => `
+            <tr>
+              <td>${b.name}</td>
+              <td>${fmt(b.verified_amount)}</td>
+              <td>${b.activation_complete
+                ? '<span class="badge-active">Active</span>'
+                : '<span class="badge-pending">Pending activation</span>'
+              }</td>
+              <td>${fmtDate(b.created_at)}</td>
+              <td>${b.activation_complete
+                ? '<button class="btn-resend" disabled>Activated</button>'
+                : `<button class="btn-resend" onclick="resendActivation('${b.id}', this)">Resend email</button>`
+              }</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function openAddForm() {
+    document.getElementById('add-buyer-form').classList.add('open');
+    document.getElementById('ab-name').focus();
+  }
+
+  function closeAddForm() {
+    document.getElementById('add-buyer-form').classList.remove('open');
+    document.getElementById('ab-error').style.display = 'none';
+    ['ab-name','ab-email','ab-amount','ab-lender','ab-expiry'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+  }
+
+  async function submitBuyer() {
+    const btn = document.getElementById('ab-submit');
+    const errEl = document.getElementById('ab-error');
+    errEl.style.display = 'none';
+
+    const client_name = document.getElementById('ab-name').value.trim();
+    const client_email = document.getElementById('ab-email').value.trim();
+    const verified_amount = parseInt(document.getElementById('ab-amount').value);
+    const lender = document.getElementById('ab-lender').value.trim();
+    const expiry_date = document.getElementById('ab-expiry').value;
+
+    if (!client_name || !client_email || !verified_amount) {
+      errEl.textContent = 'Client name, email, and pre-approved amount are required.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Registering…';
+
+    try {
+      const res = await fetch('/api/broker-submit-buyer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentSession.access_token}`,
+        },
+        body: JSON.stringify({ client_name, client_email, verified_amount, lender, expiry_date }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 409) {
+        errEl.textContent = 'This buyer is already registered on DEED.';
+        errEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Register buyer →';
+        return;
+      }
+
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Failed to register buyer. Please try again.';
+        errEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Register buyer →';
+        return;
+      }
+
+      closeAddForm();
+      loadBuyers();
+
+    } catch (err) {
+      errEl.textContent = 'Something went wrong. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Register buyer →';
+    }
+  }
+
+  async function resendActivation(buyerId, btnEl) {
+    btnEl.disabled = true;
+    btnEl.textContent = 'Sending…';
+
+    try {
+      const res = await fetch('/api/broker-resend-activation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentSession.access_token}`,
+        },
+        body: JSON.stringify({ buyer_id: buyerId }),
+      });
+
+      if (res.status === 429) {
+        btnEl.textContent = 'Wait 10 min';
+        setTimeout(() => { btnEl.textContent = 'Resend email'; btnEl.disabled = false; }, 3000);
+        return;
+      }
+
+      if (res.ok) {
+        btnEl.textContent = 'Sent ✓';
+        setTimeout(() => { btnEl.textContent = 'Resend email'; btnEl.disabled = false; }, 3000);
+      } else {
+        btnEl.textContent = 'Failed';
+        setTimeout(() => { btnEl.textContent = 'Resend email'; btnEl.disabled = false; }, 2000);
+      }
+    } catch (err) {
+      btnEl.textContent = 'Error';
+      setTimeout(() => { btnEl.textContent = 'Resend email'; btnEl.disabled = false; }, 2000);
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
