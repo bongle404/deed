@@ -7,13 +7,14 @@ const mockSingle = jest.fn();
 const mockEmails = { send: jest.fn() };
 const mockInviteUser = jest.fn();
 const mockGetUser = jest.fn();
+const mockListUsers = jest.fn();
 
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     from: mockFrom,
     auth: {
       getUser: mockGetUser,
-      admin: { inviteUserByEmail: mockInviteUser },
+      admin: { inviteUserByEmail: mockInviteUser, listUsers: mockListUsers },
     },
   })),
 }));
@@ -75,7 +76,30 @@ describe('action=register', () => {
       name: 'Alice', company: 'DevCo', email: 'a@b.com', phone: '0400000000', project_types: ['otp'],
     }), res);
     expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ success: true });
     expect(mockEmails.send).toHaveBeenCalled();
+  });
+
+  test('returns 201 when inviteUserByEmail returns User already registered', async () => {
+    mockInviteUser.mockResolvedValue({
+      data: null,
+      error: { message: 'User already registered' },
+    });
+    mockListUsers.mockResolvedValue({
+      data: { users: [{ id: 'uid-existing', email: 'a@b.com' }] },
+    });
+    mockInsert.mockResolvedValue({ error: null });
+    mockEmails.send.mockResolvedValue({});
+    const res = makeRes();
+    await handler(makeReq('POST', { action: 'register' }, {
+      name: 'Alice', company: 'DevCo', email: 'a@b.com', phone: '0400000000', project_types: ['otp'],
+    }), res);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ success: true });
+    // Verify insert was called with the looked-up auth user id
+    expect(mockInsert).toHaveBeenCalledWith([
+      expect.objectContaining({ auth_user_id: 'uid-existing' }),
+    ]);
   });
 });
 

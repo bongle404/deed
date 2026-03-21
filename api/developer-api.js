@@ -34,7 +34,15 @@ async function handleRegister(req, res) {
     console.error('Invite error:', inviteError);
     return res.status(500).json({ error: 'Failed to create account' });
   }
-  const authUserId = inviteData?.user?.id || null;
+
+  let authUserId = inviteData?.user?.id || null;
+
+  // If the user already exists in Auth, look up their ID so the row is not inserted with null
+  if (!authUserId && inviteError?.message === 'User already registered') {
+    const { data: { users } } = await supabase.auth.admin.listUsers();
+    const existing = users?.find(u => u.email === email);
+    authUserId = existing?.id || null;
+  }
 
   const { error } = await supabase.from('developers').insert([{
     name,
@@ -64,6 +72,7 @@ async function handleRegister(req, res) {
       phone ? `Phone: ${phone}` : '',
       `Project types: ${(project_types || []).join(', ')}`,
       ``,
+      !authUserId ? `⚠️ WARNING: This email is already in Supabase Auth. auth_user_id was set from existing user lookup. Verify the developers table has a valid auth_user_id before sending magic link.` : '',
       `Approve in Supabase (set status = 'approved'):`,
       `https://supabase.com/dashboard/project/jtpykhrdjkzhcbswrhzo/editor`,
       ``,
