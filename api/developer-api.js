@@ -111,12 +111,99 @@ async function handleDashboard(req, res) {
   return res.status(200).json({ developer, projects: projects || [] });
 }
 
-// ── PLACEHOLDERS (implemented in Tasks 4 + 5) ────────────────────
+// ── CREATE PROJECT ────────────────────────────────────────────────
 async function handleCreateProject(req, res) {
-  return res.status(501).json({ error: 'Not implemented' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { data: developer } = await supabase
+    .from('developers')
+    .select('id')
+    .eq('auth_user_id', user.id)
+    .single();
+  if (!developer) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { name, type, suburb, price_from, total_units, description, completion_date, units: unitList } = req.body || {};
+  if (!name || !type || !suburb || !price_from || !total_units) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  // Generate collision-safe slug
+  const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  let slug = baseSlug;
+  let suffix = 2;
+  while (true) {
+    const { data: existing } = await supabase.from('projects').select('id').eq('slug', slug).single();
+    if (!existing) break;
+    slug = `${baseSlug}-${suffix++}`;
+  }
+
+  const insertResult = await supabase.from('projects').insert([{
+    developer_id: developer.id,
+    slug, name, type, suburb,
+    price_from: parseInt(price_from),
+    total_units: parseInt(total_units),
+    units_available: parseInt(total_units),
+    description: description || null,
+    completion_date: completion_date || null,
+  }]);
+  const error = insertResult.error;
+  const project = insertResult.data?.[0] || null;
+
+  if (error) {
+    console.error('Project insert error:', error);
+    return res.status(500).json({ error: 'Failed to create project' });
+  }
+
+  // Insert units for completed stock
+  if (type === 'completed' && Array.isArray(unitList) && unitList.length > 0) {
+    const unitRows = unitList.map(u => ({
+      project_id: project.id,
+      unit_number: u.unit_number,
+      beds: u.beds || null,
+      baths: u.baths || null,
+      car_spaces: u.car_spaces || null,
+      size_sqm: u.size_sqm || null,
+      price: parseInt(u.price),
+    }));
+    await supabase.from('units').insert(unitRows);
+  }
+
+  return res.status(201).json({ slug, id: project.id });
 }
+
+// ── GET PROJECT ───────────────────────────────────────────────────
 async function handleGetProject(req, res) {
-  return res.status(501).json({ error: 'Not implemented' });
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { slug } = req.query;
+  if (!slug) return res.status(400).json({ error: 'Slug required' });
+
+  const { data: project, error } = await supabase
+    .from('projects')
+    .select('*, developers(name, company)')
+    .eq('slug', slug)
+    .single();
+
+  if (error || !project) return res.status(404).json({ error: 'Project not found' });
+
+  // Fetch units (completed stock) or interest count (OTP) in parallel
+  const [unitsResult, interestResult] = await Promise.all([
+    supabase.from('units').select('*').eq('project_id', project.id),
+    supabase.from('project_interests').select('id', { count: 'exact' }).eq('project_id', project.id),
+  ]);
+
+  return res.status(200).json({
+    ...project,
+    units: unitsResult.data || [],
+    interest_count: interestResult.count || 0,
+  });
 }
 async function handleRegisterInterest(req, res) {
   return res.status(501).json({ error: 'Not implemented' });

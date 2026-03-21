@@ -103,6 +103,69 @@ describe('action=register', () => {
   });
 });
 
+// ── create-project ────────────────────────────────────────────────
+describe('action=create-project', () => {
+  test('returns 401 with no auth', async () => {
+    const res = makeRes();
+    await handler(makeReq('POST', { action: 'create-project' }), res);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  test('returns 400 when required fields missing', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'uid-1' } }, error: null });
+    mockSingle.mockResolvedValue({ data: { id: 'dev-1' }, error: null });
+    const res = makeRes();
+    await handler(makeReq('POST', { action: 'create-project' }, { name: 'Azure' }, { authorization: 'Bearer valid' }), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  test('returns 201 and creates project with slug', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'uid-1' } }, error: null });
+    mockSingle
+      .mockResolvedValueOnce({ data: { id: 'dev-1' }, error: null }) // developer lookup
+      .mockResolvedValueOnce({ data: null, error: null }); // slug collision check
+    mockInsert.mockResolvedValue({ data: [{ id: 'proj-1', slug: 'azure-residences' }], error: null });
+    const res = makeRes();
+    await handler(makeReq('POST', { action: 'create-project' }, {
+      name: 'Azure Residences', type: 'otp', suburb: 'Burleigh Heads',
+      price_from: 620000, total_units: 24, description: 'Luxury OTP',
+    }, { authorization: 'Bearer valid' }), res);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ slug: 'azure-residences' }));
+  });
+});
+
+// ── get-project ───────────────────────────────────────────────────
+describe('action=get-project', () => {
+  test('returns 400 when no slug provided', async () => {
+    const res = makeRes();
+    await handler(makeReq('GET', { action: 'get-project' }), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  test('returns 404 when project not found', async () => {
+    mockSingle.mockResolvedValue({ data: null, error: { message: 'not found' } });
+    const res = makeRes();
+    await handler(makeReq('GET', { action: 'get-project', slug: 'missing-project' }), res);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  test('returns 200 with project + units + interest count', async () => {
+    const projectData = { id: 'proj-1', slug: 'azure-residences', type: 'otp', name: 'Azure Residences' };
+    // 1st from() call: project lookup — select → eq → single
+    const mockProjSingle = jest.fn().mockResolvedValue({ data: projectData, error: null });
+    const mockProjEq = jest.fn().mockReturnValue({ single: mockProjSingle });
+    mockFrom.mockReturnValueOnce({ select: jest.fn().mockReturnValue({ eq: mockProjEq }) });
+    // 2nd from() call: units — select → eq
+    mockFrom.mockReturnValueOnce({ select: jest.fn().mockReturnValue({ eq: jest.fn().mockResolvedValue({ data: [], error: null }) }) });
+    // 3rd from() call: interest count — select → eq
+    mockFrom.mockReturnValueOnce({ select: jest.fn().mockReturnValue({ eq: jest.fn().mockResolvedValue({ count: 7, error: null }) }) });
+    const res = makeRes();
+    await handler(makeReq('GET', { action: 'get-project', slug: 'azure-residences' }), res);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+});
+
 // ── dashboard ─────────────────────────────────────────────────────
 describe('action=dashboard', () => {
   test('returns 401 when no auth header', async () => {
