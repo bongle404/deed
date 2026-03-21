@@ -5,10 +5,32 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Combines get-broker-status (?data=status) and get-broker-buyers (?data=buyers)
+// Combines broker status/buyers (authenticated) and get-buyer-by-token (public)
 // to stay within Vercel Hobby plan's 12 function limit.
+// ?token=<uuid>  → public buyer lookup (no auth)
+// ?data=buyers   → authenticated broker buyer list
+// default GET    → authenticated broker status
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+
+  // Public: buyer activation token lookup (no auth required)
+  if (req.query.token) {
+    const { token } = req.query;
+    const { data, error } = await supabase
+      .from('buyers')
+      .select('name, verified_amount, activation_complete, activation_token_expires_at, brokers(name, brokerage)')
+      .eq('activation_token', token)
+      .single();
+    if (error || !data) return res.status(404).json({ error: 'Invalid link' });
+    if (new Date(data.activation_token_expires_at) < new Date()) return res.status(410).json({ error: 'Link expired' });
+    if (data.activation_complete) return res.status(410).json({ error: 'Already activated' });
+    return res.status(200).json({
+      name: data.name,
+      verified_amount: data.verified_amount,
+      broker_name: data.brokers?.name ?? null,
+      brokerage: data.brokers?.brokerage ?? null,
+    });
+  }
 
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });

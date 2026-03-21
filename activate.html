@@ -253,7 +253,7 @@
     }
 
     try {
-      const res = await fetch(`/api/get-buyer-by-token?token=${encodeURIComponent(activationToken)}`);
+      const res = await fetch(`/api/broker-dashboard?token=${encodeURIComponent(activationToken)}`);
       const data = await res.json();
 
       if (res.status === 404) {
