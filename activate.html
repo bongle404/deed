@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEED — Activate Your Buyer Profile</title>
+  <link rel="stylesheet" href="deed-ui.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root {
+      --blue: #2563EB; --blue-hover: #1d4ed8; --blue-pale: #eff6ff;
+      --border: #e5e7eb; --text: #111827; --muted: #6b7280; --dim: #9ca3af;
+    }
+    body { background: #fff; font-family: var(--font-body); color: var(--text); }
+    .activate-wrap {
+      min-height: 100vh; display: flex; align-items: center;
+      justify-content: center; padding: 2rem 1rem;
+    }
+    .activate-card {
+      width: 100%; max-width: 480px; background: #fff;
+      border: 1px solid var(--border); border-radius: 16px;
+      padding: 2.5rem 2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .activate-logo {
+      font-family: var(--font-display); font-size: 1.4rem;
+      letter-spacing: 0.06em; color: var(--text); display: block;
+      margin-bottom: 2rem; text-decoration: none;
+    }
+    .progress-wrap { display: flex; gap: 0.4rem; margin-bottom: 2rem; }
+    .progress-dot {
+      height: 4px; flex: 1; border-radius: 2px; background: var(--border);
+      transition: background 0.2s;
+    }
+    .progress-dot.active { background: var(--blue); }
+    .progress-dot.done { background: var(--blue); opacity: 0.4; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .screen-eyebrow {
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 0.5rem;
+    }
+    .screen-heading {
+      font-family: var(--font-display); font-size: 1.8rem;
+      letter-spacing: 0.03em; line-height: 1.1; margin-bottom: 0.5rem;
+    }
+    .screen-sub { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.75rem; }
+    .form-field { margin-bottom: 1.25rem; }
+    .form-label {
+      display: block; font-size: 0.78rem; font-weight: 500;
+      color: var(--text); margin-bottom: 0.375rem;
+    }
+    .form-input {
+      width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.9rem; font-family: inherit; color: var(--text);
+      box-sizing: border-box; transition: border-color 0.15s;
+    }
+    .form-input:focus { outline: none; border-color: var(--blue); }
+    .option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; margin-bottom: 1rem; }
+    .option-card {
+      border: 1.5px solid var(--border); border-radius: 8px; padding: 0.75rem 0.875rem;
+      cursor: pointer; font-size: 0.875rem; font-weight: 500; color: var(--muted);
+      transition: all 0.15s; text-align: center; user-select: none;
+    }
+    .option-card:hover { border-color: var(--blue); color: var(--text); }
+    .option-card.selected { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
+    .beds-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .bed-pill {
+      padding: 0.4rem 0.875rem; border: 1.5px solid var(--border);
+      border-radius: 999px; font-size: 0.8rem; font-weight: 500; color: var(--muted);
+      cursor: pointer; transition: all 0.15s; user-select: none;
+    }
+    .bed-pill:hover { border-color: var(--blue); color: var(--text); }
+    .bed-pill.selected { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
+    .suburb-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .suburb-tag {
+      display: flex; align-items: center; gap: 0.4rem; background: var(--blue-pale);
+      color: var(--blue); font-size: 0.78rem; font-weight: 500; padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+    }
+    .suburb-tag button {
+      background: none; border: none; cursor: pointer; color: var(--blue);
+      font-size: 0.9rem; padding: 0; line-height: 1;
+    }
+    .add-suburb-row { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .add-suburb-row input { flex: 1; }
+    .add-suburb-row button {
+      padding: 0.625rem 0.875rem; background: var(--blue); color: #fff;
+      border: none; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500;
+    }
+    .btn-primary {
+      width: 100%; padding: 0.875rem; background: var(--blue); color: #fff;
+      border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; margin-top: 0.5rem; transition: background 0.15s;
+    }
+    .btn-primary:hover { background: var(--blue-hover); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .verified-card {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border-radius: 16px; padding: 2rem; color: #fff; margin-bottom: 1.5rem;
+    }
+    .verified-badge-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
+    .verified-pulse {
+      width: 8px; height: 8px; border-radius: 50%; background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+    }
+    .verified-badge-text { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #22c55e; }
+    .result-name { font-family: var(--font-display); font-size: 1.4rem; letter-spacing: 0.03em; margin-bottom: 0.25rem; }
+    .result-range { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.04em; color: #60a5fa; line-height: 1; margin-bottom: 0.25rem; }
+    .result-sub { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+    .error-card {
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px;
+      padding: 1.5rem; text-align: center;
+    }
+    .error-card h3 { font-size: 1rem; font-weight: 600; color: #991b1b; margin-bottom: 0.5rem; }
+    .error-card p { font-size: 0.875rem; color: #7f1d1d; }
+    .loading-state { text-align: center; padding: 3rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="activate-wrap">
+  <div class="activate-card">
+    <a href="index.html" class="activate-logo">DEED</a>
+
+    <div id="loading-state" class="loading-state">Loading your profile…</div>
+
+    <div id="error-state" style="display:none">
+      <div class="error-card">
+        <h3 id="error-heading">Link not valid</h3>
+        <p id="error-body">This activation link is invalid or has expired. Contact your broker for a new invitation.</p>
+      </div>
+    </div>
+
+    <div id="screens" style="display:none">
+      <div class="progress-wrap">
+        <div class="progress-dot active" id="dot-1"></div>
+        <div class="progress-dot" id="dot-2"></div>
+        <div class="progress-dot" id="dot-3"></div>
+      </div>
+
+      <!-- Screen 1: Confirm details -->
+      <div class="screen active" id="screen-1">
+        <p class="screen-eyebrow">Step 01</p>
+        <h2 class="screen-heading">WELCOME TO<br/>DEED</h2>
+        <p class="screen-sub" id="broker-intro">Your broker has confirmed your borrowing capacity and registered you on DEED.</p>
+        <div class="form-field">
+          <label class="form-label">Your name</label>
+          <input type="text" id="buyer-name" class="form-input" placeholder="Full name" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">Phone <span style="color:var(--dim)">(optional)</span></label>
+          <input type="tel" id="buyer-phone" class="form-input" placeholder="04xx xxx xxx" />
+        </div>
+        <button class="btn-primary" onclick="goToScreen(2)">Continue →</button>
+      </div>
+
+      <!-- Screen 2: Preferences -->
+      <div class="screen" id="screen-2">
+        <p class="screen-eyebrow">Step 02</p>
+        <h2 class="screen-heading">WHAT ARE YOU<br/>LOOKING FOR?</h2>
+        <p class="screen-sub">We'll notify you the moment a matching property lists — before it goes anywhere else.</p>
+
+        <div class="form-field">
+          <label class="form-label">Suburbs</label>
+          <div id="suburb-tags" class="suburb-list"></div>
+          <div class="add-suburb-row">
+            <input type="text" id="suburb-input" class="form-input" placeholder="e.g. Burleigh Heads" />
+            <button onclick="addSuburb()">Add</button>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Property type</label>
+          <div class="option-grid">
+            <div class="option-card" data-field="type" data-value="house" onclick="selectOption(this)">House</div>
+            <div class="option-card" data-field="type" data-value="unit" onclick="selectOption(this)">Unit</div>
+            <div class="option-card" data-field="type" data-value="townhouse" onclick="selectOption(this)">Townhouse</div>
+            <div class="option-card" data-field="type" data-value="land" onclick="selectOption(this)">Land</div>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Minimum bedrooms</label>
+          <div class="beds-row">
+            <div class="bed-pill" data-beds="1" onclick="selectBeds(this)">1</div>
+            <div class="bed-pill" data-beds="2" onclick="selectBeds(this)">2</div>
+            <div class="bed-pill" data-beds="3" onclick="selectBeds(this)">3</div>
+            <div class="bed-pill" data-beds="4" onclick="selectBeds(this)">4</div>
+            <div class="bed-pill" data-beds="5" onclick="selectBeds(this)">5+</div>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="goToScreen(3)">Continue →</button>
+      </div>
+
+      <!-- Screen 3: Verified profile card -->
+      <div class="screen" id="screen-3">
+        <p class="screen-eyebrow">Step 03</p>
+        <h2 class="screen-heading" style="margin-bottom:1.25rem">YOU'RE<br/>VERIFIED.</h2>
+
+        <div class="verified-card">
+          <div class="verified-badge-row">
+            <div class="verified-pulse"></div>
+            <span class="verified-badge-text">DEED Verified Buyer</span>
+          </div>
+          <p class="result-name" id="profile-name"></p>
+          <p class="result-range" id="profile-amount"></p>
+          <p class="result-sub">Formally pre-approved borrowing capacity</p>
+        </div>
+
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;">
+          We'll notify you at <strong id="profile-email"></strong> the moment a matching property lists.
+        </p>
+
+        <button class="btn-primary" id="activate-btn" onclick="submitActivation()">
+          Browse listings →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://jtpykhrdjkzhcbswrhzo.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0cHlraHJkamt6aGNic3dyaHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTYxMjAsImV4cCI6MjA4OTQ5MjEyMH0.U3q_ktH3vN7loxEgUg-oJw9mXYYwhMC0aL6bK9YBVRI';
+
+  let buyerEmail = '';
+  let activationToken = '';
+  const suburbs = [];
+  const selectedTypes = [];
+  let selectedBeds = 1;
+
+  function getTokenFromHash() {
+    const hash = window.location.hash.slice(1);
+    const params = new URLSearchParams(hash);
+    return params.get('token');
+  }
+
+  function fmt(n) {
+    if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return '$' + Math.round(n / 1000) + 'k';
+    return '$' + n.toLocaleString('en-AU');
+  }
+
+  async function loadBuyerData() {
+    activationToken = getTokenFromHash();
+    if (!activationToken) {
+      showError('Link not valid', 'This activation link is missing. Check your email for the original link.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/get-buyer-by-token?token=${encodeURIComponent(activationToken)}`);
+      const data = await res.json();
+
+      if (res.status === 404) {
+        showError('Link not valid', 'This activation link is invalid. Contact your broker for a new invitation.');
+        return;
+      }
+      if (res.status === 410 && data.error === 'Already activated') {
+        showError('Already activated', 'You\'ve already activated your DEED profile. Browse listings below.');
+        document.getElementById('error-state').querySelector('.error-card').innerHTML += '<a href="browse.html" style="display:inline-block;margin-top:1rem;color:#2563EB;font-weight:500;">Browse listings →</a>';
+        return;
+      }
+      if (res.status === 410) {
+        showError('Link expired', 'This activation link has expired. Ask your broker to send you a new invitation.');
+        return;
+      }
+      if (!res.ok) {
+        showError('Something went wrong', 'Please try again or contact your broker.');
+        return;
+      }
+
+      document.getElementById('buyer-name').value = data.name || '';
+      document.getElementById('profile-name').textContent = data.name || '';
+      document.getElementById('profile-amount').textContent = fmt(data.verified_amount);
+      if (data.broker_name) {
+        document.getElementById('broker-intro').textContent =
+          `${data.broker_name} at ${data.brokerage} has confirmed your borrowing capacity and registered you on DEED.`;
+      }
+
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('screens').style.display = 'block';
+
+    } catch (err) {
+      showError('Something went wrong', 'Please refresh and try again.');
+    }
+  }
+
+  function showError(heading, body) {
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('error-heading').textContent = heading;
+    document.getElementById('error-body').textContent = body;
+    document.getElementById('error-state').style.display = 'block';
+  }
+
+  let currentScreen = 1;
+
+  function goToScreen(n) {
+    if (n === 2 && !document.getElementById('buyer-name').value.trim()) {
+      document.getElementById('buyer-name').focus();
+      return;
+    }
+    document.getElementById(`screen-${currentScreen}`).classList.remove('active');
+    document.getElementById(`screen-${n}`).classList.add('active');
+    document.getElementById(`dot-${currentScreen}`).classList.remove('active');
+    document.getElementById(`dot-${currentScreen}`).classList.add('done');
+    document.getElementById(`dot-${n}`).classList.add('active');
+
+    if (n === 3) {
+      const name = document.getElementById('buyer-name').value.trim();
+      document.getElementById('profile-name').textContent = name;
+    }
+    currentScreen = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function selectOption(el) {
+    const field = el.dataset.field;
+    document.querySelectorAll(`[data-field="${field}"]`).forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function selectBeds(el) {
+    document.querySelectorAll('.bed-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedBeds = parseInt(el.dataset.beds);
+  }
+
+  function addSuburb() {
+    const input = document.getElementById('suburb-input');
+    const val = input.value.trim();
+    if (!val || suburbs.length >= 5 || suburbs.includes(val)) return;
+    suburbs.push(val);
+    renderSuburbs();
+    input.value = '';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('suburb-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); addSuburb(); }
+    });
+  });
+
+  function removeSuburb(val) {
+    const idx = suburbs.indexOf(val);
+    if (idx > -1) suburbs.splice(idx, 1);
+    renderSuburbs();
+  }
+
+  function renderSuburbs() {
+    const container = document.getElementById('suburb-tags');
+    container.innerHTML = suburbs.map(s =>
+      `<span class="suburb-tag">${s}<button onclick="removeSuburb('${s}')" aria-label="Remove ${s}">×</button></span>`
+    ).join('');
+  }
+
+  async function submitActivation() {
+    const btn = document.getElementById('activate-btn');
+    btn.disabled = true;
+    btn.textContent = 'Activating…';
+
+    const selectedType = document.querySelector('[data-field="type"].selected');
+    const propertyTypes = selectedType ? [selectedType.dataset.value] : [];
+
+    try {
+      const res = await fetch('/api/buyer-activate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: activationToken,
+          name: document.getElementById('buyer-name').value.trim(),
+          phone: document.getElementById('buyer-phone').value.trim() || null,
+          suburbs,
+          property_types: propertyTypes,
+          min_beds: selectedBeds,
+        }),
+      });
+
+      if (res.ok) {
+        window.location.href = 'browse.html';
+      } else {
+        const data = await res.json();
+        btn.disabled = false;
+        btn.textContent = 'Browse listings →';
+        alert(data.error || 'Something went wrong. Please try again.');
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Browse listings →';
+      alert('Something went wrong. Please try again.');
+    }
+  }
+
+  loadBuyerData();
+</script>
+</body>
+</html>
