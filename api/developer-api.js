@@ -215,6 +215,7 @@ async function handleGetProject(req, res) {
     interest_count: interestResult.count || 0,
   });
 }
+// ── REGISTER INTEREST ─────────────────────────────────────────────
 async function handleRegisterInterest(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -233,6 +234,7 @@ async function handleRegisterInterest(req, res) {
   return res.status(201).json({ success: true });
 }
 
+// ── SUBMIT OFFER ──────────────────────────────────────────────────
 async function handleSubmitOffer(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -243,7 +245,7 @@ async function handleSubmitOffer(req, res) {
 
   const { error } = await supabase.from('unit_offers').insert([{
     unit_id, project_id, buyer_name, buyer_email,
-    offer_price: parseInt(offer_price),
+    offer_price: parseInt(offer_price) || 0,
     settlement_days: settlement_days ? parseInt(settlement_days) : null,
     deposit_percent: deposit_percent ? parseFloat(deposit_percent) : null,
     message: message || null,
