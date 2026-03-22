@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Execution Engine
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-03-22T06:23:08.364Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-03-22T06:27:56.910Z"
 last_activity: 2026-03-22 — 02-01 complete (LEGAL-01/02/04 test stubs, 19 tests created)
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 17
-  completed_plans: 12
+  completed_plans: 13
   percent: 35
 ---
 
@@ -57,6 +57,7 @@ Progress: [████░░░░░░] 35%
 | Phase 02-qld-legal-scaffolding P04 | 12 | 2 tasks | 3 files |
 | Phase 02-qld-legal-scaffolding P06 | 5 | 2 tasks | 0 files |
 | Phase 03-ai-pricing-tool P01 | 2 | 3 tasks | 3 files |
+| Phase 03-ai-pricing-tool P02 | 3 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,8 @@ Recent decisions affecting current work:
 - [Phase 02-qld-legal-scaffolding]: 02-04: deriveChecklist inlined in browser HTML files — Node require() not available in browser; helpers/ file remains server-side test-contract source of truth
 - [Phase 02-qld-legal-scaffolding]: Human verification gate used as final Phase 2 gate — no legal feature ships without end-to-end browser walkthrough
 - [Phase 03-ai-pricing-tool]: 03-01: price-estimate.test.js mocks node-fetch and Supabase cache-miss; offer-floor.test.js mocks @anthropic-ai/sdk constructor; below_floor_reason regex allows flexible dollar formatting
+- [Phase 03-ai-pricing-tool]: 03-02: Cache lookup uses single .eq chain + JS-side validation to match test mock constraint (one level of chaining)
+- [Phase 03-ai-pricing-tool]: 03-02: PROPTECH_DATA_API_KEY guard — fetch always runs; headers populated only when key present (required for test mock compatibility)
 
 ### Pending Todos
 
@@ -106,6 +109,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T06:22:59.438Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-03-22T06:27:56.908Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
