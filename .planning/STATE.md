@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Execution Engine
 status: executing
-stopped_at: "Checkpoint: 02-03-PLAN.md — awaiting human verify of conveyancer referral card in accept-modal step-3"
-last_updated: "2026-03-22T05:20:45.695Z"
+stopped_at: Completed 02-03-PLAN.md — LEGAL-03 conveyancer referral prompt
+last_updated: "2026-03-22T05:23:07.751Z"
 last_activity: 2026-03-22 — 02-01 complete (LEGAL-01/02/04 test stubs, 19 tests created)
 progress:
   total_phases: 5
@@ -52,6 +52,7 @@ Progress: [████░░░░░░] 35%
 | Phase 01-rea-domain-portal-integration P03 | 2min | 1 tasks | 3 files |
 | Phase 02-qld-legal-scaffolding P02 | 18 | 2 tasks | 2 files |
 | Phase 02-qld-legal-scaffolding P03 | 4 | 1 tasks | 1 files |
+| Phase 02-qld-legal-scaffolding P03 | 5 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,9 @@ Recent decisions affecting current work:
 - [Phase 02-qld-legal-scaffolding]: 02-03: Conveyancer referral card is always-present HTML in accept-step-3 — no JS toggle needed, existing modal show/hide handles visibility
 - [Phase 02-qld-legal-scaffolding]: 02-03: QLS disclosure defaults to 'may receive' framing before commercial arrangement exists — conservative/safer default
 - [Phase 02-qld-legal-scaffolding]: 02-03: Placeholder partner details used — must be replaced when real QLD conveyancing firm is partnered
+- [Phase 02-qld-legal-scaffolding]: 02-03: Referral card is always-present HTML in step-3 — no JS toggle needed, existing modal show/hide handles visibility
+- [Phase 02-qld-legal-scaffolding]: 02-03: QLS disclosure defaults to 'may receive' framing before any commercial arrangement exists — conservative/safer default
+- [Phase 02-qld-legal-scaffolding]: 02-03: Placeholder partner details used — must be replaced when real QLD conveyancing firm is partnered
 
 ### Pending Todos
 
@@ -91,6 +95,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T05:20:45.689Z
-Stopped at: Checkpoint: 02-03-PLAN.md — awaiting human verify of conveyancer referral card in accept-modal step-3
+Last session: 2026-03-22T05:23:07.749Z
+Stopped at: Completed 02-03-PLAN.md — LEGAL-03 conveyancer referral prompt
 Resume file: None
