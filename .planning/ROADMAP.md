@@ -29,12 +29,19 @@ v2.0 transforms DEED from a listing platform into a complete private sale execut
 **Goal**: Sellers can opt in to REA/Domain distribution via a QLD-licensed FSBO intermediary, with listing status visible in their dashboard
 **Depends on**: Nothing (first phase — table stakes for all buyer reach)
 **Requirements**: PORTAL-01, PORTAL-02, PORTAL-03
-**Commercial dependency**: QLD-licensed FSBO intermediary partnership must be established before development starts. Initiate commercial conversation immediately — longest lead time item in v2.0.
+**Commercial dependency**: Ed is obtaining the QLD agent licence directly (DEED acts as its own licensed agency — no third-party partnership needed). Outstanding actions before going live: (1) confirm QLD corporate agent licence for DEED Pty Ltd with OFT, (2) apply for REA Ignite agency account and obtain SFTP credentials, (3) set portal listing fee amount, (4) run Supabase migration SQL. Code is built with a credential guard — safe to build and test before the account is live.
 **Success Criteria** (what must be TRUE):
-  1. DEED can submit a listing to realestate.com.au via a QLD-licensed FSBO intermediary integration
+  1. DEED can submit a listing to realestate.com.au via REAXML feed from a licensed agency account
   2. Seller can opt in to REA/Domain listing during the sell flow with clear fee disclosure before confirming
   3. Seller dashboard shows whether their listing is live on REA/Domain and its current status
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Wave 1: Test stubs for PORTAL-01 (submit-to-portals) and PORTAL-03 (portal-status badge logic)
+- [ ] 01-02-PLAN.md — Wave 1: DB migration SQL + sell.html Step 6 opt-in toggle + goLive() portal fields (PORTAL-02)
+- [ ] 01-03-PLAN.md — Wave 2: api/submit-to-portals.js — REAXML builder + SFTP delivery + credential guard (PORTAL-01)
+- [ ] 01-04-PLAN.md — Wave 2: api/portal-status.js GET handler + dashboard.html portal status card (PORTAL-03)
+- [ ] 01-05-PLAN.md — Wave 3: Human verification checkpoint (all three PORTAL requirements)
 
 ### Phase 2: QLD Legal Scaffolding
 **Goal**: Sellers complete QLD mandatory disclosure obligations (Form 2, prescribed certificates) within the listing flow and can access a conveyancer referral at offer acceptance
@@ -105,11 +112,11 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. REA/Domain Portal Integration | v2.0 | 0/TBD | Not started | - |
+| 1. REA/Domain Portal Integration | v2.0 | 0/5 | Plans written | - |
 | 2. QLD Legal Scaffolding | v2.0 | 0/6 | Plans written | - |
 | 3. AI Pricing Tool | v2.0 | 0/6 | Plans written + verified | - |
 | 4. Negotiation Facilitation | v2.0 | 0/TBD | Not started | - |
 | 5. Buyer Finance Verification | v2.0 | 0/TBD | Not started | - |
 
 ---
-*Roadmap created: 2026-03-21 | Phase order revised: 2026-03-22 (see MARKET-AUDIT.md) | Phase 3 plans written: 2026-03-21 | Phase 2 plans written: 2026-03-22*
+*Roadmap created: 2026-03-21 | Phase order revised: 2026-03-22 (see MARKET-AUDIT.md) | Phase 3 plans written: 2026-03-21 | Phase 2 plans written: 2026-03-22 | Phase 1 plans written: 2026-03-22*
