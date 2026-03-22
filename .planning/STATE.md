@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Execution Engine
 status: executing
-stopped_at: Completed 02-05-PLAN.md — LEGAL-04 disclosure PDF generator
-last_updated: "2026-03-22T05:26:08.413Z"
+stopped_at: Completed 02-04-PLAN.md — LEGAL-02 disclosure certificate checklist
+last_updated: "2026-03-22T05:28:58.236Z"
 last_activity: 2026-03-22 — 02-01 complete (LEGAL-01/02/04 test stubs, 19 tests created)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 17
-  completed_plans: 9
+  completed_plans: 10
   percent: 35
 ---
 
@@ -54,6 +54,7 @@ Progress: [████░░░░░░] 35%
 | Phase 02-qld-legal-scaffolding P03 | 4 | 1 tasks | 1 files |
 | Phase 02-qld-legal-scaffolding P03 | 5 | 1 tasks | 1 files |
 | Phase 02-qld-legal-scaffolding P05 | 4 | 1 tasks | 3 files |
+| Phase 02-qld-legal-scaffolding P04 | 12 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,9 @@ Recent decisions affecting current work:
 - [Phase 02-qld-legal-scaffolding]: 02-03: Placeholder partner details used — must be replaced when real QLD conveyancing firm is partnered
 - [Phase 02-qld-legal-scaffolding]: 02-05: pdfmake getBuffer() wrapped in Promise for async Vercel handler compatibility
 - [Phase 02-qld-legal-scaffolding]: 02-05: ATO 15% withholding warning only shown when ato_clearance_obtained is false
+- [Phase 02-qld-legal-scaffolding]: 02-04: helpers/disclosure-checklist.js at root helpers/ (not api/helpers/) — test contract uses ../../helpers relative path from api/__tests__/
+- [Phase 02-qld-legal-scaffolding]: 02-04: module.exports = deriveChecklist (direct function) with named alias — test requires function directly, not destructured
+- [Phase 02-qld-legal-scaffolding]: 02-04: deriveChecklist inlined in browser HTML files — Node require() not available in browser; helpers/ file remains server-side test-contract source of truth
 
 ### Pending Todos
 
@@ -98,6 +102,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T05:26:08.410Z
-Stopped at: Completed 02-05-PLAN.md — LEGAL-04 disclosure PDF generator
+Last session: 2026-03-22T05:28:58.232Z
+Stopped at: Completed 02-04-PLAN.md — LEGAL-02 disclosure certificate checklist
 Resume file: None
