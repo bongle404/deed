@@ -386,6 +386,24 @@
     </div>
   </div>
 
+  <!-- Portal Distribution Status — Phase 1 -->
+  <div id="portal-status-card" style="display:none; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:1.5rem 2rem; margin-bottom:1.5rem;">
+    <div style="font-size:0.62rem; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color:#6b7280; margin-bottom:0.75rem;">Portal Distribution</div>
+    <div style="display:flex; gap:2rem; flex-wrap:wrap; align-items:center;">
+      <div>
+        <span style="font-size:0.82rem; color:#6b7280; margin-right:0.5rem;">realestate.com.au</span>
+        <span id="rea-badge" style="font-size:0.82rem; font-weight:600; color:#9ca3af;">—</span>
+      </div>
+      <div>
+        <span style="font-size:0.82rem; color:#6b7280; margin-right:0.5rem;">domain.com.au</span>
+        <span id="domain-badge" style="font-size:0.82rem; font-weight:600; color:#9ca3af;">—</span>
+      </div>
+    </div>
+    <div id="rea-link-row" style="display:none; margin-top:0.75rem; font-size:0.82rem;">
+      <a id="rea-listing-link" href="#" target="_blank" rel="noopener" style="color:#2563EB;">View on realestate.com.au →</a>
+    </div>
+  </div>
+
   <!-- WAR ROOM BANNER -->
   <div class="war-room-banner" id="war-room-banner">
     <div class="war-room-top">
@@ -1106,6 +1124,44 @@
 
     document.getElementById('listing-address').classList.remove('loading-pulse');
     renderDashboard(listing, offers || []);
+    loadPortalStatus(listingId);
+  }
+
+  function renderPortalStatus(data) {
+    if (!data || !data.portal_opted_in) return; // card stays hidden
+    document.getElementById('portal-status-card').style.display = 'block';
+    const statusMap = {
+      'not_submitted': { label: 'Not opted in', color: '#9ca3af' },
+      'pending':       { label: 'Processing…',  color: '#d97706' },
+      'live':          { label: 'Live',          color: '#16a34a' },
+      'rejected':      { label: 'Rejected — contact DEED', color: '#dc2626' },
+      'withdrawn':     { label: 'Withdrawn',     color: '#6b7280' },
+    };
+    const rea = statusMap[data.rea_status] || statusMap['not_submitted'];
+    const domain = statusMap[data.domain_status] || statusMap['not_submitted'];
+    const reaBadge = document.getElementById('rea-badge');
+    reaBadge.textContent = rea.label;
+    reaBadge.style.color = rea.color;
+    const domainBadge = document.getElementById('domain-badge');
+    domainBadge.textContent = domain.label;
+    domainBadge.style.color = domain.color;
+    if (data.rea_status === 'live' && data.rea_listing_url) {
+      const linkRow = document.getElementById('rea-link-row');
+      linkRow.style.display = 'block';
+      document.getElementById('rea-listing-link').href = data.rea_listing_url;
+    }
+  }
+
+  async function loadPortalStatus(listingId) {
+    if (!listingId) return;
+    try {
+      const r = await fetch(`/api/portal-status?listing_id=${encodeURIComponent(listingId)}`);
+      if (!r.ok) return;
+      const data = await r.json();
+      renderPortalStatus(data);
+    } catch (e) {
+      // non-fatal — portal card stays hidden
+    }
   }
 
   initDashboard();
