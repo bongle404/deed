@@ -17,7 +17,7 @@ v2.0 transforms DEED from a listing platform into a complete private sale execut
 
 **Milestone Goal:** Sellers can reach buyers via REA/Domain, navigate QLD legal obligations, price confidently with AI comparables, negotiate structured offers, and verify buyer finance — all without an agent.
 
-- [ ] **Phase 1: REA/Domain Portal Integration** - Sellers can list on REA/Domain via FSBO intermediary from the sell flow
+- [x] **Phase 1: REA/Domain Portal Integration** - Sellers can list on REA/Domain via FSBO intermediary from the sell flow (complete 2026-03-22)
 - [ ] **Phase 2: QLD Legal Scaffolding** - Guided Form 2 disclosure, transparency checklist, and conveyancer referral built into the sell flow
 - [ ] **Phase 3: AI Pricing Tool** - Seller gets a confidence-interval price estimate backed by comparable sales before listing
 - [ ] **Phase 4: Negotiation Facilitation** - Structured counteroffer flow with side-by-side offer comparison and AI below-market flagging
@@ -39,9 +39,9 @@ v2.0 transforms DEED from a listing platform into a complete private sale execut
 Plans:
 - [x] 01-01-PLAN.md — Wave 1: Test stubs for PORTAL-01 (submit-to-portals) and PORTAL-03 (portal-status badge logic)
 - [x] 01-02-PLAN.md — Wave 1: DB migration SQL + sell.html Step 6 opt-in toggle + goLive() portal fields (PORTAL-02)
-- [ ] 01-03-PLAN.md — Wave 2: api/submit-to-portals.js — REAXML builder + SFTP delivery + credential guard (PORTAL-01)
-- [ ] 01-04-PLAN.md — Wave 2: api/portal-status.js GET handler + dashboard.html portal status card (PORTAL-03)
-- [ ] 01-05-PLAN.md — Wave 3: Human verification checkpoint (all three PORTAL requirements)
+- [x] 01-03-PLAN.md — Wave 2: api/submit-to-portals.js — REAXML builder + SFTP delivery + credential guard (PORTAL-01)
+- [x] 01-04-PLAN.md — Wave 2: api/portal-status.js GET handler + dashboard.html portal status card (PORTAL-03)
+- [x] 01-05-PLAN.md — Wave 3: Human verification checkpoint (all three PORTAL requirements)
 
 ### Phase 2: QLD Legal Scaffolding
 **Goal**: Sellers complete QLD mandatory disclosure obligations (Form 2, prescribed certificates) within the listing flow and can access a conveyancer referral at offer acceptance
@@ -112,7 +112,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. REA/Domain Portal Integration | 4/5 | In Progress|  | - |
+| 1. REA/Domain Portal Integration | v2.0 | 5/5 | Complete | 2026-03-22 |
 | 2. QLD Legal Scaffolding | v2.0 | 0/6 | Plans written | - |
 | 3. AI Pricing Tool | v2.0 | 0/6 | Plans written + verified | - |
 | 4. Negotiation Facilitation | v2.0 | 0/TBD | Not started | - |
