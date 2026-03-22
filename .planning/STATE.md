@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Execution Engine
-status: planning
-stopped_at: Completed 02-01-PLAN.md (Wave 0 test stubs for LEGAL-01/02/04 — 19 tests, 2 RED 1 GREEN)
-last_updated: "2026-03-22T05:15:00Z"
-last_activity: 2026-03-22 — 02-01 complete (LEGAL-01/02/04 test stubs, Wave 0 RED state established)
+status: executing
+stopped_at: Completed 02-02-PLAN.md (Form 2 disclosure — api/disclosure.js + sell.html Step 5)
+last_updated: "2026-03-22T05:18:01.697Z"
+last_activity: 2026-03-22 — 02-01 complete (LEGAL-01/02/04 test stubs, 19 tests created)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 17
-  completed_plans: 6
+  completed_plans: 7
   percent: 35
 ---
 
@@ -50,6 +50,7 @@ Progress: [████░░░░░░] 35%
 *Updated after each plan completion*
 | Phase 01-rea-domain-portal-integration P04 | 7 | 2 tasks | 2 files |
 | Phase 01-rea-domain-portal-integration P03 | 2min | 1 tasks | 3 files |
+| Phase 02-qld-legal-scaffolding P02 | 18 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,8 @@ Recent decisions affecting current work:
 - [Phase 02-01]: disclosure.test.js GREEN (not RED) because api/disclosure.js was pre-built by 02-02 execution before this Wave 0 plan ran — tests confirm contract matches
 - [Phase 02-01]: pdfmake mocked with { virtual: true } for packages not yet installed — prevents install dependency blocking Wave 0
 - [Phase 02-01]: disclosure-checklist tests use findItem() label-fragment lookup instead of fixed index — resilient to item ordering changes
+- [Phase 02-qld-legal-scaffolding]: canPublish check runs client-side via Supabase anon key — no separate read endpoint
+- [Phase 02-qld-legal-scaffolding]: Step 5 disclosure panel uses id='step-disclosure' with STEP_IDS mapping in goToStep()
 
 ### Pending Todos
 
@@ -84,6 +87,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T05:15:00Z
-Stopped at: Completed 02-01-PLAN.md (Wave 0 test stubs for LEGAL-01/02/04 — 19 tests, 2 RED 1 GREEN)
+Last session: 2026-03-22T05:18:01.695Z
+Stopped at: Completed 02-02-PLAN.md (Form 2 disclosure — api/disclosure.js + sell.html Step 5)
 Resume file: None
