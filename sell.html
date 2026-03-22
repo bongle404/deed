@@ -442,6 +442,17 @@
     .comps-table tr:last-child td { border-bottom: none; }
     .comp-price { color: var(--blue) !important; font-weight: 600; }
 
+    /* ── Price estimate widget ───────────────────────────────────────────── */
+    .price-estimate-widget { margin-bottom: 1.5rem; }
+    .estimate-bands { display: flex; flex-direction: row; gap: 1rem; margin-bottom: 1.5rem; }
+    .estimate-band { flex: 1; text-align: center; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+    .estimate-band-mid { border-color: var(--blue); background: rgba(37,99,235,0.04); }
+    .estimate-band-label { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.4rem; }
+    .estimate-band-value { font-family: var(--font-display); font-size: 1.6rem; color: var(--text); margin: 0; }
+    .estimate-confidence { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .estimate-data-note { font-size: 0.72rem; color: var(--muted); margin-bottom: 1rem; }
+    .comps-table .comp-price-cell { color: var(--blue); font-weight: 600; }
+
     /* Info cards */
     .info-card {
       border: 1px solid var(--border);
@@ -755,22 +766,42 @@
         <h2 class="step-heading">COMPARABLE<br/><span class="accent">SALES</span></h2>
         <p class="step-sub">Here's what similar properties sold for in your area in the last 6 months. Use this to set a price grounded in evidence, not gut feel.</p>
 
-        <div class="info-card" style="padding:0;overflow:hidden;margin-bottom:1.5rem;">
-          <table class="comps-table">
-            <thead><tr><th>Address</th><th>Sold price</th><th>Bed/Bath</th><th>Land</th><th>Sold</th></tr></thead>
-            <tbody>
-              <tr><td>8 Moreton St</td><td class="comp-price">$920,000</td><td>3/2</td><td>450m²</td><td>1mo</td></tr>
-              <tr><td>22 Stanley St</td><td class="comp-price">$875,000</td><td>3/1</td><td>405m²</td><td>2mo</td></tr>
-              <tr><td>5 Merthyr Rd</td><td class="comp-price">$810,000</td><td>3/2</td><td>390m²</td><td>3mo</td></tr>
-              <tr><td>31 Villiers St</td><td class="comp-price">$1,050,000</td><td>4/2</td><td>607m²</td><td>4mo</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="info-card info-card-blue" style="margin-bottom:1rem;">
-          <p class="info-card-label" style="color:#1d4ed8;">DEED price estimate</p>
-          <p class="info-card-value" style="font-size:2rem;color:var(--blue);">$840,000 – $930,000</p>
-          <p class="info-card-sub" style="color:#2563eb;">Based on 4 comparable sales in New Farm, QLD</p>
+        <div id="price-estimate-widget" class="price-estimate-widget">
+          <div id="estimate-loading" style="display:none;">
+            <p class="step-sub">Fetching comparable sales...</p>
+          </div>
+          <div id="estimate-content" style="display:none;">
+            <div class="estimate-bands">
+              <div class="estimate-band">
+                <p class="estimate-band-label">Low estimate</p>
+                <p class="estimate-band-value" id="est-low">—</p>
+              </div>
+              <div class="estimate-band estimate-band-mid">
+                <p class="estimate-band-label">Likely range</p>
+                <p class="estimate-band-value" id="est-mid">—</p>
+              </div>
+              <div class="estimate-band">
+                <p class="estimate-band-label">High estimate</p>
+                <p class="estimate-band-value" id="est-high">—</p>
+              </div>
+            </div>
+            <p class="estimate-confidence" id="est-confidence"></p>
+            <p class="estimate-data-note" id="est-data-note"></p>
+            <div class="info-card" style="padding:0;overflow:hidden;margin-bottom:1.5rem;">
+              <table class="comps-table" id="comps-table">
+                <thead>
+                  <tr><th>Address</th><th>Sold price</th><th>Bed/Bath</th><th>Sold</th></tr>
+                </thead>
+                <tbody id="comps-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div id="estimate-error" style="display:none;">
+            <p class="step-sub">Unable to fetch comparable sales for this suburb. Set your price based on your research.</p>
+          </div>
+          <div id="estimate-empty" style="display:block;">
+            <p class="step-sub">Enter your suburb and number of bedrooms above to see comparable sales.</p>
+          </div>
         </div>
 
         <div class="info-card info-card-green" style="margin-bottom:1rem;">
@@ -1340,6 +1371,97 @@
     btn.disabled = false;
   }
 
+  // ── Price estimate widget ──────────────────────────────────────────────
+  let estimateDebounceTimer;
+  let lastEstimate = null;
+  const AU_CURRENCY = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+
+  function formatSoldDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-AU', { month: 'short', year: 'numeric' });
+  }
+
+  function renderEstimateWidget(data) {
+    document.getElementById('estimate-loading').style.display = 'none';
+    document.getElementById('estimate-error').style.display = 'none';
+    document.getElementById('estimate-empty').style.display = 'none';
+
+    if (!data || data.error) {
+      document.getElementById('estimate-error').style.display = 'block';
+      return;
+    }
+
+    lastEstimate = data;
+
+    document.getElementById('est-low').textContent = data.low ? AU_CURRENCY.format(data.low) : '—';
+    document.getElementById('est-mid').textContent = data.mid ? AU_CURRENCY.format(data.mid) : '—';
+    document.getElementById('est-high').textContent = data.high ? AU_CURRENCY.format(data.high) : '—';
+
+    const confidenceLabels = { HIGH: 'High confidence — 5+ comparable sales', MEDIUM: 'Medium confidence — 3–4 comparable sales', LOW: 'Low confidence — fewer than 3 comparable sales' };
+    document.getElementById('est-confidence').textContent = confidenceLabels[data.confidence] || '';
+    document.getElementById('est-data-note').textContent = `Based on ${data.comp_count} comparable sale${data.comp_count !== 1 ? 's' : ''} from Proptech Data`;
+
+    const tbody = document.getElementById('comps-tbody');
+    tbody.innerHTML = '';
+    (data.comparables || []).slice(0, 8).forEach(comp => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${comp.address || '—'}</td>
+        <td class="comp-price-cell">${AU_CURRENCY.format(comp.price)}</td>
+        <td>${comp.bedrooms || '—'}/${comp.bathrooms || '—'}</td>
+        <td>${formatSoldDate(comp.sold_date)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('estimate-content').style.display = 'block';
+  }
+
+  async function refreshEstimate() {
+    const suburb = (document.getElementById('suburb') || {}).value || '';
+    const bedrooms = (document.getElementById('beds') || {}).value || '';
+    const bathrooms = (document.getElementById('baths') || {}).value || '';
+    const propertyType = selections.type || 'house';
+
+    if (!suburb || !bedrooms) {
+      document.getElementById('estimate-empty').style.display = 'block';
+      document.getElementById('estimate-content').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('estimate-loading').style.display = 'block';
+    document.getElementById('estimate-content').style.display = 'none';
+    document.getElementById('estimate-empty').style.display = 'none';
+
+    try {
+      const res = await fetch('/api/price-estimate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ suburb, bedrooms: parseInt(bedrooms), bathrooms: parseInt(bathrooms), property_type: propertyType })
+      });
+      const data = await res.json();
+      renderEstimateWidget(data);
+    } catch (err) {
+      document.getElementById('estimate-loading').style.display = 'none';
+      document.getElementById('estimate-error').style.display = 'block';
+    }
+  }
+
+  // Attach debounced listeners for bedrooms, bathrooms, land-size
+  ['beds', 'baths', 'land-size'].forEach(fieldId => {
+    const el = document.getElementById(fieldId);
+    if (el) {
+      el.addEventListener('input', () => {
+        clearTimeout(estimateDebounceTimer);
+        estimateDebounceTimer = setTimeout(refreshEstimate, 600);
+      });
+    }
+  });
+  // Suburb: trigger on change (discrete selection), also attach after DOM ready
+  const suburbEl = document.getElementById('suburb');
+  if (suburbEl) suburbEl.addEventListener('change', refreshEstimate);
+
   // ── Portal opt-in toggle ───────────────────────────────────────────────
   function togglePortalFeeAck(checked) {
     const ackRow = document.getElementById('portal-fee-ack-row');
@@ -1495,6 +1617,10 @@
         paid:          false,
         portal_opted_in:          portalOptedIn,
         portal_fee_acknowledged:  portalFeeAck,
+        price_estimate_low:       lastEstimate?.low || null,
+        price_estimate_mid:       lastEstimate?.mid || null,
+        price_estimate_high:      lastEstimate?.high || null,
+        price_estimate_confidence: lastEstimate?.confidence || null,
       }]).select();
 
       if (listingError) throw listingError;
