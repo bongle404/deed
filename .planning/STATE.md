@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Execution Engine
 status: executing
-stopped_at: Completed 02-03-PLAN.md — LEGAL-03 conveyancer referral prompt
-last_updated: "2026-03-22T05:23:07.751Z"
+stopped_at: Completed 02-05-PLAN.md — LEGAL-04 disclosure PDF generator
+last_updated: "2026-03-22T05:26:08.413Z"
 last_activity: 2026-03-22 — 02-01 complete (LEGAL-01/02/04 test stubs, 19 tests created)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 17
-  completed_plans: 8
+  completed_plans: 9
   percent: 35
 ---
 
@@ -53,6 +53,7 @@ Progress: [████░░░░░░] 35%
 | Phase 02-qld-legal-scaffolding P02 | 18 | 2 tasks | 2 files |
 | Phase 02-qld-legal-scaffolding P03 | 4 | 1 tasks | 1 files |
 | Phase 02-qld-legal-scaffolding P03 | 5 | 1 tasks | 1 files |
+| Phase 02-qld-legal-scaffolding P05 | 4 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Recent decisions affecting current work:
 - [Phase 02-qld-legal-scaffolding]: 02-03: Referral card is always-present HTML in step-3 — no JS toggle needed, existing modal show/hide handles visibility
 - [Phase 02-qld-legal-scaffolding]: 02-03: QLS disclosure defaults to 'may receive' framing before any commercial arrangement exists — conservative/safer default
 - [Phase 02-qld-legal-scaffolding]: 02-03: Placeholder partner details used — must be replaced when real QLD conveyancing firm is partnered
+- [Phase 02-qld-legal-scaffolding]: 02-05: pdfmake getBuffer() wrapped in Promise for async Vercel handler compatibility
+- [Phase 02-qld-legal-scaffolding]: 02-05: ATO 15% withholding warning only shown when ato_clearance_obtained is false
 
 ### Pending Todos
 
@@ -95,6 +98,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T05:23:07.749Z
-Stopped at: Completed 02-03-PLAN.md — LEGAL-03 conveyancer referral prompt
+Last session: 2026-03-22T05:26:08.410Z
+Stopped at: Completed 02-05-PLAN.md — LEGAL-04 disclosure PDF generator
 Resume file: None
