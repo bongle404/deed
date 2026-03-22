@@ -46,7 +46,15 @@ v2.0 transforms DEED from a listing platform into a complete private sale execut
   2. Platform displays prescribed certificate checklist (pool safety, body corp, title, rates, water, planning) with pass/fail status on the listing
   3. At offer acceptance, seller is shown a conveyancer referral prompt with a QLD-licensed partner
   4. Seller can download a pre-filled disclosure statement PDF from their dashboard
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Wave 0: test stubs for LEGAL-01, LEGAL-02, LEGAL-04 (disclosure, checklist, PDF)
+- [ ] 02-02-PLAN.md — Wave 1: DB migration + Form 2 disclosure step in sell.html + publish gate (LEGAL-01)
+- [ ] 02-03-PLAN.md — Wave 1: Conveyancer referral prompt in dashboard.html accept modal (LEGAL-03)
+- [ ] 02-04-PLAN.md — Wave 2: Certificate checklist module + display on listing.html and dashboard.html (LEGAL-02)
+- [ ] 02-05-PLAN.md — Wave 2: PDF generation API route /api/generate-disclosure (LEGAL-04)
+- [ ] 02-06-PLAN.md — Wave 3: Human verification checkpoint (all four LEGAL requirements)
 
 ### Phase 3: AI Pricing Tool
 **Goal**: Sellers can see a data-backed price estimate with comparable sales before they publish — and the platform uses that estimate to flag weak offers automatically
@@ -98,10 +106,10 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. REA/Domain Portal Integration | v2.0 | 0/TBD | Not started | - |
-| 2. QLD Legal Scaffolding | v2.0 | 0/TBD | Not started | - |
+| 2. QLD Legal Scaffolding | v2.0 | 0/6 | Plans written | - |
 | 3. AI Pricing Tool | v2.0 | 0/6 | Plans written + verified | - |
 | 4. Negotiation Facilitation | v2.0 | 0/TBD | Not started | - |
 | 5. Buyer Finance Verification | v2.0 | 0/TBD | Not started | - |
 
 ---
-*Roadmap created: 2026-03-21 | Phase order revised: 2026-03-22 (see MARKET-AUDIT.md) | Phase 3 plans written: 2026-03-21*
+*Roadmap created: 2026-03-21 | Phase order revised: 2026-03-22 (see MARKET-AUDIT.md) | Phase 3 plans written: 2026-03-21 | Phase 2 plans written: 2026-03-22*
