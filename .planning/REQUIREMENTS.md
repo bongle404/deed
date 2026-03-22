@@ -35,9 +35,9 @@
 
 ### Portal (REA/Domain Access)
 
-- [ ] **PORTAL-01**: DEED integrates with a QLD-licensed FSBO intermediary to submit listings to realestate.com.au
-- [ ] **PORTAL-02**: Seller can opt in to REA/Domain listing from the sell flow (with fee disclosure)
-- [ ] **PORTAL-03**: Listing status (live on REA/Domain) is visible in seller dashboard
+- [x] **PORTAL-01**: DEED integrates with a QLD-licensed FSBO intermediary to submit listings to realestate.com.au
+- [x] **PORTAL-02**: Seller can opt in to REA/Domain listing from the sell flow (with fee disclosure)
+- [x] **PORTAL-03**: Listing status (live on REA/Domain) is visible in seller dashboard
 
 ## v3 Requirements (Deferred)
 
@@ -65,30 +65,30 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PRICE-01 | TBD | Pending |
-| PRICE-02 | TBD | Pending |
-| PRICE-03 | TBD | Pending |
-| PRICE-04 | TBD | Pending |
-| VERIF-01 | TBD | Pending |
-| VERIF-02 | TBD | Pending |
-| VERIF-03 | TBD | Pending |
-| VERIF-04 | TBD | Pending |
-| LEGAL-01 | TBD | Pending |
-| LEGAL-02 | TBD | Pending |
-| LEGAL-03 | TBD | Pending |
-| LEGAL-04 | TBD | Pending |
-| NEGO-01 | TBD | Pending |
-| NEGO-02 | TBD | Pending |
-| NEGO-03 | TBD | Pending |
-| NEGO-04 | TBD | Pending |
-| PORTAL-01 | TBD | Pending |
-| PORTAL-02 | TBD | Pending |
-| PORTAL-03 | TBD | Pending |
+| PRICE-01 | Phase 1 | Pending |
+| PRICE-02 | Phase 1 | Pending |
+| PRICE-03 | Phase 1 | Pending |
+| PRICE-04 | Phase 1 | Pending |
+| VERIF-01 | Phase 2 | Pending |
+| VERIF-02 | Phase 2 | Pending |
+| VERIF-03 | Phase 2 | Pending |
+| VERIF-04 | Phase 2 | Pending |
+| LEGAL-01 | Phase 3 | Pending |
+| LEGAL-02 | Phase 3 | Pending |
+| LEGAL-03 | Phase 3 | Pending |
+| LEGAL-04 | Phase 3 | Pending |
+| NEGO-01 | Phase 4 | Pending |
+| NEGO-02 | Phase 4 | Pending |
+| NEGO-03 | Phase 4 | Pending |
+| NEGO-04 | Phase 4 | Pending |
+| PORTAL-01 | Phase 5 | Complete |
+| PORTAL-02 | Phase 5 | Pending |
+| PORTAL-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 19 total
-- Mapped to phases: 0 (roadmapper pending)
-- Unmapped: 19 ⚠️
+- Mapped to phases: 19/19 ✓
+- Unmapped: 0
 
 ---
-*Requirements defined: 2026-03-21*
+*Requirements defined: 2026-03-21 | Traceability updated: 2026-03-21*

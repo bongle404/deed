@@ -37,8 +37,8 @@ v2.0 transforms DEED from a listing platform into a complete private sale execut
 **Plans**: 5 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Wave 1: Test stubs for PORTAL-01 (submit-to-portals) and PORTAL-03 (portal-status badge logic)
-- [ ] 01-02-PLAN.md — Wave 1: DB migration SQL + sell.html Step 6 opt-in toggle + goLive() portal fields (PORTAL-02)
+- [x] 01-01-PLAN.md — Wave 1: Test stubs for PORTAL-01 (submit-to-portals) and PORTAL-03 (portal-status badge logic)
+- [x] 01-02-PLAN.md — Wave 1: DB migration SQL + sell.html Step 6 opt-in toggle + goLive() portal fields (PORTAL-02)
 - [ ] 01-03-PLAN.md — Wave 2: api/submit-to-portals.js — REAXML builder + SFTP delivery + credential guard (PORTAL-01)
 - [ ] 01-04-PLAN.md — Wave 2: api/portal-status.js GET handler + dashboard.html portal status card (PORTAL-03)
 - [ ] 01-05-PLAN.md — Wave 3: Human verification checkpoint (all three PORTAL requirements)
@@ -112,7 +112,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. REA/Domain Portal Integration | v2.0 | 0/5 | Plans written | - |
+| 1. REA/Domain Portal Integration | 2/5 | In Progress|  | - |
 | 2. QLD Legal Scaffolding | v2.0 | 0/6 | Plans written | - |
 | 3. AI Pricing Tool | v2.0 | 0/6 | Plans written + verified | - |
 | 4. Negotiation Facilitation | v2.0 | 0/TBD | Not started | - |
