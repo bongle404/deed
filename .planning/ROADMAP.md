@@ -18,7 +18,7 @@ v2.0 transforms DEED from a listing platform into a complete private sale execut
 **Milestone Goal:** Sellers can reach buyers via REA/Domain, navigate QLD legal obligations, price confidently with AI comparables, negotiate structured offers, and verify buyer finance — all without an agent.
 
 - [x] **Phase 1: REA/Domain Portal Integration** - Sellers can list on REA/Domain via FSBO intermediary from the sell flow (complete 2026-03-22)
-- [ ] **Phase 2: QLD Legal Scaffolding** - Guided Form 2 disclosure, transparency checklist, and conveyancer referral built into the sell flow
+- [x] **Phase 2: QLD Legal Scaffolding** - Guided Form 2 disclosure, transparency checklist, and conveyancer referral built into the sell flow (completed 2026-03-22)
 - [ ] **Phase 3: AI Pricing Tool** - Seller gets a confidence-interval price estimate backed by comparable sales before listing
 - [ ] **Phase 4: Negotiation Facilitation** - Structured counteroffer flow with side-by-side offer comparison and AI below-market flagging
 - [ ] **Phase 5: Buyer Finance Verification** - Verified buyer badge via illion BankStatements (or lighter pre-approval upload) ranks verified buyers above unverified
@@ -113,7 +113,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. REA/Domain Portal Integration | v2.0 | 5/5 | Complete | 2026-03-22 |
-| 2. QLD Legal Scaffolding | 5/6 | In Progress|  | - |
+| 2. QLD Legal Scaffolding | 6/6 | Complete   | 2026-03-22 | - |
 | 3. AI Pricing Tool | v2.0 | 0/6 | Plans written + verified | - |
 | 4. Negotiation Facilitation | v2.0 | 0/TBD | Not started | - |
 | 5. Buyer Finance Verification | v2.0 | 0/TBD | Not started | - |
