@@ -7,10 +7,10 @@
 
 ### Pricing (AI Pricing Tool)
 
-- [ ] **PRICE-01**: Seller can see an AI-generated price estimate with confidence interval (low/mid/high) before publishing their listing
-- [ ] **PRICE-02**: Price estimate displays the comparable sales it is based on (suburb, sale date, price, beds/baths)
-- [ ] **PRICE-03**: Seller dashboard flags any incoming offer below the estimated floor price with a reason
-- [ ] **PRICE-04**: Price estimate updates if seller changes property details (beds, baths, size)
+- [x] **PRICE-01**: Seller can see an AI-generated price estimate with confidence interval (low/mid/high) before publishing their listing
+- [x] **PRICE-02**: Price estimate displays the comparable sales it is based on (suburb, sale date, price, beds/baths)
+- [x] **PRICE-03**: Seller dashboard flags any incoming offer below the estimated floor price with a reason
+- [x] **PRICE-04**: Price estimate updates if seller changes property details (beds, baths, size)
 
 ### Verification (Buyer Finance Verification)
 
@@ -65,10 +65,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PRICE-01 | Phase 1 | Pending |
-| PRICE-02 | Phase 1 | Pending |
-| PRICE-03 | Phase 1 | Pending |
-| PRICE-04 | Phase 1 | Pending |
+| PRICE-01 | Phase 1 | Complete |
+| PRICE-02 | Phase 1 | Complete |
+| PRICE-03 | Phase 1 | Complete |
+| PRICE-04 | Phase 1 | Complete |
 | VERIF-01 | Phase 2 | Pending |
 | VERIF-02 | Phase 2 | Pending |
 | VERIF-03 | Phase 2 | Pending |
