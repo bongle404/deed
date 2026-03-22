@@ -113,7 +113,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. REA/Domain Portal Integration | v2.0 | 5/5 | Complete | 2026-03-22 |
-| 2. QLD Legal Scaffolding | v2.0 | 0/6 | Plans written | - |
+| 2. QLD Legal Scaffolding | 1/6 | In Progress|  | - |
 | 3. AI Pricing Tool | v2.0 | 0/6 | Plans written + verified | - |
 | 4. Negotiation Facilitation | v2.0 | 0/TBD | Not started | - |
 | 5. Buyer Finance Verification | v2.0 | 0/TBD | Not started | - |

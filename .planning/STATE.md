@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Execution Engine
 status: planning
-stopped_at: Completed 01-05-PLAN.md (Phase 1 human browser verification — all checks approved)
-last_updated: "2026-03-22T05:08:41.777Z"
-last_activity: 2026-03-22 — 01-05 complete (Phase 1 browser verification approved, PORTAL-01/02/03 verified)
+stopped_at: Completed 02-01-PLAN.md (Wave 0 test stubs for LEGAL-01/02/04 — 19 tests, 2 RED 1 GREEN)
+last_updated: "2026-03-22T05:15:00Z"
+last_activity: 2026-03-22 — 02-01 complete (LEGAL-01/02/04 test stubs, Wave 0 RED state established)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 17
-  completed_plans: 5
-  percent: 29
+  completed_plans: 6
+  percent: 35
 ---
 
 # DEED — GSD State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 
 ## Current Position
 
-Phase: 1 of 5 (REA/Domain Portal Integration) — COMPLETE
-Plan: 5 of 5 (01-05 complete — Phase 1 done)
-Status: Phase 1 complete — ready to plan Phase 2
-Last activity: 2026-03-22 — 01-05 complete (Phase 1 browser verification approved, PORTAL-01/02/03 verified)
+Phase: 2 of 5 (QLD Legal Scaffolding) — IN PROGRESS
+Plan: 1 of 5 complete (02-01 done — Wave 0 test stubs)
+Status: Phase 2 executing — Wave 0 complete, Wave 1 implementation next
+Last activity: 2026-03-22 — 02-01 complete (LEGAL-01/02/04 test stubs, 19 tests created)
 
-Progress: [███░░░░░░░] 29%
+Progress: [████░░░░░░] 35%
 
 ## Performance Metrics
 
@@ -68,6 +68,9 @@ Recent decisions affecting current work:
 - [Phase 01-rea-domain-portal-integration]: 01-04: 405 handler uses .json() not .end() — test mock does not implement res.end(), json() satisfies assertion and is valid for a JSON API
 - [Phase 01-03]: Credential guard uses only REA_SFTP_HOST (not REA_AGENCY_ID) to match the test contract
 - [Phase 01-03]: module.exports.default = handler added for CommonJS destructuring compatibility in tests
+- [Phase 02-01]: disclosure.test.js GREEN (not RED) because api/disclosure.js was pre-built by 02-02 execution before this Wave 0 plan ran — tests confirm contract matches
+- [Phase 02-01]: pdfmake mocked with { virtual: true } for packages not yet installed — prevents install dependency blocking Wave 0
+- [Phase 02-01]: disclosure-checklist tests use findItem() label-fragment lookup instead of fixed index — resilient to item ordering changes
 
 ### Pending Todos
 
@@ -81,6 +84,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T05:30:00Z
-Stopped at: Completed 01-05-PLAN.md (Phase 1 human browser verification — all checks approved)
+Last session: 2026-03-22T05:15:00Z
+Stopped at: Completed 02-01-PLAN.md (Wave 0 test stubs for LEGAL-01/02/04 — 19 tests, 2 RED 1 GREEN)
 Resume file: None
