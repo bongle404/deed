@@ -82,7 +82,7 @@
 | NEGO-03 | Phase 4 | Pending |
 | NEGO-04 | Phase 4 | Pending |
 | PORTAL-01 | Phase 5 | Complete |
-| PORTAL-02 | Phase 5 | Pending |
+| PORTAL-02 | Phase 1 | Complete |
 | PORTAL-03 | Phase 5 | Complete |
 
 **Coverage:**
@@ -91,4 +91,4 @@
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-03-21 | Traceability updated: 2026-03-21*
+*Requirements defined: 2026-03-21 | Traceability updated: 2026-03-22*
