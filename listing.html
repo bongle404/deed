@@ -277,6 +277,36 @@
     .badge-new { background: var(--blue-pale); color: var(--blue); border: 1px solid #bfdbfe; }
     .deed-verified { font-size: 0.68rem; font-weight: 500; padding: 0.25rem 0.65rem; border-radius: 999px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 
+    /* ── DISCLOSURE CHECKLIST ────────────────── */
+    .disclosure-checklist-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .disclosure-checklist-card-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid var(--section-bg);
+      font-size: 0.82rem;
+    }
+    .checklist-item:last-child { border-bottom: none; }
+    .checklist-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .checklist-label { color: var(--text); flex: 1; }
+    .checklist-note { font-size: 0.74rem; color: var(--muted); margin-top: 0.15rem; }
+    .checklist-self-reported { font-size: 0.72rem; color: var(--dim); margin-top: 0.75rem; font-style: italic; }
+
     /* Reveal animation */
     .reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease, transform 0.4s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
@@ -557,7 +587,7 @@
           <a href="qualify.html" class="btn-outline-lg">
             Get pre-qualified first
           </a>
-          <p class="fee-note">No agent. No commission.<br/>Seller paid $999 flat to list on DEED.</p>
+          <p class="fee-note">No agent. No commission.<br/>Listed privately on DEED. Platform fee on settlement.</p>
         </div>
 
       </div><!-- /sidebar-card -->
@@ -597,6 +627,12 @@
           <span class="detail-key">Flood zone</span>
           <span class="detail-val positive">No flood overlay</span>
         </div>
+      </div>
+
+      <!-- DISCLOSURE CHECKLIST -->
+      <div id="disclosure-checklist-card" class="disclosure-checklist-card reveal" style="display:none;">
+        <div class="disclosure-checklist-card-title">Seller Disclosure — QLD Property Law Act 2023</div>
+        <div id="disclosure-checklist-items"></div>
       </div>
 
     </div><!-- /sidebar-col -->
@@ -695,6 +731,9 @@
       }
 
       sessionStorage.setItem('deedListingId', l.id);
+
+      // Load and render disclosure checklist
+      loadDisclosureChecklist(l.id);
     }
 
     function updateDetails(l) {
@@ -771,6 +810,88 @@
       document.addEventListener('click', (e) => {
         if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) mobileMenu.classList.remove('open');
       });
+    }
+
+    // ── DISCLOSURE CHECKLIST (inline — no Node require in browser) ────────────
+
+    function deriveChecklist(disclosure) {
+      const d = disclosure || {};
+
+      function poolItem() {
+        if (!d.has_pool || d.pool_status === 'no_pool') return { label: 'Pool Safety Certificate', status: 'pass', note: 'No pool on property' };
+        if (d.pool_status === 'compliant') return { label: 'Pool Safety Certificate', status: 'pass', note: null };
+        if (d.pool_status === 'non_compliant_form36') return { label: 'Pool Safety Certificate', status: 'warning', note: 'Form 36 (notice of no certificate) will be provided to buyer' };
+        return { label: 'Pool Safety Certificate', status: 'warning', note: null };
+      }
+      function bodyCorpItem() {
+        if (!d.has_community_title) return { label: 'Body Corporate Certificate', status: 'pass', note: 'Not a community title property' };
+        if (d.body_corp_cert_status === 'provided') return { label: 'Body Corporate Certificate', status: 'pass', note: null };
+        if (d.body_corp_cert_status === 'pending') return { label: 'Body Corporate Certificate', status: 'warning', note: 'Requested — allow 5 business days' };
+        return { label: 'Body Corporate Certificate', status: 'warning', note: 'Not yet obtained' };
+      }
+      function titleItem() {
+        return { label: 'Title Search', status: 'info', note: 'Obtain from Titles Queensland (~$35). Your conveyancer can arrange this.' };
+      }
+      function councilItem() {
+        return (d.council_rates_amount != null && d.council_rates_amount !== '')
+          ? { label: 'Council Rates', status: 'pass', note: null }
+          : { label: 'Council Rates', status: 'warning', note: 'Amount not provided by seller' };
+      }
+      function waterItem() {
+        return (d.water_rates_amount != null && d.water_rates_amount !== '')
+          ? { label: 'Water Rates', status: 'pass', note: null }
+          : { label: 'Water Rates', status: 'warning', note: 'Amount not provided by seller' };
+      }
+      function buildingItem() {
+        return d.has_building_notices
+          ? { label: 'Building Notices', status: 'fail', note: 'Seller has disclosed outstanding building notices — verify before exchanging contracts' }
+          : { label: 'Building Notices', status: 'pass', note: null };
+      }
+      function planningItem() {
+        if (d.has_contamination_notice || d.has_transport_notice) {
+          const flags = [];
+          if (d.has_contamination_notice) flags.push('contamination notice');
+          if (d.has_transport_notice) flags.push('transport/infrastructure notice');
+          return { label: 'Planning / Contamination', status: 'fail', note: 'Seller has disclosed: ' + flags.join(', ') + ' — verify with local council before exchanging' };
+        }
+        return { label: 'Planning / Contamination', status: 'pass', note: null };
+      }
+      function atoItem() {
+        return d.ato_clearance_obtained
+          ? { label: 'ATO Clearance Certificate', status: 'pass', note: null }
+          : { label: 'ATO Clearance Certificate', status: 'warning', note: 'Required for all QLD property sales from 1 Jan 2025. Without it, buyer withholds 15% at settlement. Apply at ato.gov.au.' };
+      }
+
+      return [poolItem(), bodyCorpItem(), titleItem(), councilItem(), waterItem(), buildingItem(), planningItem(), atoItem()];
+    }
+
+    function renderChecklist(items, containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const icons = { pass: '\u2713', fail: '\u2715', warning: '\u26a0', info: '\u24d8' };
+      const colours = { pass: '#16a34a', fail: '#dc2626', warning: '#d97706', info: '#2563eb' };
+      container.innerHTML = items.map(function(item) {
+        return '<div class="checklist-item">' +
+          '<span class="checklist-icon" style="color:' + colours[item.status] + '">' + icons[item.status] + '</span>' +
+          '<div>' +
+          '<div class="checklist-label">' + item.label + '</div>' +
+          (item.note ? '<div class="checklist-note">' + item.note + '</div>' : '') +
+          '</div>' +
+          '</div>';
+      }).join('') + '<p class="checklist-self-reported">Certificates are self-reported by the seller. Buyers should verify independently before exchanging contracts.</p>';
+    }
+
+    async function loadDisclosureChecklist(listingId) {
+      if (!listingId) return;
+      try {
+        const { data, error } = await db.from('disclosure_statements').select('*').eq('listing_id', listingId).single();
+        if (error || !data) return;
+        const card = document.getElementById('disclosure-checklist-card');
+        if (card) card.style.display = '';
+        renderChecklist(deriveChecklist(data), 'disclosure-checklist-items');
+      } catch (e) {
+        // non-fatal — checklist card stays hidden
+      }
     }
   </script>
 </body>
