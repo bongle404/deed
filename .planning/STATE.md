@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Execution Engine
 status: executing
-stopped_at: Completed 02-02-PLAN.md (Form 2 disclosure — api/disclosure.js + sell.html Step 5)
-last_updated: "2026-03-22T05:18:01.697Z"
+stopped_at: "Checkpoint: 02-03-PLAN.md — awaiting human verify of conveyancer referral card in accept-modal step-3"
+last_updated: "2026-03-22T05:20:45.695Z"
 last_activity: 2026-03-22 — 02-01 complete (LEGAL-01/02/04 test stubs, 19 tests created)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 17
-  completed_plans: 7
+  completed_plans: 8
   percent: 35
 ---
 
@@ -51,6 +51,7 @@ Progress: [████░░░░░░] 35%
 | Phase 01-rea-domain-portal-integration P04 | 7 | 2 tasks | 2 files |
 | Phase 01-rea-domain-portal-integration P03 | 2min | 1 tasks | 3 files |
 | Phase 02-qld-legal-scaffolding P02 | 18 | 2 tasks | 2 files |
+| Phase 02-qld-legal-scaffolding P03 | 4 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ Recent decisions affecting current work:
 - [Phase 02-01]: disclosure-checklist tests use findItem() label-fragment lookup instead of fixed index — resilient to item ordering changes
 - [Phase 02-qld-legal-scaffolding]: canPublish check runs client-side via Supabase anon key — no separate read endpoint
 - [Phase 02-qld-legal-scaffolding]: Step 5 disclosure panel uses id='step-disclosure' with STEP_IDS mapping in goToStep()
+- [Phase 02-qld-legal-scaffolding]: 02-03: Conveyancer referral card is always-present HTML in accept-step-3 — no JS toggle needed, existing modal show/hide handles visibility
+- [Phase 02-qld-legal-scaffolding]: 02-03: QLS disclosure defaults to 'may receive' framing before commercial arrangement exists — conservative/safer default
+- [Phase 02-qld-legal-scaffolding]: 02-03: Placeholder partner details used — must be replaced when real QLD conveyancing firm is partnered
 
 ### Pending Todos
 
@@ -87,6 +91,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T05:18:01.695Z
-Stopped at: Completed 02-02-PLAN.md (Form 2 disclosure — api/disclosure.js + sell.html Step 5)
+Last session: 2026-03-22T05:20:45.689Z
+Stopped at: Checkpoint: 02-03-PLAN.md — awaiting human verify of conveyancer referral card in accept-modal step-3
 Resume file: None

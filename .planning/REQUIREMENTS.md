@@ -23,7 +23,7 @@
 
 - [x] **LEGAL-01**: Seller completes a guided QLD Property Disclosure Statement form as part of the listing flow
 - [x] **LEGAL-02**: Platform displays a 2024 QLD transparency checklist (climate risk, pool safety, body corp) with pass/fail status
-- [ ] **LEGAL-03**: At offer acceptance, seller is shown a conveyancer referral prompt with a QLD-licensed partner
+- [x] **LEGAL-03**: At offer acceptance, seller is shown a conveyancer referral prompt with a QLD-licensed partner
 - [x] **LEGAL-04**: Seller can download a pre-filled disclosure statement PDF from their dashboard
 
 ### Negotiation (Negotiation Facilitation)
@@ -75,7 +75,7 @@
 | VERIF-04 | Phase 2 | Pending |
 | LEGAL-01 | Phase 3 | Complete |
 | LEGAL-02 | Phase 3 | Complete |
-| LEGAL-03 | Phase 3 | Pending |
+| LEGAL-03 | Phase 3 | Complete |
 | LEGAL-04 | Phase 3 | Complete |
 | NEGO-01 | Phase 4 | Pending |
 | NEGO-02 | Phase 4 | Pending |
