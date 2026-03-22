@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v2.0
+milestone_name: Execution Engine
+status: executing
+stopped_at: Completed 01-04-PLAN.md (portal-status API handler + dashboard portal card)
+last_updated: "2026-03-22T04:52:07.155Z"
+last_activity: 2026-03-22 — 01-02 complete (portal opt-in UI + DB migration SQL)
+progress:
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 17
+  completed_plans: 4
+  percent: 24
+---
+
 # DEED — GSD State
 
 ## Project Reference
@@ -10,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 1 of 5 (REA/Domain Portal Integration)
-Plan: 3 of 5 (01-02 complete — next: 01-03)
-Status: Executing Wave 1
-Last activity: 2026-03-22 — 01-02 complete (portal opt-in UI + DB migration SQL)
+Plan: 5 of 5 (01-04 complete — next: 01-05)
+Status: Executing Wave 2
+Last activity: 2026-03-22 — 01-04 complete (portal-status API handler + dashboard portal card)
 
-Progress: [██░░░░░░░░] 20%
+Progress: [██░░░░░░░░] 24%
 
 ## Performance Metrics
 
@@ -32,6 +48,8 @@ Progress: [██░░░░░░░░] 20%
 **Recent Trend:** Wave 1 (DB+UI) executing on schedule
 
 *Updated after each plan completion*
+| Phase 01-rea-domain-portal-integration P04 | 7 | 2 tasks | 2 files |
+| Phase 01-rea-domain-portal-integration P03 | 2min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -47,6 +65,9 @@ Recent decisions affecting current work:
 - 01-02: Portal submission is fire-and-forget — status tracked in Supabase rea_status/domain_status, not awaited in goLive()
 - 01-01: buildReaXml must be exported as named export from submit-to-portals.js (required by test contract)
 - 01-01: ssh2-sftp-client must be installed as a dependency in Plan 03 (not yet in package.json)
+- [Phase 01-rea-domain-portal-integration]: 01-04: 405 handler uses .json() not .end() — test mock does not implement res.end(), json() satisfies assertion and is valid for a JSON API
+- [Phase 01-03]: Credential guard uses only REA_SFTP_HOST (not REA_AGENCY_ID) to match the test contract
+- [Phase 01-03]: module.exports.default = handler added for CommonJS destructuring compatibility in tests
 
 ### Pending Todos
 
@@ -60,6 +81,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22
-Stopped at: Completed 01-01-PLAN.md (TDD stubs for portal API handlers) — Note: 01-01 executed after 01-02 due to orchestration order; position unchanged at Plan 3 of 5
+Last session: 2026-03-22T04:52:07.152Z
+Stopped at: Completed 01-03-PLAN.md (REAXML generation + SFTP delivery handler)
 Resume file: None
