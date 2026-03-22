@@ -656,11 +656,11 @@
       <div class="step-nav-item" data-step="3"><div class="step-nav-num">03</div><span class="step-nav-label">Pricing & features</span></div>
       <div class="step-nav-item" data-step="4"><div class="step-nav-num">04</div><span class="step-nav-label">Photos</span></div>
       <div class="step-nav-item" data-step="5"><div class="step-nav-num">05</div><span class="step-nav-label">Review listing</span></div>
-      <div class="step-nav-item" data-step="6"><div class="step-nav-num">06</div><span class="step-nav-label">Pay & publish</span></div>
+      <div class="step-nav-item" data-step="6"><div class="step-nav-num">06</div><span class="step-nav-label">Go live</span></div>
     </nav>
     <div class="sidebar-fee">
-      <div class="fee-amount">$1,499</div>
-      <div class="fee-desc">Flat fee to list · No commission</div>
+      <div class="fee-amount">Free to list</div>
+      <div class="fee-desc">Platform fee on settlement · No commission</div>
     </div>
   </aside>
 
@@ -927,6 +927,24 @@
           <span style="font-size:0.875rem;line-height:1.5;">I understand that DEED's platform fee is due on settlement of sale.</span>
         </label>
 
+        <!-- Portal distribution opt-in — Phase 1 -->
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:1.25rem;margin-bottom:1.5rem;">
+          <div style="font-size:0.825rem;font-weight:600;color:#0369a1;margin-bottom:0.5rem;">List on realestate.com.au &amp; Domain</div>
+          <p style="font-size:0.82rem;color:#374151;line-height:1.5;margin:0 0 1rem;">
+            Reach buyers browsing REA and Domain in addition to DEED's verified network.
+            DEED handles submission on your behalf as a QLD-licensed agency.
+            An additional portal listing fee of <strong>[PORTAL_FEE_PLACEHOLDER]</strong> is payable on settlement.
+          </p>
+          <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;margin-bottom:0.75rem;">
+            <input type="checkbox" id="portal-opt-in" style="margin-top:3px;width:18px;height:18px;flex-shrink:0;accent-color:#0369a1;" onchange="togglePortalFeeAck(this.checked)" />
+            <span style="font-size:0.875rem;line-height:1.5;">Yes — list my property on realestate.com.au and Domain</span>
+          </label>
+          <label id="portal-fee-ack-row" style="display:none;align-items:flex-start;gap:0.75rem;cursor:pointer;">
+            <input type="checkbox" id="portal-fee-ack" style="margin-top:3px;width:18px;height:18px;flex-shrink:0;accent-color:#0369a1;" />
+            <span style="font-size:0.875rem;line-height:1.5;">I understand the additional portal listing fee is payable on settlement.</span>
+          </label>
+        </div>
+
         <button id="go-live-btn" type="button" onclick="goLive()"
           style="width:100%;min-height:52px;background:#2563EB;color:#fff;font-size:1rem;font-weight:700;border:none;border-radius:10px;cursor:pointer;">
           Confirm &amp; Go Live
@@ -1137,11 +1155,26 @@
     btn.disabled = false;
   }
 
+  // ── Portal opt-in toggle ───────────────────────────────────────────────
+  function togglePortalFeeAck(checked) {
+    const ackRow = document.getElementById('portal-fee-ack-row');
+    ackRow.style.display = checked ? 'flex' : 'none';
+    if (!checked) document.getElementById('portal-fee-ack').checked = false;
+  }
+
   // ── Go Live & Supabase submit ──────────────────────────────────────────
   async function goLive() {
     const ack = document.getElementById('fee-acknowledgement');
     if (!ack.checked) {
       ack.reportValidity();
+      return;
+    }
+
+    // Validate portal fee acknowledgement if seller opted in
+    const portalOptedIn = document.getElementById('portal-opt-in').checked;
+    const portalFeeAck  = document.getElementById('portal-fee-ack').checked;
+    if (portalOptedIn && !portalFeeAck) {
+      alert('Please acknowledge the portal listing fee to continue.');
       return;
     }
     const btn = document.getElementById('go-live-btn');
@@ -1178,6 +1211,8 @@
         deadline,
         status:        'active',
         paid:          false,
+        portal_opted_in:          portalOptedIn,
+        portal_fee_acknowledged:  portalFeeAck,
       }]).select();
 
       if (listingError) throw listingError;
@@ -1207,6 +1242,15 @@
           } catch (photoErr) {
             console.warn('Photo upload failed (non-fatal):', photoErr);
           }
+        }
+
+        // Portal submission — fire-and-forget (status tracked via rea_status in Supabase)
+        if (portalOptedIn) {
+          fetch('/api/submit-to-portals', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ listing_id: listingId }),
+          }).catch(() => {}); // non-fatal — status tracked in Supabase
         }
 
         fetch('/api/notify', {
