@@ -19,7 +19,7 @@ created: 2026-03-22
 |----------|-------|
 | **Framework** | jest (existing project) |
 | **Config file** | package.json (scripts.test) |
-| **Quick run command** | `npm test -- --testPathPattern=legal` |
+| **Quick run command** | `npm test -- --testPathPattern=disclosure` |
 | **Full suite command** | `npm test` |
 | **Estimated runtime** | ~15 seconds |
 
@@ -27,7 +27,7 @@ created: 2026-03-22
 
 ## Sampling Rate
 
-- **After every task commit:** Run `npm test -- --testPathPattern=legal`
+- **After every task commit:** Run `npm test -- --testPathPattern=disclosure`
 - **After every plan wave:** Run `npm test`
 - **Before `/gsd:verify-work`:** Full suite must be green
 - **Max feedback latency:** 15 seconds
@@ -41,11 +41,11 @@ created: 2026-03-22
 | 2-01-01 | 01 | 1 | LEGAL-01 | unit | `npm test -- --testPathPattern=disclosure` | ❌ W0 | ⬜ pending |
 | 2-01-02 | 01 | 1 | LEGAL-01 | unit | `npm test -- --testPathPattern=disclosure` | ❌ W0 | ⬜ pending |
 | 2-01-03 | 01 | 2 | LEGAL-01 | integration | `npm test -- --testPathPattern=disclosure` | ❌ W0 | ⬜ pending |
-| 2-02-01 | 02 | 1 | LEGAL-02 | unit | `npm test -- --testPathPattern=certificates` | ❌ W0 | ⬜ pending |
-| 2-02-02 | 02 | 1 | LEGAL-02 | unit | `npm test -- --testPathPattern=certificates` | ❌ W0 | ⬜ pending |
+| 2-02-01 | 02 | 1 | LEGAL-02 | unit | `npm test -- --testPathPattern=disclosure-checklist` | ❌ W0 | ⬜ pending |
+| 2-02-02 | 02 | 1 | LEGAL-02 | unit | `npm test -- --testPathPattern=disclosure-checklist` | ❌ W0 | ⬜ pending |
 | 2-03-01 | 03 | 1 | LEGAL-03 | manual | — | n/a | ⬜ pending |
-| 2-04-01 | 04 | 1 | LEGAL-04 | unit | `npm test -- --testPathPattern=pdf` | ❌ W0 | ⬜ pending |
-| 2-04-02 | 04 | 2 | LEGAL-04 | integration | `npm test -- --testPathPattern=pdf` | ❌ W0 | ⬜ pending |
+| 2-04-01 | 04 | 1 | LEGAL-04 | unit | `npm test -- --testPathPattern=generate-disclosure` | ❌ W0 | ⬜ pending |
+| 2-04-02 | 04 | 2 | LEGAL-04 | integration | `npm test -- --testPathPattern=generate-disclosure` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -53,10 +53,10 @@ created: 2026-03-22
 
 ## Wave 0 Requirements
 
-- [ ] `tests/disclosure.test.js` — stubs for LEGAL-01 (Form 2 gate, field validation)
-- [ ] `tests/certificates.test.js` — stubs for LEGAL-02 (checklist, pass/fail logic)
-- [ ] `tests/pdf.test.js` — stubs for LEGAL-04 (PDF generation, download endpoint)
-- [ ] `tests/setup.js` — shared fixtures if not already present
+- [ ] `api/__tests__/disclosure.test.js` — stubs for LEGAL-01 (Form 2 gate, field validation)
+- [ ] `api/__tests__/disclosure-checklist.test.js` — stubs for LEGAL-02 (checklist, pass/fail logic)
+- [ ] `api/__tests__/generate-disclosure.test.js` — stubs for LEGAL-04 (PDF generation, download endpoint)
+- [ ] `api/__tests__/setup.js` — shared fixtures if not already present
 
 *LEGAL-03 (conveyancer referral prompt) is UI-only — manual verification only.*
 
