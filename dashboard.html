@@ -360,6 +360,32 @@
     .checklist-label { color: var(--text); flex: 1; }
     .checklist-note { font-size: 0.74rem; color: var(--muted); margin-top: 0.15rem; }
     .checklist-self-reported { font-size: 0.72rem; color: var(--dim); margin-top: 0.75rem; font-style: italic; }
+
+    /* Below-floor offer flag */
+    .below-floor-flag {
+      margin-top: 0.75rem;
+      padding: 0.6rem 1rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .below-floor-flag-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #dc2626;
+      white-space: nowrap;
+      margin-top: 0.05rem;
+    }
+    .below-floor-flag-reason {
+      font-size: 0.8rem;
+      color: #7f1d1d;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -993,6 +1019,11 @@
         <span class="ai-tag">◆ AI</span>
         <span>${insight}</span>
       </div>
+      ${offer.below_floor ? `
+      <div class="below-floor-flag">
+        <span class="below-floor-flag-label">Below market</span>
+        <span class="below-floor-flag-reason">${offer.below_floor_reason || 'This offer is below the estimated floor price for comparable properties in this suburb.'}</span>
+      </div>` : ''}
     </div>`;
   }
 
