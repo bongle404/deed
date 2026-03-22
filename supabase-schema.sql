@@ -323,3 +323,25 @@ alter table buyers add column if not exists
 -- max_price is integer. Alter to bigint if any pre-approvals exceed $2.1M.
 -- alter table buyers alter column max_price type bigint;
 -- (Uncomment and run if needed before inserting large amounts.)
+
+-- ═══════════════════════════════════════════════════════════════════════════
+--  IMPORTANT: This migration MUST be run in Supabase SQL Editor BEFORE the
+--  sell flow portal opt-in can save portal fields to the database.
+--  Dashboard → SQL Editor → New query → paste block below → Run
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- ── Phase 1: REA/Domain Portal Integration ──────────────────────────────
+-- Run this block in Supabase SQL Editor (Dashboard → SQL Editor → New query)
+-- Safe to re-run: all statements use "add column if not exists"
+
+alter table listings add column if not exists portal_opted_in boolean default false;
+alter table listings add column if not exists portal_fee_acknowledged boolean default false;
+alter table listings add column if not exists rea_status text default 'not_submitted';
+  -- values: not_submitted | pending | live | rejected | withdrawn
+alter table listings add column if not exists domain_status text default 'not_submitted';
+  -- values: not_submitted | pending | live | rejected | withdrawn
+alter table listings add column if not exists rea_listing_url text;
+alter table listings add column if not exists domain_listing_url text;
+alter table listings add column if not exists portal_submitted_at timestamptz;
+alter table listings add column if not exists portal_error text;
+-- ────────────────────────────────────────────────────────────────────────
