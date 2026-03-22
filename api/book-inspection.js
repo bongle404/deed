@@ -1,8 +1,13 @@
 // DEED — Open home inspection booking handler
 // POST /api/book-inspection
 // Requires: SUPABASE_SERVICE_KEY, RESEND_API_KEY, SELLER_EMAIL env vars
+//
+// Optional: if the request body includes offer_price, a below-floor check is
+// run against the listing's price_estimate_low after the booking is saved.
+// The check is fire-and-continue — it never blocks a 200 response.
 
 const { createClient } = require('@supabase/supabase-js');
+const { checkBelowFloor } = require('./offer-floor');
 
 const SUPABASE_URL = 'https://jtpykhrdjkzhcbswrhzo.supabase.co';
 const RESEND_API   = 'https://api.resend.com/emails';
@@ -129,7 +134,7 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Server configuration error.' });
   }
 
-  const { listing_id, slot_id, slot_label, name, email, phone } = req.body || {};
+  const { listing_id, slot_id, slot_label, name, email, phone, offer_price } = req.body || {};
 
   const validationError = validateInput({ listing_id, slot_id, slot_label, name, email, phone });
   if (validationError) return res.status(400).json({ error: validationError });
@@ -144,6 +149,33 @@ module.exports = async function handler(req, res) {
     if (dbError) {
       console.error('Supabase insert error:', dbError.message);
       return res.status(500).json({ error: 'Booking failed. Please try again.' });
+    }
+
+    // 1b. Below-floor check (fire-and-continue — never blocks the booking response)
+    // Runs only when the request includes an offer_price (e.g. buyer indicates offer during booking).
+    if (offer_price != null) {
+      try {
+        const { data: listing } = await sb
+          .from('listings')
+          .select('price_estimate_low, price_estimate_mid, price_estimate_high')
+          .eq('id', listing_id)
+          .single();
+
+        if (listing) {
+          const { below_floor, below_floor_reason } = await checkBelowFloor(
+            parseFloat(offer_price),
+            listing
+          );
+          if (below_floor) {
+            await sb
+              .from('offers')
+              .update({ below_floor: true, below_floor_reason })
+              .eq('listing_id', listing_id);
+          }
+        }
+      } catch (floorErr) {
+        console.error('Below-floor check error (non-fatal):', floorErr.message);
+      }
     }
 
     // 2. Send emails (failures are logged but do not block the 200 response)
